@@ -3,7 +3,7 @@
 文件目的：
 - 彙整 `hillfog_20260610.md` 的既有分析
 - 彙整 `hillfog_new_idea.txt` 的新產品方向
-- 對齊 `D:\home\mindscore\README.md` 的新架構
+- 對齊 `README.md` 的新架構
 - 形成可直接用於重構與改版規劃的現代化藍圖
 
 ---

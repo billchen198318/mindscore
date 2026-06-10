@@ -15,23 +15,23 @@ However, the seed database only contains one default formula, so the default beh
 
 Main scoring chain:
 
-- `D:\home\hillfog\core-hillfog\src\org\qifu\hillfog\util\FormulaUtils.java`
-- `D:\home\hillfog\core-hillfog\src\org\qifu\hillfog\util\AggregationMethodUtils.java`
-- `D:\home\hillfog\core-hillfog\src\org\qifu\hillfog\util\AggregationMethod.java`
-- `D:\home\hillfog\core-hillfog\src\org\qifu\hillfog\callable\ScoreCalculationCallable.java`
-- `D:\home\hillfog\core-hillfog\src\org\qifu\hillfog\util\KpiScore.java`
-- `D:\home\hillfog\core-hillfog\src\org\qifu\hillfog\util\BalancedScorecard.java`
+- `hillfog\core-hillfog\src\org\qifu\hillfog\util\FormulaUtils.java`
+- `hillfog\core-hillfog\src\org\qifu\hillfog\util\AggregationMethodUtils.java`
+- `hillfog\core-hillfog\src\org\qifu\hillfog\util\AggregationMethod.java`
+- `hillfog\core-hillfog\src\org\qifu\hillfog\callable\ScoreCalculationCallable.java`
+- `hillfog\core-hillfog\src\org\qifu\hillfog\util\KpiScore.java`
+- `hillfog\core-hillfog\src\org\qifu\hillfog\util\BalancedScorecard.java`
 
 KPI code definitions:
 
-- `D:\home\hillfog\core-hillfog\src\org\qifu\hillfog\model\KpiBasicCode.java`
-- `D:\home\hillfog\core-hillfog\src\org\qifu\hillfog\model\KpiBasicCode.json`
-- `D:\home\hillfog\core-hillfog\src\org\qifu\hillfog\model\FormulaVariable.java`
+- `hillfog\core-hillfog\src\org\qifu\hillfog\model\KpiBasicCode.java`
+- `hillfog\core-hillfog\src\org\qifu\hillfog\model\KpiBasicCode.json`
+- `hillfog\core-hillfog\src\org\qifu\hillfog\model\FormulaVariable.java`
 
 KPI UI:
 
-- `D:\home\hillfog\core-app\resources\templates\view\hillfog_kpib\create-page.ftl`
-- `D:\home\hillfog\core-app\resources\templates\view\hillfog_kpib\edit-page.ftl`
+- `hillfog\core-app\resources\templates\view\hillfog_kpib\create-page.ftl`
+- `hillfog\core-app\resources\templates\view\hillfog_kpib\edit-page.ftl`
 
 Report UI:
 
@@ -40,7 +40,7 @@ Report UI:
 
 Database seed:
 
-- `D:\home\hillfog\doc\hillfog.sql`
+- `hillfog\doc\hillfog.sql`
 
 ## 2. Actual Scoring Chain In hillfog
 
@@ -99,6 +99,7 @@ Explicit formula variables:
 | `$P{kpi.min}` | `hf_kpi.MIN` |
 | `$P{kpi.target}` | `hf_kpi.TARGET` |
 | `$P{kpi.weight}` | `hf_kpi.WEIGHT` |
+| `$P{kpi}` | `hf_kpi.*` |
 
 The full KPI object is also passed into the formula parameter map:
 
