@@ -35,8 +35,8 @@ KPI UI:
 
 Report UI:
 
-- `D:\home\hillfog\core-app\resources\static\js\hillfog\HF_PROG002D0001Q.js`
-- `D:\home\hillfog\core-app\resources\static\js\hillfog\HF_PROG005D0001Q.js`
+- `hillfog\core-app\resources\static\js\hillfog\HF_PROG002D0001Q.js`
+- `hillfog\core-app\resources\static\js\hillfog\HF_PROG005D0001Q.js`
 
 Database seed:
 
