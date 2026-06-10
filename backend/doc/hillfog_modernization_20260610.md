@@ -764,3 +764,129 @@ MindScore is built on top of qifu4. New business code must stay out of the qifu4
 - `core-base`, `core-standard`, `core-std`, `core-lib`, and `backend/core` are reused as platform dependencies
 - JWT, httpOnly cookie handling, base security, role permission, menu, program configuration, upload, token, and common BaseService behavior are provided by qifu4
 - Do not add KPI / OKR / BSC / PDCA / report / insight business code into the base or core projects
+
+---
+
+## 19. Upgrade Outcome
+
+After modernization, MindScore should evolve from an old-style performance management system into an Enterprise Performance Intelligence Platform.
+
+The most important change is not only UI improvement. The system role changes from:
+
+`Input KPI / OKR data -> calculate score -> show report`
+
+to:
+
+`Track strategy, objectives, indicators, actions, and organizational alignment -> explain deviation -> suggest next actions`
+
+### 19.1 Before and after
+
+| Area | Original hillfog | Modernized MindScore |
+|---|---|---|
+| System style | FreeMarker + jQuery server-side management system | qifu4 + API + Nuxt 3 frontend |
+| Platform base | legacy qifu3 / local jar / old base | qifu4 JWT httpOnly / permission / menu / BaseService |
+| KPI | formula, aggregation, input, report | calculation core plus snapshot, versioning, trend, anomaly analysis |
+| OKR | objective, key result, initiative, progress | cycle, alignment, dependency, confidence, progress insight |
+| BSC | scorecard, perspective, strategy objective, KPI weight | strategy map, versioning, monthly / quarterly snapshot |
+| PDCA | task, item, Gantt, close request | action loop connected with KPI / OKR / BSC insight |
+| Report | static query report | dashboard, trend comparison, drill-down, snapshot comparison |
+| Org chart | personal OKR view | organization performance map across department, manager, employee, and alignment |
+| Permission | legacy permission handling | qifu4 menu / role / program permission |
+| Frontend | mixed forms and page scripts | Nuxt 3 operational workspace |
+| Insight | none | risk warning, root cause, recommended action, management summary |
+
+### 19.2 KPI upgrade
+
+KPI should not only be a score.
+
+It should support:
+
+- lag / lead indicator classification
+- trend detection
+- target deviation detection
+- anomaly flagging
+- relation to strategy objective
+- relation to PDCA improvement actions
+- snapshot comparison by month / quarter / year
+
+### 19.3 OKR upgrade
+
+OKR should not only be a progress percentage.
+
+It should support:
+
+- cycle management
+- objective and key result alignment
+- confidence tracking
+- initiative effectiveness
+- dependency graph
+- owner and organization view
+- blocked objective detection
+- progress explanation
+
+### 19.4 BSC upgrade
+
+BSC should become the strategy map of the system.
+
+The structure should support:
+
+- Vision
+- Perspective
+- Strategy Objective
+- KPI
+- OKR
+- PDCA action
+- weighted score
+- score color
+- monthly / quarterly strategy snapshot
+
+The key change is drill-down:
+
+`Scorecard -> Perspective -> Strategy Objective -> KPI / OKR -> PDCA`
+
+### 19.5 PDCA upgrade
+
+PDCA should become the execution feedback loop.
+
+Instead of only showing tasks, it should connect:
+
+- KPI issue
+- OKR risk
+- BSC strategy objective
+- action owner
+- execution status
+- close request
+- improvement result
+
+This turns PDCA from task tracking into measurable improvement tracking.
+
+### 19.6 Report upgrade
+
+Reports should become a management workspace.
+
+Expected views:
+
+- current month performance
+- current quarter performance
+- red / yellow / green indicators
+- delayed PDCA actions
+- at-risk OKR objectives
+- department comparison
+- personal OKR alignment
+- scorecard snapshot comparison
+- target vs actual trend
+
+### 19.7 Practical priority
+
+Do not make AI / insight too heavy in the first phase.
+
+The first phase should stabilize:
+
+- KPI / OKR / BSC / PDCA data model
+- API
+- calculation engine
+- snapshot
+- report query
+- Nuxt 3 operational UI
+
+Insight should consume stable data after the deterministic engine is reliable.
