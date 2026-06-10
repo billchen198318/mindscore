@@ -503,7 +503,148 @@ Recommended fields in score result:
 | `CALCULATION_TRACE` | JSON explanation of calculation |
 | `FORMULA_VERSION` | Formula/policy version used |
 
-## 15. Important Product Decision
+## 15. Management Mode To Formula Recommendation
+
+MindScore should preserve the hillfog formula architecture, but improve the user experience.
+
+The preferred flow is:
+
+```text
+User selects KPI management mode
+-> system recommends and auto-selects a suitable formula
+-> user can accept or manually choose another formula
+-> system records both recommended formula and actual selected formula
+```
+
+This keeps two things true at the same time:
+
+```text
+1. Normal users do not need to understand formula scripting.
+2. Advanced users still keep formula-level flexibility.
+```
+
+### 15.1 Suggested UI Behavior
+
+When the user selects a KPI management mode:
+
+| Selected management mode | Auto-selected formula |
+|---|---|
+| Bigger is better | `BIGGER_IS_BETTER_LINEAR` |
+| Smaller is better | `SMALLER_IS_BETTER_LINEAR` |
+| Quasi is better | `QUASI_IS_BETTER_RANGE` |
+| Percent of target | `PERCENT_OF_TARGET` |
+| Threshold / pass-fail | `THRESHOLD_PASS_FAIL` |
+| Manual score | `MANUAL_SCORE` |
+
+Example UI flow:
+
+```text
+1. User selects "Bigger is better".
+2. Formula dropdown automatically selects "BIGGER_IS_BETTER_LINEAR".
+3. UI shows formula explanation and sample calculation.
+4. User can keep the formula or manually choose another formula.
+5. Save action records the recommendation and the final selected formula.
+```
+
+The formula field should remain visible and editable, not hidden.
+
+Reason:
+
+```text
+Management mode expresses business meaning.
+Formula expresses calculation implementation.
+```
+
+The system should recommend, not force.
+
+### 15.2 Formula Explanation In UI
+
+The formula dropdown should show a plain-language explanation.
+
+Example for `BIGGER_IS_BETTER_LINEAR`:
+
+```text
+Suitable for revenue, completion rate, production volume, satisfaction score.
+If actual >= target, score is 100.
+If actual <= min, score is 0.
+Values between min and target are scored linearly.
+```
+
+Example for `SMALLER_IS_BETTER_LINEAR`:
+
+```text
+Suitable for cost, defect count, delay days, complaint count.
+If actual <= target, score is 100.
+If actual >= max, score is 0.
+Values between target and max are scored linearly.
+```
+
+Example for `QUASI_IS_BETTER_RANGE`:
+
+```text
+Suitable for inventory level, budget usage, staffing ratio, utilization rate.
+If actual is within target +/- quasi range, score is 100.
+If actual is outside the accepted range, score is reduced by deviation.
+```
+
+### 15.3 Formula Selection State
+
+MindScore should record whether the formula was accepted from recommendation or manually changed.
+
+Suggested values:
+
+| Value | Meaning |
+|---|---|
+| `AUTO` | Formula was auto-selected from management mode and accepted |
+| `MANUAL_OVERRIDE` | Formula was recommended but user selected another existing formula |
+| `CUSTOM` | User selected or created a custom formula |
+
+Suggested KPI fields:
+
+| Field | Purpose |
+|---|---|
+| `MANAGEMENT_MODE` | Business meaning, such as bigger / smaller / quasi |
+| `FORMULA_OID` | Actual formula used for calculation |
+| `RECOMMENDED_FORMULA_OID` | Formula recommended by the system |
+| `FORMULA_SELECTION_MODE` | `AUTO`, `MANUAL_OVERRIDE`, or `CUSTOM` |
+
+This makes the score auditable:
+
+```text
+The KPI was configured as "Bigger is better".
+The system recommended "BIGGER_IS_BETTER_LINEAR".
+The user actually selected "PERCENT_OF_TARGET".
+Formula selection mode is "MANUAL_OVERRIDE".
+```
+
+### 15.4 Why This Fits hillfog
+
+This is a direct evolution of the original hillfog design.
+
+hillfog already had:
+
+```text
+KPI management metadata
++ formula selection
++ formula variables
++ aggregation method
+```
+
+MindScore should not remove that flexibility.
+
+The upgrade is to add:
+
+```text
+management-mode-driven formula recommendation
++ built-in formula templates
++ formula explanation
++ formula test panel
++ formula selection audit trail
+```
+
+This approach keeps the old architecture while making it usable for normal SaaS users.
+
+## 16. Important Product Decision
 
 For MindScore, do not make LLM the official scoring engine.
 
@@ -523,7 +664,7 @@ LLM:
 
 This keeps KPI score auditable and enterprise-safe.
 
-## 16. Final Summary
+## 17. Final Summary
 
 The original hillfog design was stronger than it first appears:
 
