@@ -1385,3 +1385,11 @@ Insight Inbox shows risks, anomalies, delays, and recommendations.
 Insight Detail shows evidence, related KPI / OKR / BSC / PDCA, LLM summary, recommendation, and action creation.
 
 Action Board tracks PDCA / initiative / task items generated from insights and whether the next score improved.
+
+## Appendix: hillfog Scoring Semantics
+
+The recovered details for `compareType`, `management`, `target / min / max`, `quasiRange`, formula variables, and the gap between the original metadata design and the seeded default formula are documented separately:
+
+- `hillfog_scoring_semantics_20260610.md`
+
+This is intentionally separated from the modernization document because it is a focused scoring-engine reference and should become the basis for MindScore deterministic scoring policy implementation.
