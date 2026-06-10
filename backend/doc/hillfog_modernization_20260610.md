@@ -61,8 +61,7 @@
 `README.md` 對新架構的方向已經很清楚，建議 hillfog 現代化時直接採用同一套分層思維：
 
 - `backend/app`
-- `backend/base`
-- `backend/core`
+- qifu4 base / core projects
 - `frontend-v-nx`
 
 這代表新系統不應再沿用舊式「一大坨 controller + template + static js」的方式，而要改成：
@@ -74,11 +73,17 @@
 
 ### 3.1 建議責任切分
 
-- `backend/base`
+- qifu4 base / core projects
   - 共用例外、共用回應模型、共用驗證、共用工具、共用安全元件
-- `backend/core`
-  - KPI / OKR / BSC / PDCA / measure data / score engine / report service
+- qifu4 core projects
+  - reused as platform dependencies
+  - no MindScore / hillfog business code should be added
 - `backend/app`
+  - MindScore / hillfog backend code only
+  - REST API
+  - application service
+  - KPI / OKR / BSC / PDCA / measure data / score engine / report service
+  - qifu4 JWT / httpOnly / permission / menu integration
   - REST API、認證、路由、組態、啟動入口、整合第三方
 - `frontend-v-nx`
   - Nuxt 3 前端
@@ -455,8 +460,7 @@ AI 不應直接取代 deterministic engine。
 `README.md` 的價值在於它已經提供一個可直接借鑑的現代骨架：
 
 - `backend/app`：應用層
-- `backend/base`：共用層
-- `backend/core`：核心業務層
+- qifu4 base / core projects：平台底層，沿用不改
 - `frontend-v-nx`：前端層
 
 ### 12.1 對 hillfog 的對應
@@ -464,9 +468,9 @@ AI 不應直接取代 deterministic engine。
 - 舊 `core-app` 的 HTML page、FreeMarker、static js
   - 轉成 `frontend-v-nx`
 - 舊 `core-hillfog` 的 entity / service / logic / util
-  - 轉成 `backend/core`
+  - 轉成 `backend/app`
 - 舊共用工具與基礎服務
-  - 轉成 `backend/base`
+  - 優先沿用 qifu4 base / core projects；只有 MindScore 專用工具才放 `backend/app`
 - 新 API 與啟動入口
   - 轉成 `backend/app`
 
@@ -748,3 +752,15 @@ hillfog 現代化後應建立閉環：
 - 以前後端分離取代 server-rendered
 - 以 Nuxt 3 重建體驗
 - 以 MindScore 的概念把系統升級成 `Enterprise Performance Intelligence Platform`
+
+---
+
+## 18. Development Boundary
+
+MindScore is built on top of qifu4. New business code must stay out of the qifu4 platform layers.
+
+- Backend MindScore code goes under `backend/app`
+- Frontend MindScore code goes under `frontend-v-nx`
+- `core-base`, `core-standard`, `core-std`, `core-lib`, and `backend/core` are reused as platform dependencies
+- JWT, httpOnly cookie handling, base security, role permission, menu, program configuration, upload, token, and common BaseService behavior are provided by qifu4
+- Do not add KPI / OKR / BSC / PDCA / report / insight business code into the base or core projects

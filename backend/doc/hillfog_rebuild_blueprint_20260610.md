@@ -65,19 +65,17 @@ Provided by `qifu4` and reused as-is:
 - common util
 - audit helpers
 
-### 2.2 `backend/core`
+### 2.2 qifu4 core / base projects
 
 放 MindScore 的核心領域：
 
-- KPI engine
-- OKR engine
-- BSC engine
-- PDCA engine
-- organization / employee domain
-- formula / aggregation
-- dependency graph
-- score snapshot
-- insight data
+- `core-base`
+- `core-standard`
+- `core-std`
+- `core-lib`
+- `backend/core`
+- These layers are reused as platform dependencies.
+- MindScore / hillfog business code must not be added here.
 
 ### 2.3 `backend/app`
 
@@ -85,9 +83,13 @@ Provided by `qifu4` and reused as-is:
 
 Application layer on top of qifu4 base services:
 
-- authentication
-- authorization
-- REST controllers
+- MindScore REST controllers
+- MindScore services
+- MindScore domain logic
+- KPI / OKR / BSC / PDCA calculation
+- report and snapshot services
+- qifu4 authentication integration
+- qifu4 authorization integration
 - request/response mapping
 - swagger/openapi
 - application config
@@ -104,6 +106,16 @@ Application layer on top of qifu4 base services:
 - dialogs
 - forms
 - insights
+
+### 2.5 Development boundary
+
+MindScore is built on top of qifu4. New business code must stay out of the qifu4 platform layers.
+
+- Backend MindScore code goes under `backend/app`
+- Frontend MindScore code goes under `frontend-v-nx`
+- `core-base`, `core-standard`, `core-std`, `core-lib`, and `backend/core` are reused as platform dependencies
+- JWT, httpOnly cookie handling, base security, role permission, menu, program configuration, upload, token, and common BaseService behavior are provided by qifu4
+- Do not add KPI / OKR / BSC / PDCA / report / insight business code into the base or core projects
 
 ---
 
