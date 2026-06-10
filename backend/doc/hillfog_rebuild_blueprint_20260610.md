@@ -1745,3 +1745,9 @@ This is intentionally separated from the rebuild blueprint because it is a focus
 The domain-only evaluation of hillfog, including why MindScore should not be positioned as a BSC-first product and how BSC / PDCA should be reframed for modern SaaS usage, is documented separately:
 
 - `hillfog_domain_positioning_20260610.md`
+
+## Appendix: MindScore Business DDL
+
+The standalone business logic DDL, including KPI formula auto-selection fields and Chinese column descriptions, is documented separately:
+
+- `mindscore_business_ddl_20260610.md`
