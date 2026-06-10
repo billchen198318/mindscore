@@ -1739,3 +1739,9 @@ The recovered details for `compareType`, `management`, `target / min / max`, `qu
 - `hillfog_scoring_semantics_20260610.md`
 
 This is intentionally separated from the rebuild blueprint because it is a focused scoring-engine reference and should become the basis for MindScore deterministic scoring policy implementation.
+
+## Appendix: hillfog Domain Positioning
+
+The domain-only evaluation of hillfog, including why MindScore should not be positioned as a BSC-first product and how BSC / PDCA should be reframed for modern SaaS usage, is documented separately:
+
+- `hillfog_domain_positioning_20260610.md`
