@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.qifu.md.mapper.MdKpiMeasureDataMapper">
+
+  <resultMap id="BaseResultMap" type="org.qifu.md.entity.MdKpiMeasureData">
+    <id column="OID" jdbcType="CHAR" property="oid" />
+    <result column="KPI_OID" jdbcType="CHAR" property="kpiOid" />
+    <result column="PERIOD_TYPE" jdbcType="VARCHAR" property="periodType" />
+    <result column="PERIOD_KEY" jdbcType="VARCHAR" property="periodKey" />
+    <result column="MEASURE_DATE" jdbcType="DATE" property="measureDate" />
+    <result column="TARGET_VALUE" jdbcType="DECIMAL" property="targetValue" />
+    <result column="ACTUAL_VALUE" jdbcType="DECIMAL" property="actualValue" />
+    <result column="MIN_VALUE" jdbcType="DECIMAL" property="minValue" />
+    <result column="MAX_VALUE" jdbcType="DECIMAL" property="maxValue" />
+    <result column="DATA_FOR_TYPE" jdbcType="VARCHAR" property="dataForType" />
+    <result column="ACCOUNT" jdbcType="VARCHAR" property="account" />
+    <result column="ORG_OID" jdbcType="CHAR" property="orgOid" />
+    <result column="SOURCE_TYPE" jdbcType="VARCHAR" property="sourceType" />
+    <result column="SOURCE_REF" jdbcType="VARCHAR" property="sourceRef" />
+    <result column="EVIDENCE_TEXT" jdbcType="VARCHAR" property="evidenceText" />
+    <result column="LOCKED" jdbcType="VARCHAR" property="locked" />
+    <result column="CUSERID" jdbcType="VARCHAR" property="cuserid" />
+    <result column="CDATE" jdbcType="TIMESTAMP" property="cdate" />
+    <result column="UUSERID" jdbcType="VARCHAR" property="uuserid" />
+    <result column="UDATE" jdbcType="TIMESTAMP" property="udate" />
+  </resultMap>
+  
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_kpi_measure_data
+    where OID = #{oid,jdbcType=CHAR}
+  </select>  
+  
+  <sql id="baseConditions">
+    <if test="oid != null and oid != ''.toString() ">
+        AND OID = #{oid,jdbcType=CHAR}
+    </if>
+    <if test="kpiOid != null and kpiOid != ''.toString() ">
+        AND KPI_OID = #{kpiOid,jdbcType=CHAR}
+    </if>
+    <if test="periodType != null and periodType != ''.toString() ">
+        AND PERIOD_TYPE = #{periodType,jdbcType=VARCHAR}
+    </if>
+    <if test="periodKey != null and periodKey != ''.toString() ">
+        AND PERIOD_KEY = #{periodKey,jdbcType=VARCHAR}
+    </if>
+    <if test="dataForType != null and dataForType != ''.toString() ">
+        AND DATA_FOR_TYPE = #{dataForType,jdbcType=VARCHAR}
+    </if>
+    <if test="account != null and account != ''.toString() ">
+        AND ACCOUNT = #{account,jdbcType=VARCHAR}
+    </if>
+    <if test="orgOid != null and orgOid != ''.toString() ">
+        AND ORG_OID = #{orgOid,jdbcType=CHAR}
+    </if>
+  </sql>
+  
+  <select id="selectListByParams" parameterType="java.util.HashMap" resultMap="BaseResultMap">
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_kpi_measure_data
+    WHERE 1=1
+    <include refid="baseConditions" />
+    <if test="orderBy != null and orderBy != ''.toString() and sortType != null and sortType != ''.toString() ">
+        ORDER BY ${orderBy} ${sortType}
+    </if>
+  </select>    
+  
+  <select id="findPage" parameterType="java.util.HashMap" resultMap="BaseResultMap">
+    <include refid="org.qifu.core.mapper.DB1Config.sql1"/>
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_kpi_measure_data
+    WHERE 1=1
+    <include refid="baseConditions" />
+    <include refid="org.qifu.core.mapper.DB1Config.sql2"/>
+  </select>  
+  
+  <select id="count" parameterType="java.util.HashMap" resultType="java.lang.Long">
+    select count(*) from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_kpi_measure_data
+    WHERE 1=1
+    <include refid="baseConditions" />
+  </select>  
+  
+  <insert id="insert" parameterType="org.qifu.md.entity.MdKpiMeasureData"> 
+    insert into <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_kpi_measure_data
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="oid != null">OID,</if>
+      <if test="kpiOid != null">KPI_OID,</if>
+      <if test="periodType != null">PERIOD_TYPE,</if>
+      <if test="periodKey != null">PERIOD_KEY,</if>
+      <if test="measureDate != null">MEASURE_DATE,</if>
+      <if test="targetValue != null">TARGET_VALUE,</if>
+      <if test="actualValue != null">ACTUAL_VALUE,</if>
+      <if test="minValue != null">MIN_VALUE,</if>
+      <if test="maxValue != null">MAX_VALUE,</if>
+      <if test="dataForType != null">DATA_FOR_TYPE,</if>
+      <if test="account != null">ACCOUNT,</if>
+      <if test="orgOid != null">ORG_OID,</if>
+      <if test="sourceType != null">SOURCE_TYPE,</if>
+      <if test="sourceRef != null">SOURCE_REF,</if>
+      <if test="evidenceText != null">EVIDENCE_TEXT,</if>
+      <if test="locked != null">LOCKED,</if>
+      <if test="cuserid != null">CUSERID,</if>
+      <if test="cdate != null">CDATE,</if>
+      <if test="uuserid != null">UUSERID,</if>
+      <if test="udate != null">UDATE,</if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="oid != null">#{oid,jdbcType=CHAR},</if>
+      <if test="kpiOid != null">#{kpiOid,jdbcType=CHAR},</if>
+      <if test="periodType != null">#{periodType,jdbcType=VARCHAR},</if>
+      <if test="periodKey != null">#{periodKey,jdbcType=VARCHAR},</if>
+      <if test="measureDate != null">#{measureDate,jdbcType=DATE},</if>
+      <if test="targetValue != null">#{targetValue,jdbcType=DECIMAL},</if>
+      <if test="actualValue != null">#{actualValue,jdbcType=DECIMAL},</if>
+      <if test="minValue != null">#{minValue,jdbcType=DECIMAL},</if>
+      <if test="maxValue != null">#{maxValue,jdbcType=DECIMAL},</if>
+      <if test="dataForType != null">#{dataForType,jdbcType=VARCHAR},</if>
+      <if test="account != null">#{account,jdbcType=VARCHAR},</if>
+      <if test="orgOid != null">#{orgOid,jdbcType=CHAR},</if>
+      <if test="sourceType != null">#{sourceType,jdbcType=VARCHAR},</if>
+      <if test="sourceRef != null">#{sourceRef,jdbcType=VARCHAR},</if>
+      <if test="evidenceText != null">#{evidenceText,jdbcType=VARCHAR},</if>
+      <if test="locked != null">#{locked,jdbcType=VARCHAR},</if>
+      <if test="cuserid != null">#{cuserid,jdbcType=VARCHAR},</if>
+      <if test="cdate != null">#{cdate,jdbcType=TIMESTAMP},</if>
+      <if test="uuserid != null">#{uuserid,jdbcType=VARCHAR},</if>
+      <if test="udate != null">#{udate,jdbcType=TIMESTAMP},</if>
+    </trim>
+  </insert>  
+  
+  <update id="update" parameterType="org.qifu.md.entity.MdKpiMeasureData">
+    update <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_kpi_measure_data
+    <set>
+      <if test="kpiOid != null">KPI_OID = #{kpiOid,jdbcType=CHAR},</if>
+      <if test="periodType != null">PERIOD_TYPE = #{periodType,jdbcType=VARCHAR},</if>
+      <if test="periodKey != null">PERIOD_KEY = #{periodKey,jdbcType=VARCHAR},</if>
+      <if test="measureDate != null">MEASURE_DATE = #{measureDate,jdbcType=DATE},</if>
+      <if test="targetValue != null">TARGET_VALUE = #{targetValue,jdbcType=DECIMAL},</if>
+      <if test="actualValue != null">ACTUAL_VALUE = #{actualValue,jdbcType=DECIMAL},</if>
+      <if test="minValue != null">MIN_VALUE = #{minValue,jdbcType=DECIMAL},</if>
+      <if test="maxValue != null">MAX_VALUE = #{maxValue,jdbcType=DECIMAL},</if>
+      <if test="dataForType != null">DATA_FOR_TYPE = #{dataForType,jdbcType=VARCHAR},</if>
+      <if test="account != null">ACCOUNT = #{account,jdbcType=VARCHAR},</if>
+      <if test="orgOid != null">ORG_OID = #{orgOid,jdbcType=CHAR},</if>
+      <if test="sourceType != null">SOURCE_TYPE = #{sourceType,jdbcType=VARCHAR},</if>
+      <if test="sourceRef != null">SOURCE_REF = #{sourceRef,jdbcType=VARCHAR},</if>
+      <if test="evidenceText != null">EVIDENCE_TEXT = #{evidenceText,jdbcType=VARCHAR},</if>
+      <if test="locked != null">LOCKED = #{locked,jdbcType=VARCHAR},</if>
+      <if test="uuserid != null">UUSERID = #{uuserid,jdbcType=VARCHAR},</if>
+      <if test="udate != null">UDATE = #{udate,jdbcType=TIMESTAMP},</if>
+    </set>
+    where OID = #{oid,jdbcType=CHAR}
+  </update>  
+  
+  <delete id="delete" parameterType="org.qifu.md.entity.MdKpiMeasureData">
+    delete from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_kpi_measure_data
+    where OID = #{oid,jdbcType=CHAR}
+  </delete>  
+  
+</mapper>

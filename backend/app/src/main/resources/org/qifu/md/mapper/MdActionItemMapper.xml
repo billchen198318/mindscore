@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.qifu.md.mapper.MdActionItemMapper">
+
+  <resultMap id="BaseResultMap" type="org.qifu.md.entity.MdActionItem">
+    <id column="OID" jdbcType="CHAR" property="oid" />
+    <result column="PLAN_OID" jdbcType="CHAR" property="planOid" />
+    <result column="PARENT_OID" jdbcType="CHAR" property="parentOid" />
+    <result column="ITEM_NAME" jdbcType="VARCHAR" property="itemName" />
+    <result column="ACTION_STAGE" jdbcType="VARCHAR" property="actionStage" />
+    <result column="DESCRIPTION" jdbcType="VARCHAR" property="description" />
+    <result column="START_DATE" jdbcType="DATE" property="startDate" />
+    <result column="END_DATE" jdbcType="DATE" property="endDate" />
+    <result column="DONE_DATE" jdbcType="DATE" property="doneDate" />
+    <result column="PROGRESS_VALUE" jdbcType="DECIMAL" property="progressValue" />
+    <result column="STATUS" jdbcType="VARCHAR" property="status" />
+    <result column="SORT_NO" jdbcType="INTEGER" property="sortNo" />
+    <result column="CUSERID" jdbcType="VARCHAR" property="cuserid" />
+    <result column="CDATE" jdbcType="TIMESTAMP" property="cdate" />
+    <result column="UUSERID" jdbcType="VARCHAR" property="uuserid" />
+    <result column="UDATE" jdbcType="TIMESTAMP" property="udate" />
+  </resultMap>
+  
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_action_item
+    where OID = #{oid,jdbcType=CHAR}
+  </select>  
+  
+  <sql id="baseConditions">
+	<if test="oid != null and oid != ''.toString() ">
+		AND OID = #{oid,jdbcType=CHAR}
+	</if>
+	<if test="planOid != null and planOid != ''.toString() ">
+		AND PLAN_OID = #{planOid,jdbcType=CHAR}
+	</if>
+	<if test="parentOid != null and parentOid != ''.toString() ">
+		AND PARENT_OID = #{parentOid,jdbcType=CHAR}
+	</if>
+	<if test="itemName != null and itemName != ''.toString() ">
+		AND ITEM_NAME LIKE #{itemName,jdbcType=VARCHAR}
+	</if>
+	<if test="status != null and status != ''.toString() ">
+		AND STATUS = #{status,jdbcType=VARCHAR}
+	</if>
+  </sql>
+  
+  <select id="selectListByParams" parameterType="java.util.HashMap" resultMap="BaseResultMap">
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_action_item
+    WHERE 1=1
+	
+	<include refid="baseConditions" />
+		
+	<if test="orderBy != null and orderBy != ''.toString() and sortType != null and sortType != ''.toString() ">
+		ORDER BY  ${orderBy} ${sortType}
+	</if>
+  </select>    
+  
+  <select id="findPage" parameterType="java.util.HashMap" resultMap="BaseResultMap">
+  	<include refid="org.qifu.core.mapper.DB1Config.sql1"/>
+  	
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_action_item
+    WHERE 1=1
+	
+	<include refid="baseConditions" />
+		
+	<include refid="org.qifu.core.mapper.DB1Config.sql2"/>
+  </select>  
+  
+  <select id="count" parameterType="java.util.HashMap" resultType="java.lang.Long">
+    select count(*) from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_action_item
+    WHERE 1=1
+	
+	<include refid="baseConditions" />
+	
+  </select>  
+  
+  <insert id="insert" parameterType="org.qifu.md.entity.MdActionItem"> 
+    insert into <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_action_item
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="oid != null">
+        OID,
+      </if>
+      <if test="planOid != null">
+        PLAN_OID,
+      </if>
+      <if test="parentOid != null">
+        PARENT_OID,
+      </if>
+      <if test="itemName != null">
+        ITEM_NAME,
+      </if>
+      <if test="actionStage != null">
+        ACTION_STAGE,
+      </if>
+      <if test="description != null">
+        DESCRIPTION,
+      </if>
+      <if test="startDate != null">
+        START_DATE,
+      </if>
+      <if test="endDate != null">
+        END_DATE,
+      </if>
+      <if test="doneDate != null">
+        DONE_DATE,
+      </if>
+      <if test="progressValue != null">
+        PROGRESS_VALUE,
+      </if>
+      <if test="status != null">
+        STATUS,
+      </if>
+      <if test="sortNo != null">
+        SORT_NO,
+      </if>
+      <if test="cuserid != null">
+        CUSERID,
+      </if>
+      <if test="cdate != null">
+        CDATE,
+      </if>
+      <if test="uuserid != null">
+        UUSERID,
+      </if>
+      <if test="udate != null">
+        UDATE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="oid != null">
+        #{oid,jdbcType=CHAR},
+      </if>
+      <if test="planOid != null">
+        #{planOid,jdbcType=CHAR},
+      </if>
+      <if test="parentOid != null">
+        #{parentOid,jdbcType=CHAR},
+      </if>
+      <if test="itemName != null">
+        #{itemName,jdbcType=VARCHAR},
+      </if>
+      <if test="actionStage != null">
+        #{actionStage,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null">
+        #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="startDate != null">
+        #{startDate,jdbcType=DATE},
+      </if>
+      <if test="endDate != null">
+        #{endDate,jdbcType=DATE},
+      </if>
+      <if test="doneDate != null">
+        #{doneDate,jdbcType=DATE},
+      </if>
+      <if test="progressValue != null">
+        #{progressValue,jdbcType=DECIMAL},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="sortNo != null">
+        #{sortNo,jdbcType=INTEGER},
+      </if>
+      <if test="cuserid != null">
+        #{cuserid,jdbcType=VARCHAR},
+      </if>
+      <if test="cdate != null">
+        #{cdate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="uuserid != null">
+        #{uuserid,jdbcType=VARCHAR},
+      </if>
+      <if test="udate != null">
+        #{udate,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>  
+  
+  <update id="update" parameterType="org.qifu.md.entity.MdActionItem">
+    update <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_action_item
+    <set>
+      <if test="planOid != null">
+        PLAN_OID = #{planOid,jdbcType=CHAR},
+      </if>
+      <if test="parentOid != null">
+        PARENT_OID = #{parentOid,jdbcType=CHAR},
+      </if>
+      <if test="itemName != null">
+        ITEM_NAME = #{itemName,jdbcType=VARCHAR},
+      </if>
+      <if test="actionStage != null">
+        ACTION_STAGE = #{actionStage,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null">
+        DESCRIPTION = #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="startDate != null">
+        START_DATE = #{startDate,jdbcType=DATE},
+      </if>
+      <if test="endDate != null">
+        END_DATE = #{endDate,jdbcType=DATE},
+      </if>
+      <if test="doneDate != null">
+        DONE_DATE = #{doneDate,jdbcType=DATE},
+      </if>
+      <if test="progressValue != null">
+        PROGRESS_VALUE = #{progressValue,jdbcType=DECIMAL},
+      </if>
+      <if test="status != null">
+        STATUS = #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="sortNo != null">
+        SORT_NO = #{sortNo,jdbcType=INTEGER},
+      </if>
+      <if test="uuserid != null">
+        UUSERID = #{uuserid,jdbcType=VARCHAR},
+      </if>
+      <if test="udate != null">
+        UDATE = #{udate,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where OID = #{oid,jdbcType=CHAR}
+  </update>  
+  
+  <delete id="delete" parameterType="org.qifu.md.entity.MdActionItem">
+    delete from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_action_item
+    where OID = #{oid,jdbcType=CHAR}
+  </delete>  
+  
+</mapper>

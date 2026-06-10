@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.qifu.md.mapper.MdKpiMapper">
+
+  <resultMap id="BaseResultMap" type="org.qifu.md.entity.MdKpi">
+    <id column="OID" jdbcType="CHAR" property="oid" />
+    <result column="KPI_CODE" jdbcType="VARCHAR" property="kpiCode" />
+    <result column="KPI_NAME" jdbcType="VARCHAR" property="kpiName" />
+    <result column="DESCRIPTION" jdbcType="VARCHAR" property="description" />
+    <result column="UNIT_NAME" jdbcType="VARCHAR" property="unitName" />
+    <result column="DATA_TYPE" jdbcType="VARCHAR" property="dataType" />
+    <result column="PERIOD_TYPE" jdbcType="VARCHAR" property="periodType" />
+    <result column="MANAGEMENT_MODE" jdbcType="VARCHAR" property="managementMode" />
+    <result column="COMPARE_MODE" jdbcType="VARCHAR" property="compareMode" />
+    <result column="MIN_VALUE" jdbcType="DECIMAL" property="minValue" />
+    <result column="TARGET_VALUE" jdbcType="DECIMAL" property="targetValue" />
+    <result column="MAX_VALUE" jdbcType="DECIMAL" property="maxValue" />
+    <result column="QUASI_RANGE" jdbcType="DECIMAL" property="quasiRange" />
+    <result column="SCORE_CAP_MODE" jdbcType="VARCHAR" property="scoreCapMode" />
+    <result column="SCORING_POLICY" jdbcType="VARCHAR" property="scoringPolicy" />
+    <result column="FORMULA_OID" jdbcType="CHAR" property="formulaOid" />
+    <result column="RECOMMENDED_FORMULA_OID" jdbcType="CHAR" property="recommendedFormulaOid" />
+    <result column="FORMULA_SELECTION_MODE" jdbcType="VARCHAR" property="formulaSelectionMode" />
+    <result column="AGGR_METHOD_OID" jdbcType="CHAR" property="aggrMethodOid" />
+    <result column="FORMULA_VERSION_NO" jdbcType="INTEGER" property="formulaVersionNo" />
+    <result column="WEIGHT_VALUE" jdbcType="DECIMAL" property="weightValue" />
+    <result column="ENABLED" jdbcType="VARCHAR" property="enabled" />
+    <result column="CUSERID" jdbcType="VARCHAR" property="cuserid" />
+    <result column="CDATE" jdbcType="TIMESTAMP" property="cdate" />
+    <result column="UUSERID" jdbcType="VARCHAR" property="uuserid" />
+    <result column="UDATE" jdbcType="TIMESTAMP" property="udate" />
+  </resultMap>
+  
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_kpi
+    where OID = #{oid,jdbcType=CHAR}
+  </select>  
+  
+  <sql id="baseConditions">
+    <if test="oid != null and oid != ''.toString() ">
+        AND OID = #{oid,jdbcType=CHAR}
+    </if>
+    <if test="kpiCode != null and kpiCode != ''.toString() ">
+        AND KPI_CODE = #{kpiCode,jdbcType=VARCHAR}
+    </if>
+    <if test="kpiName != null and kpiName != ''.toString() ">
+        AND KPI_NAME LIKE #{kpiName,jdbcType=VARCHAR}
+    </if>
+    <if test="enabled != null and enabled != ''.toString() ">
+        AND ENABLED = #{enabled,jdbcType=VARCHAR}
+    </if>
+  </sql>
+  
+  <select id="selectListByParams" parameterType="java.util.HashMap" resultMap="BaseResultMap">
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_kpi
+    WHERE 1=1
+    <include refid="baseConditions" />
+    <if test="orderBy != null and orderBy != ''.toString() and sortType != null and sortType != ''.toString() ">
+        ORDER BY ${orderBy} ${sortType}
+    </if>
+  </select>    
+  
+  <select id="findPage" parameterType="java.util.HashMap" resultMap="BaseResultMap">
+    <include refid="org.qifu.core.mapper.DB1Config.sql1"/>
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_kpi
+    WHERE 1=1
+    <include refid="baseConditions" />
+    <include refid="org.qifu.core.mapper.DB1Config.sql2"/>
+  </select>  
+  
+  <select id="count" parameterType="java.util.HashMap" resultType="java.lang.Long">
+    select count(*) from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_kpi
+    WHERE 1=1
+    <include refid="baseConditions" />
+  </select>  
+  
+  <insert id="insert" parameterType="org.qifu.md.entity.MdKpi"> 
+    insert into <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_kpi
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="oid != null">OID,</if>
+      <if test="kpiCode != null">KPI_CODE,</if>
+      <if test="kpiName != null">KPI_NAME,</if>
+      <if test="description != null">DESCRIPTION,</if>
+      <if test="unitName != null">UNIT_NAME,</if>
+      <if test="dataType != null">DATA_TYPE,</if>
+      <if test="periodType != null">PERIOD_TYPE,</if>
+      <if test="managementMode != null">MANAGEMENT_MODE,</if>
+      <if test="compareMode != null">COMPARE_MODE,</if>
+      <if test="minValue != null">MIN_VALUE,</if>
+      <if test="targetValue != null">TARGET_VALUE,</if>
+      <if test="maxValue != null">MAX_VALUE,</if>
+      <if test="quasiRange != null">QUASI_RANGE,</if>
+      <if test="scoreCapMode != null">SCORE_CAP_MODE,</if>
+      <if test="scoringPolicy != null">SCORING_POLICY,</if>
+      <if test="formulaOid != null">FORMULA_OID,</if>
+      <if test="recommendedFormulaOid != null">RECOMMENDED_FORMULA_OID,</if>
+      <if test="formulaSelectionMode != null">FORMULA_SELECTION_MODE,</if>
+      <if test="aggrMethodOid != null">AGGR_METHOD_OID,</if>
+      <if test="formulaVersionNo != null">FORMULA_VERSION_NO,</if>
+      <if test="weightValue != null">WEIGHT_VALUE,</if>
+      <if test="enabled != null">ENABLED,</if>
+      <if test="cuserid != null">CUSERID,</if>
+      <if test="cdate != null">CDATE,</if>
+      <if test="uuserid != null">UUSERID,</if>
+      <if test="udate != null">UDATE,</if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="oid != null">#{oid,jdbcType=CHAR},</if>
+      <if test="kpiCode != null">#{kpiCode,jdbcType=VARCHAR},</if>
+      <if test="kpiName != null">#{kpiName,jdbcType=VARCHAR},</if>
+      <if test="description != null">#{description,jdbcType=VARCHAR},</if>
+      <if test="unitName != null">#{unitName,jdbcType=VARCHAR},</if>
+      <if test="dataType != null">#{dataType,jdbcType=VARCHAR},</if>
+      <if test="periodType != null">#{periodType,jdbcType=VARCHAR},</if>
+      <if test="managementMode != null">#{managementMode,jdbcType=VARCHAR},</if>
+      <if test="compareMode != null">#{compareMode,jdbcType=VARCHAR},</if>
+      <if test="minValue != null">#{minValue,jdbcType=DECIMAL},</if>
+      <if test="targetValue != null">#{targetValue,jdbcType=DECIMAL},</if>
+      <if test="maxValue != null">#{maxValue,jdbcType=DECIMAL},</if>
+      <if test="quasiRange != null">#{quasiRange,jdbcType=DECIMAL},</if>
+      <if test="scoreCapMode != null">#{scoreCapMode,jdbcType=VARCHAR},</if>
+      <if test="scoringPolicy != null">#{scoringPolicy,jdbcType=VARCHAR},</if>
+      <if test="formulaOid != null">#{formulaOid,jdbcType=CHAR},</if>
+      <if test="recommendedFormulaOid != null">#{recommendedFormulaOid,jdbcType=CHAR},</if>
+      <if test="formulaSelectionMode != null">#{formulaSelectionMode,jdbcType=VARCHAR},</if>
+      <if test="aggrMethodOid != null">#{aggrMethodOid,jdbcType=CHAR},</if>
+      <if test="formulaVersionNo != null">#{formulaVersionNo,jdbcType=INTEGER},</if>
+      <if test="weightValue != null">#{weightValue,jdbcType=DECIMAL},</if>
+      <if test="enabled != null">#{enabled,jdbcType=VARCHAR},</if>
+      <if test="cuserid != null">#{cuserid,jdbcType=VARCHAR},</if>
+      <if test="cdate != null">#{cdate,jdbcType=TIMESTAMP},</if>
+      <if test="uuserid != null">#{uuserid,jdbcType=VARCHAR},</if>
+      <if test="udate != null">#{udate,jdbcType=TIMESTAMP},</if>
+    </trim>
+  </insert>  
+  
+  <update id="update" parameterType="org.qifu.md.entity.MdKpi">
+    update <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_kpi
+    <set>
+      <if test="kpiCode != null">KPI_CODE = #{kpiCode,jdbcType=VARCHAR},</if>
+      <if test="kpiName != null">KPI_NAME = #{kpiName,jdbcType=VARCHAR},</if>
+      <if test="description != null">DESCRIPTION = #{description,jdbcType=VARCHAR},</if>
+      <if test="unitName != null">UNIT_NAME = #{unitName,jdbcType=VARCHAR},</if>
+      <if test="dataType != null">DATA_TYPE = #{dataType,jdbcType=VARCHAR},</if>
+      <if test="periodType != null">PERIOD_TYPE = #{periodType,jdbcType=VARCHAR},</if>
+      <if test="managementMode != null">MANAGEMENT_MODE = #{managementMode,jdbcType=VARCHAR},</if>
+      <if test="compareMode != null">COMPARE_MODE = #{compareMode,jdbcType=VARCHAR},</if>
+      <if test="minValue != null">MIN_VALUE = #{minValue,jdbcType=DECIMAL},</if>
+      <if test="targetValue != null">TARGET_VALUE = #{targetValue,jdbcType=DECIMAL},</if>
+      <if test="maxValue != null">MAX_VALUE = #{maxValue,jdbcType=DECIMAL},</if>
+      <if test="quasiRange != null">QUASI_RANGE = #{quasiRange,jdbcType=DECIMAL},</if>
+      <if test="scoreCapMode != null">SCORE_CAP_MODE = #{scoreCapMode,jdbcType=VARCHAR},</if>
+      <if test="scoringPolicy != null">SCORING_POLICY = #{scoringPolicy,jdbcType=VARCHAR},</if>
+      <if test="formulaOid != null">FORMULA_OID = #{formulaOid,jdbcType=CHAR},</if>
+      <if test="recommendedFormulaOid != null">RECOMMENDED_FORMULA_OID = #{recommendedFormulaOid,jdbcType=CHAR},</if>
+      <if test="formulaSelectionMode != null">FORMULA_SELECTION_MODE = #{formulaSelectionMode,jdbcType=VARCHAR},</if>
+      <if test="aggrMethodOid != null">AGGR_METHOD_OID = #{aggrMethodOid,jdbcType=CHAR},</if>
+      <if test="formulaVersionNo != null">FORMULA_VERSION_NO = #{formulaVersionNo,jdbcType=INTEGER},</if>
+      <if test="weightValue != null">WEIGHT_VALUE = #{weightValue,jdbcType=DECIMAL},</if>
+      <if test="enabled != null">ENABLED = #{enabled,jdbcType=VARCHAR},</if>
+      <if test="uuserid != null">UUSERID = #{uuserid,jdbcType=VARCHAR},</if>
+      <if test="udate != null">UDATE = #{udate,jdbcType=TIMESTAMP},</if>
+    </set>
+    where OID = #{oid,jdbcType=CHAR}
+  </update>  
+  
+  <delete id="delete" parameterType="org.qifu.md.entity.MdKpi">
+    delete from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_kpi
+    where OID = #{oid,jdbcType=CHAR}
+  </delete>  
+  
+</mapper>

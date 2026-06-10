@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.qifu.md.mapper.MdOkrCheckinMapper">
+
+  <resultMap id="BaseResultMap" type="org.qifu.md.entity.MdOkrCheckin">
+    <id column="OID" jdbcType="CHAR" property="oid" />
+    <result column="KR_OID" jdbcType="CHAR" property="krOid" />
+    <result column="CHECKIN_DATE" jdbcType="DATE" property="checkinDate" />
+    <result column="CURRENT_VALUE" jdbcType="DECIMAL" property="currentValue" />
+    <result column="PROGRESS_VALUE" jdbcType="DECIMAL" property="progressValue" />
+    <result column="CONFIDENCE_SCORE" jdbcType="DECIMAL" property="confidenceScore" />
+    <result column="COMMENT_TEXT" jdbcType="VARCHAR" property="commentText" />
+    <result column="CUSERID" jdbcType="VARCHAR" property="cuserid" />
+    <result column="CDATE" jdbcType="TIMESTAMP" property="cdate" />
+    <result column="UUSERID" jdbcType="VARCHAR" property="uuserid" />
+    <result column="UDATE" jdbcType="TIMESTAMP" property="udate" />
+  </resultMap>
+  
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_okr_checkin
+    where OID = #{oid,jdbcType=CHAR}
+  </select>  
+  
+  <sql id="baseConditions">
+    <if test="oid != null and oid != ''.toString() ">
+        AND OID = #{oid,jdbcType=CHAR}
+    </if>
+    <if test="krOid != null and krOid != ''.toString() ">
+        AND KR_OID = #{krOid,jdbcType=CHAR}
+    </if>
+  </sql>
+  
+  <select id="selectListByParams" parameterType="java.util.HashMap" resultMap="BaseResultMap">
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_okr_checkin
+    WHERE 1=1
+    <include refid="baseConditions" />
+    <if test="orderBy != null and orderBy != ''.toString() and sortType != null and sortType != ''.toString() ">
+        ORDER BY ${orderBy} ${sortType}
+    </if>
+  </select>    
+  
+  <select id="findPage" parameterType="java.util.HashMap" resultMap="BaseResultMap">
+    <include refid="org.qifu.core.mapper.DB1Config.sql1"/>
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_okr_checkin
+    WHERE 1=1
+    <include refid="baseConditions" />
+    <include refid="org.qifu.core.mapper.DB1Config.sql2"/>
+  </select>  
+  
+  <select id="count" parameterType="java.util.HashMap" resultType="java.lang.Long">
+    select count(*) from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_okr_checkin
+    WHERE 1=1
+    <include refid="baseConditions" />
+  </select>  
+  
+  <insert id="insert" parameterType="org.qifu.md.entity.MdOkrCheckin"> 
+    insert into <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_okr_checkin
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="oid != null">OID,</if>
+      <if test="krOid != null">KR_OID,</if>
+      <if test="checkinDate != null">CHECKIN_DATE,</if>
+      <if test="currentValue != null">CURRENT_VALUE,</if>
+      <if test="progressValue != null">PROGRESS_VALUE,</if>
+      <if test="confidenceScore != null">CONFIDENCE_SCORE,</if>
+      <if test="commentText != null">COMMENT_TEXT,</if>
+      <if test="cuserid != null">CUSERID,</if>
+      <if test="cdate != null">CDATE,</if>
+      <if test="uuserid != null">UUSERID,</if>
+      <if test="udate != null">UDATE,</if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="oid != null">#{oid,jdbcType=CHAR},</if>
+      <if test="krOid != null">#{krOid,jdbcType=CHAR},</if>
+      <if test="checkinDate != null">#{checkinDate,jdbcType=DATE},</if>
+      <if test="currentValue != null">#{currentValue,jdbcType=DECIMAL},</if>
+      <if test="progressValue != null">#{progressValue,jdbcType=DECIMAL},</if>
+      <if test="confidenceScore != null">#{confidenceScore,jdbcType=DECIMAL},</if>
+      <if test="commentText != null">#{commentText,jdbcType=VARCHAR},</if>
+      <if test="cuserid != null">#{cuserid,jdbcType=VARCHAR},</if>
+      <if test="cdate != null">#{cdate,jdbcType=TIMESTAMP},</if>
+      <if test="uuserid != null">#{uuserid,jdbcType=VARCHAR},</if>
+      <if test="udate != null">#{udate,jdbcType=TIMESTAMP},</if>
+    </trim>
+  </insert>  
+  
+  <update id="update" parameterType="org.qifu.md.entity.MdOkrCheckin">
+    update <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_okr_checkin
+    <set>
+      <if test="krOid != null">KR_OID = #{krOid,jdbcType=CHAR},</if>
+      <if test="checkinDate != null">CHECKIN_DATE = #{checkinDate,jdbcType=DATE},</if>
+      <if test="currentValue != null">CURRENT_VALUE = #{currentValue,jdbcType=DECIMAL},</if>
+      <if test="progressValue != null">PROGRESS_VALUE = #{progressValue,jdbcType=DECIMAL},</if>
+      <if test="confidenceScore != null">CONFIDENCE_SCORE = #{confidenceScore,jdbcType=DECIMAL},</if>
+      <if test="commentText != null">COMMENT_TEXT = #{commentText,jdbcType=VARCHAR},</if>
+      <if test="uuserid != null">UUSERID = #{uuserid,jdbcType=VARCHAR},</if>
+      <if test="udate != null">UDATE = #{udate,jdbcType=TIMESTAMP},</if>
+    </set>
+    where OID = #{oid,jdbcType=CHAR}
+  </update>  
+  
+  <delete id="delete" parameterType="org.qifu.md.entity.MdOkrCheckin">
+    delete from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_okr_checkin
+    where OID = #{oid,jdbcType=CHAR}
+  </delete>  
+  
+</mapper>

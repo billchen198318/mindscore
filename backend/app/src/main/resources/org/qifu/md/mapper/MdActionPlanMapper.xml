@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.qifu.md.mapper.MdActionPlanMapper">
+
+  <resultMap id="BaseResultMap" type="org.qifu.md.entity.MdActionPlan">
+    <id column="OID" jdbcType="CHAR" property="oid" />
+    <result column="PLAN_CODE" jdbcType="VARCHAR" property="planCode" />
+    <result column="PLAN_NAME" jdbcType="VARCHAR" property="planName" />
+    <result column="DESCRIPTION" jdbcType="VARCHAR" property="description" />
+    <result column="START_DATE" jdbcType="DATE" property="startDate" />
+    <result column="END_DATE" jdbcType="DATE" property="endDate" />
+    <result column="PROGRESS_VALUE" jdbcType="DECIMAL" property="progressValue" />
+    <result column="STATUS" jdbcType="VARCHAR" property="status" />
+    <result column="CUSERID" jdbcType="VARCHAR" property="cuserid" />
+    <result column="CDATE" jdbcType="TIMESTAMP" property="cdate" />
+    <result column="UUSERID" jdbcType="VARCHAR" property="uuserid" />
+    <result column="UDATE" jdbcType="TIMESTAMP" property="udate" />
+  </resultMap>
+  
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_action_plan
+    where OID = #{oid,jdbcType=CHAR}
+  </select>  
+  
+  <sql id="baseConditions">
+	<if test="oid != null and oid != ''.toString() ">
+		AND OID = #{oid,jdbcType=CHAR}
+	</if>
+	<if test="planCode != null and planCode != ''.toString() ">
+		AND PLAN_CODE = #{planCode,jdbcType=VARCHAR}
+	</if>
+	<if test="planName != null and planName != ''.toString() ">
+		AND PLAN_NAME LIKE #{planName,jdbcType=VARCHAR}
+	</if>
+	<if test="status != null and status != ''.toString() ">
+		AND STATUS = #{status,jdbcType=VARCHAR}
+	</if>
+  </sql>
+  
+  <select id="selectListByParams" parameterType="java.util.HashMap" resultMap="BaseResultMap">
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_action_plan
+    WHERE 1=1
+	
+	<include refid="baseConditions" />
+		
+	<if test="orderBy != null and orderBy != ''.toString() and sortType != null and sortType != ''.toString() ">
+		ORDER BY  ${orderBy} ${sortType}
+	</if>
+  </select>    
+  
+  <select id="findPage" parameterType="java.util.HashMap" resultMap="BaseResultMap">
+  	<include refid="org.qifu.core.mapper.DB1Config.sql1"/>
+  	
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_action_plan
+    WHERE 1=1
+	
+	<include refid="baseConditions" />
+		
+	<include refid="org.qifu.core.mapper.DB1Config.sql2"/>
+  </select>  
+  
+  <select id="count" parameterType="java.util.HashMap" resultType="java.lang.Long">
+    select count(*) from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_action_plan
+    WHERE 1=1
+	
+	<include refid="baseConditions" />
+	
+  </select>  
+  
+  <insert id="insert" parameterType="org.qifu.md.entity.MdActionPlan"> 
+    insert into <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_action_plan
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="oid != null">
+        OID,
+      </if>
+      <if test="planCode != null">
+        PLAN_CODE,
+      </if>
+      <if test="planName != null">
+        PLAN_NAME,
+      </if>
+      <if test="description != null">
+        DESCRIPTION,
+      </if>
+      <if test="startDate != null">
+        START_DATE,
+      </if>
+      <if test="endDate != null">
+        END_DATE,
+      </if>
+      <if test="progressValue != null">
+        PROGRESS_VALUE,
+      </if>
+      <if test="status != null">
+        STATUS,
+      </if>
+      <if test="cuserid != null">
+        CUSERID,
+      </if>
+      <if test="cdate != null">
+        CDATE,
+      </if>
+      <if test="uuserid != null">
+        UUSERID,
+      </if>
+      <if test="udate != null">
+        UDATE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="oid != null">
+        #{oid,jdbcType=CHAR},
+      </if>
+      <if test="planCode != null">
+        #{planCode,jdbcType=VARCHAR},
+      </if>
+      <if test="planName != null">
+        #{planName,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null">
+        #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="startDate != null">
+        #{startDate,jdbcType=DATE},
+      </if>
+      <if test="endDate != null">
+        #{endDate,jdbcType=DATE},
+      </if>
+      <if test="progressValue != null">
+        #{progressValue,jdbcType=DECIMAL},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="cuserid != null">
+        #{cuserid,jdbcType=VARCHAR},
+      </if>
+      <if test="cdate != null">
+        #{cdate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="uuserid != null">
+        #{uuserid,jdbcType=VARCHAR},
+      </if>
+      <if test="udate != null">
+        #{udate,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>  
+  
+  <update id="update" parameterType="org.qifu.md.entity.MdActionPlan">
+    update <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_action_plan
+    <set>
+      <if test="planCode != null">
+        PLAN_CODE = #{planCode,jdbcType=VARCHAR},
+      </if>
+      <if test="planName != null">
+        PLAN_NAME = #{planName,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null">
+        DESCRIPTION = #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="startDate != null">
+        START_DATE = #{startDate,jdbcType=DATE},
+      </if>
+      <if test="endDate != null">
+        END_DATE = #{endDate,jdbcType=DATE},
+      </if>
+      <if test="progressValue != null">
+        PROGRESS_VALUE = #{progressValue,jdbcType=DECIMAL},
+      </if>
+      <if test="status != null">
+        STATUS = #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="uuserid != null">
+        UUSERID = #{uuserid,jdbcType=VARCHAR},
+      </if>
+      <if test="udate != null">
+        UDATE = #{udate,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where OID = #{oid,jdbcType=CHAR}
+  </update>  
+  
+  <delete id="delete" parameterType="org.qifu.md.entity.MdActionPlan">
+    delete from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_action_plan
+    where OID = #{oid,jdbcType=CHAR}
+  </delete>  
+  
+</mapper>

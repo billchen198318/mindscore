@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.qifu.md.mapper.MdStrategySnapshotMapper">
+
+  <resultMap id="BaseResultMap" type="org.qifu.md.entity.MdStrategySnapshot">
+    <id column="OID" jdbcType="CHAR" property="oid" />
+    <result column="WORKSPACE_OID" jdbcType="CHAR" property="workspaceOid" />
+    <result column="PERIOD_TYPE" jdbcType="VARCHAR" property="periodType" />
+    <result column="PERIOD_KEY" jdbcType="VARCHAR" property="periodKey" />
+    <result column="SCORE_VALUE" jdbcType="DECIMAL" property="scoreValue" />
+    <result column="KPI_COUNT" jdbcType="INTEGER" property="kpiCount" />
+    <result column="OKR_COUNT" jdbcType="INTEGER" property="okrCount" />
+    <result column="CALCULATION_TRACE" jdbcType="LONGVARCHAR" property="calculationTrace" />
+    <result column="SNAPSHOT_AT" jdbcType="TIMESTAMP" property="snapshotAt" />
+    <result column="CUSERID" jdbcType="VARCHAR" property="cuserid" />
+    <result column="CDATE" jdbcType="TIMESTAMP" property="cdate" />
+    <result column="UUSERID" jdbcType="VARCHAR" property="uuserid" />
+    <result column="UDATE" jdbcType="TIMESTAMP" property="udate" />
+  </resultMap>
+  
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_strategy_snapshot
+    where OID = #{oid,jdbcType=CHAR}
+  </select>  
+  
+  <sql id="baseConditions">
+    <if test="oid != null and oid != ''.toString() ">
+        AND OID = #{oid,jdbcType=CHAR}
+    </if>
+    <if test="workspaceOid != null and workspaceOid != ''.toString() ">
+        AND WORKSPACE_OID = #{workspaceOid,jdbcType=CHAR}
+    </if>
+    <if test="periodType != null and periodType != ''.toString() ">
+        AND PERIOD_TYPE = #{periodType,jdbcType=VARCHAR}
+    </if>
+    <if test="periodKey != null and periodKey != ''.toString() ">
+        AND PERIOD_KEY = #{periodKey,jdbcType=VARCHAR}
+    </if>
+  </sql>
+  
+  <select id="selectListByParams" parameterType="java.util.HashMap" resultMap="BaseResultMap">
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_strategy_snapshot
+    WHERE 1=1
+    <include refid="baseConditions" />
+    <if test="orderBy != null and orderBy != ''.toString() and sortType != null and sortType != ''.toString() ">
+        ORDER BY ${orderBy} ${sortType}
+    </if>
+  </select>    
+  
+  <select id="findPage" parameterType="java.util.HashMap" resultMap="BaseResultMap">
+    <include refid="org.qifu.core.mapper.DB1Config.sql1"/>
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_strategy_snapshot
+    WHERE 1=1
+    <include refid="baseConditions" />
+    <include refid="org.qifu.core.mapper.DB1Config.sql2"/>
+  </select>  
+  
+  <select id="count" parameterType="java.util.HashMap" resultType="java.lang.Long">
+    select count(*) from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_strategy_snapshot
+    WHERE 1=1
+    <include refid="baseConditions" />
+  </select>  
+  
+  <insert id="insert" parameterType="org.qifu.md.entity.MdStrategySnapshot"> 
+    insert into <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_strategy_snapshot
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="oid != null">OID,</if>
+      <if test="workspaceOid != null">WORKSPACE_OID,</if>
+      <if test="periodType != null">PERIOD_TYPE,</if>
+      <if test="periodKey != null">PERIOD_KEY,</if>
+      <if test="scoreValue != null">SCORE_VALUE,</if>
+      <if test="kpiCount != null">KPI_COUNT,</if>
+      <if test="okrCount != null">OKR_COUNT,</if>
+      <if test="calculationTrace != null">CALCULATION_TRACE,</if>
+      <if test="snapshotAt != null">SNAPSHOT_AT,</if>
+      <if test="cuserid != null">CUSERID,</if>
+      <if test="cdate != null">CDATE,</if>
+      <if test="uuserid != null">UUSERID,</if>
+      <if test="udate != null">UDATE,</if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="oid != null">#{oid,jdbcType=CHAR},</if>
+      <if test="workspaceOid != null">#{workspaceOid,jdbcType=CHAR},</if>
+      <if test="periodType != null">#{periodType,jdbcType=VARCHAR},</if>
+      <if test="periodKey != null">#{periodKey,jdbcType=VARCHAR},</if>
+      <if test="scoreValue != null">#{scoreValue,jdbcType=DECIMAL},</if>
+      <if test="kpiCount != null">#{kpiCount,jdbcType=INTEGER},</if>
+      <if test="okrCount != null">#{okrCount,jdbcType=INTEGER},</if>
+      <if test="calculationTrace != null">#{calculationTrace,jdbcType=LONGVARCHAR},</if>
+      <if test="snapshotAt != null">#{snapshotAt,jdbcType=TIMESTAMP},</if>
+      <if test="cuserid != null">#{cuserid,jdbcType=VARCHAR},</if>
+      <if test="cdate != null">#{cdate,jdbcType=TIMESTAMP},</if>
+      <if test="uuserid != null">#{uuserid,jdbcType=VARCHAR},</if>
+      <if test="udate != null">#{udate,jdbcType=TIMESTAMP},</if>
+    </trim>
+  </insert>  
+  
+  <update id="update" parameterType="org.qifu.md.entity.MdStrategySnapshot">
+    update <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_strategy_snapshot
+    <set>
+      <if test="workspaceOid != null">WORKSPACE_OID = #{workspaceOid,jdbcType=CHAR},</if>
+      <if test="periodType != null">PERIOD_TYPE = #{periodType,jdbcType=VARCHAR},</if>
+      <if test="periodKey != null">PERIOD_KEY = #{periodKey,jdbcType=VARCHAR},</if>
+      <if test="scoreValue != null">SCORE_VALUE = #{scoreValue,jdbcType=DECIMAL},</if>
+      <if test="kpiCount != null">KPI_COUNT = #{kpiCount,jdbcType=INTEGER},</if>
+      <if test="okrCount != null">OKR_COUNT = #{okrCount,jdbcType=INTEGER},</if>
+      <if test="calculationTrace != null">CALCULATION_TRACE = #{calculationTrace,jdbcType=LONGVARCHAR},</if>
+      <if test="snapshotAt != null">SNAPSHOT_AT = #{snapshotAt,jdbcType=TIMESTAMP},</if>
+      <if test="uuserid != null">UUSERID = #{uuserid,jdbcType=VARCHAR},</if>
+      <if test="udate != null">UDATE = #{udate,jdbcType=TIMESTAMP},</if>
+    </set>
+    where OID = #{oid,jdbcType=CHAR}
+  </update>  
+  
+  <delete id="delete" parameterType="org.qifu.md.entity.MdStrategySnapshot">
+    delete from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_strategy_snapshot
+    where OID = #{oid,jdbcType=CHAR}
+  </delete>  
+  
+</mapper>

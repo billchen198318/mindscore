@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.qifu.md.mapper.MdOkrSnapshotMapper">
+
+  <resultMap id="BaseResultMap" type="org.qifu.md.entity.MdOkrSnapshot">
+    <id column="OID" jdbcType="CHAR" property="oid" />
+    <result column="OBJECTIVE_OID" jdbcType="CHAR" property="objectiveOid" />
+    <result column="PERIOD_KEY" jdbcType="VARCHAR" property="periodKey" />
+    <result column="PROGRESS_VALUE" jdbcType="DECIMAL" property="progressValue" />
+    <result column="CONFIDENCE_SCORE" jdbcType="DECIMAL" property="confidenceScore" />
+    <result column="SCORE_STATUS" jdbcType="VARCHAR" property="scoreStatus" />
+    <result column="CALCULATION_TRACE" jdbcType="LONGVARCHAR" property="calculationTrace" />
+    <result column="SNAPSHOT_AT" jdbcType="TIMESTAMP" property="snapshotAt" />
+    <result column="CUSERID" jdbcType="VARCHAR" property="cuserid" />
+    <result column="CDATE" jdbcType="TIMESTAMP" property="cdate" />
+    <result column="UUSERID" jdbcType="VARCHAR" property="uuserid" />
+    <result column="UDATE" jdbcType="TIMESTAMP" property="udate" />
+  </resultMap>
+  
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_okr_snapshot
+    where OID = #{oid,jdbcType=CHAR}
+  </select>  
+  
+  <sql id="baseConditions">
+    <if test="oid != null and oid != ''.toString() ">
+        AND OID = #{oid,jdbcType=CHAR}
+    </if>
+    <if test="objectiveOid != null and objectiveOid != ''.toString() ">
+        AND OBJECTIVE_OID = #{objectiveOid,jdbcType=CHAR}
+    </if>
+    <if test="periodKey != null and periodKey != ''.toString() ">
+        AND PERIOD_KEY = #{periodKey,jdbcType=VARCHAR}
+    </if>
+  </sql>
+  
+  <select id="selectListByParams" parameterType="java.util.HashMap" resultMap="BaseResultMap">
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_okr_snapshot
+    WHERE 1=1
+    <include refid="baseConditions" />
+    <if test="orderBy != null and orderBy != ''.toString() and sortType != null and sortType != ''.toString() ">
+        ORDER BY ${orderBy} ${sortType}
+    </if>
+  </select>    
+  
+  <select id="findPage" parameterType="java.util.HashMap" resultMap="BaseResultMap">
+    <include refid="org.qifu.core.mapper.DB1Config.sql1"/>
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_okr_snapshot
+    WHERE 1=1
+    <include refid="baseConditions" />
+    <include refid="org.qifu.core.mapper.DB1Config.sql2"/>
+  </select>  
+  
+  <select id="count" parameterType="java.util.HashMap" resultType="java.lang.Long">
+    select count(*) from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_okr_snapshot
+    WHERE 1=1
+    <include refid="baseConditions" />
+  </select>  
+  
+  <insert id="insert" parameterType="org.qifu.md.entity.MdOkrSnapshot"> 
+    insert into <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_okr_snapshot
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="oid != null">OID,</if>
+      <if test="objectiveOid != null">OBJECTIVE_OID,</if>
+      <if test="periodKey != null">PERIOD_KEY,</if>
+      <if test="progressValue != null">PROGRESS_VALUE,</if>
+      <if test="confidenceScore != null">CONFIDENCE_SCORE,</if>
+      <if test="scoreStatus != null">SCORE_STATUS,</if>
+      <if test="calculationTrace != null">CALCULATION_TRACE,</if>
+      <if test="snapshotAt != null">SNAPSHOT_AT,</if>
+      <if test="cuserid != null">CUSERID,</if>
+      <if test="cdate != null">CDATE,</if>
+      <if test="uuserid != null">UUSERID,</if>
+      <if test="udate != null">UDATE,</if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="oid != null">#{oid,jdbcType=CHAR},</if>
+      <if test="objectiveOid != null">#{objectiveOid,jdbcType=CHAR},</if>
+      <if test="periodKey != null">#{periodKey,jdbcType=VARCHAR},</if>
+      <if test="progressValue != null">#{progressValue,jdbcType=DECIMAL},</if>
+      <if test="confidenceScore != null">#{confidenceScore,jdbcType=DECIMAL},</if>
+      <if test="scoreStatus != null">#{scoreStatus,jdbcType=VARCHAR},</if>
+      <if test="calculationTrace != null">#{calculationTrace,jdbcType=LONGVARCHAR},</if>
+      <if test="snapshotAt != null">#{snapshotAt,jdbcType=TIMESTAMP},</if>
+      <if test="cuserid != null">#{cuserid,jdbcType=VARCHAR},</if>
+      <if test="cdate != null">#{cdate,jdbcType=TIMESTAMP},</if>
+      <if test="uuserid != null">#{uuserid,jdbcType=VARCHAR},</if>
+      <if test="udate != null">#{udate,jdbcType=TIMESTAMP},</if>
+    </trim>
+  </insert>  
+  
+  <update id="update" parameterType="org.qifu.md.entity.MdOkrSnapshot">
+    update <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_okr_snapshot
+    <set>
+      <if test="objectiveOid != null">OBJECTIVE_OID = #{objectiveOid,jdbcType=CHAR},</if>
+      <if test="periodKey != null">PERIOD_KEY = #{periodKey,jdbcType=VARCHAR},</if>
+      <if test="progressValue != null">PROGRESS_VALUE = #{progressValue,jdbcType=DECIMAL},</if>
+      <if test="confidenceScore != null">CONFIDENCE_SCORE = #{confidenceScore,jdbcType=DECIMAL},</if>
+      <if test="scoreStatus != null">SCORE_STATUS = #{scoreStatus,jdbcType=VARCHAR},</if>
+      <if test="calculationTrace != null">CALCULATION_TRACE = #{calculationTrace,jdbcType=LONGVARCHAR},</if>
+      <if test="snapshotAt != null">SNAPSHOT_AT = #{snapshotAt,jdbcType=TIMESTAMP},</if>
+      <if test="uuserid != null">UUSERID = #{uuserid,jdbcType=VARCHAR},</if>
+      <if test="udate != null">UDATE = #{udate,jdbcType=TIMESTAMP},</if>
+    </set>
+    where OID = #{oid,jdbcType=CHAR}
+  </update>  
+  
+  <delete id="delete" parameterType="org.qifu.md.entity.MdOkrSnapshot">
+    delete from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_okr_snapshot
+    where OID = #{oid,jdbcType=CHAR}
+  </delete>  
+  
+</mapper>
