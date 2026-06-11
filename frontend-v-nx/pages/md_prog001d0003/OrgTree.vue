@@ -20,8 +20,8 @@ const onChange = async (evt: any) => {
     if (evt.added) {
         // 獲取被移動的節點
         const movedItem = evt.added.element;
-        // 使用當前層級的 parentOid 作為新父節點
-        const newParentOid = props.parentOid || null;
+        // 使用當前層級的 parentOid 作為新父節點，若無則使用系統預設的零值 OID 代表根節點
+        const newParentOid = props.parentOid || '00000000-0000-0000-0000-000000000000';
 
         if (!movedItem) {
             toast.error("無法取得移動節點資訊");

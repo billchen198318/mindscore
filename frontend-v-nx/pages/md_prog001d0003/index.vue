@@ -66,7 +66,21 @@ onMounted(() => {
 
 <div class="card mb-4">
   <div class="card-body">
-    <OrgTree v-model="queryPageStore.treeData" @refresh="loadTreeData" />
+    <div class="mb-3 p-3 text-center root-drop-zone">
+      <i class="bi bi-info-circle me-2"></i>
+      將組織拖曳至此列表即可移至根節點
+    </div>
+    <OrgTree v-model="queryPageStore.treeData" :parentOid="null" @refresh="loadTreeData" />
   </div>
 </div>
 </template>
+
+<style scoped>
+.root-drop-zone {
+  background-color: #f0f7ff;
+  border: 2px dashed #b8daff;
+  color: #004085;
+  border-radius: 8px;
+  font-weight: 500;
+}
+</style>
