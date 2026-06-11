@@ -1,7 +1,7 @@
 /*M!999999\- enable the sandbox mode */ 
 -- MariaDB dump 10.19-12.2.2-MariaDB, for Win64 (AMD64)
 --
--- Host: localhost    Database: qifu4
+-- Host: localhost    Database: mdscore
 -- ------------------------------------------------------
 -- Server version	12.2.2-MariaDB
 
@@ -15,6 +15,963 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*M!100616 SET @OLD_NOTE_VERBOSITY=@@NOTE_VERBOSITY, NOTE_VERBOSITY=0 */;
+
+--
+-- Table structure for table `md_action_item`
+--
+
+DROP TABLE IF EXISTS `md_action_item`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `md_action_item` (
+  `OID` char(36) NOT NULL COMMENT '主鍵 OID',
+  `PLAN_OID` char(36) NOT NULL COMMENT 'Action Plan OID',
+  `PARENT_OID` char(36) DEFAULT NULL COMMENT '上層 Action Item OID',
+  `ITEM_NAME` varchar(300) NOT NULL COMMENT 'Action Item 名稱',
+  `ACTION_STAGE` varchar(32) NOT NULL DEFAULT 'DO' COMMENT '階段 PLAN/DO/CHECK/ACT',
+  `DESCRIPTION` varchar(2000) DEFAULT NULL COMMENT '說明',
+  `START_DATE` date DEFAULT NULL COMMENT '開始日期',
+  `END_DATE` date DEFAULT NULL COMMENT '結束日期',
+  `DONE_DATE` date DEFAULT NULL COMMENT '完成日期',
+  `PROGRESS_VALUE` decimal(10,4) NOT NULL DEFAULT 0.0000 COMMENT '進度百分比',
+  `STATUS` varchar(32) NOT NULL DEFAULT 'ACTIVE' COMMENT '狀態',
+  `SORT_NO` int(11) NOT NULL DEFAULT 0 COMMENT '排序',
+  `CUSERID` varchar(24) NOT NULL COMMENT '建立者',
+  `CDATE` datetime NOT NULL COMMENT '建立時間',
+  `UUSERID` varchar(24) DEFAULT NULL COMMENT '更新者',
+  `UDATE` datetime DEFAULT NULL COMMENT '更新時間',
+  PRIMARY KEY (`OID`),
+  KEY `IDX_MD_ACTION_ITEM_PLAN` (`PLAN_OID`),
+  KEY `IDX_MD_ACTION_ITEM_PARENT` (`PARENT_OID`),
+  KEY `IDX_MD_ACTION_ITEM_STATUS` (`STATUS`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore Action Item';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `md_action_item`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `md_action_item` WRITE;
+/*!40000 ALTER TABLE `md_action_item` DISABLE KEYS */;
+/*!40000 ALTER TABLE `md_action_item` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `md_action_owner`
+--
+
+DROP TABLE IF EXISTS `md_action_owner`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `md_action_owner` (
+  `OID` char(36) NOT NULL COMMENT '主鍵 OID',
+  `ACTION_TYPE` varchar(32) NOT NULL COMMENT 'Action 類型 PLAN/ITEM',
+  `ACTION_OID` char(36) NOT NULL COMMENT 'Action Plan 或 Action Item OID',
+  `OWNER_TYPE` varchar(32) NOT NULL COMMENT 'owner 類型 ACCOUNT/ORG',
+  `ACCOUNT` varchar(24) DEFAULT NULL COMMENT 'qifu4 帳號',
+  `ORG_OID` char(36) DEFAULT NULL COMMENT '組織 OID',
+  `OWNER_ROLE` varchar(32) NOT NULL DEFAULT 'OWNER' COMMENT 'owner 角色 OWNER/VIEWER/APPROVER',
+  `CUSERID` varchar(24) NOT NULL COMMENT '建立者',
+  `CDATE` datetime NOT NULL COMMENT '建立時間',
+  `UUSERID` varchar(24) DEFAULT NULL COMMENT '更新者',
+  `UDATE` datetime DEFAULT NULL COMMENT '更新時間',
+  PRIMARY KEY (`OID`),
+  KEY `IDX_MD_ACTION_OWNER_ACTION` (`ACTION_TYPE`,`ACTION_OID`),
+  KEY `IDX_MD_ACTION_OWNER_ACCOUNT` (`ACCOUNT`),
+  KEY `IDX_MD_ACTION_OWNER_ORG` (`ORG_OID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore Action owner';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `md_action_owner`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `md_action_owner` WRITE;
+/*!40000 ALTER TABLE `md_action_owner` DISABLE KEYS */;
+/*!40000 ALTER TABLE `md_action_owner` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `md_action_plan`
+--
+
+DROP TABLE IF EXISTS `md_action_plan`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `md_action_plan` (
+  `OID` char(36) NOT NULL COMMENT '主鍵 OID',
+  `PLAN_CODE` varchar(64) NOT NULL COMMENT 'Action Plan 代碼',
+  `PLAN_NAME` varchar(300) NOT NULL COMMENT 'Action Plan 名稱',
+  `DESCRIPTION` varchar(2000) DEFAULT NULL COMMENT '說明',
+  `START_DATE` date DEFAULT NULL COMMENT '開始日期',
+  `END_DATE` date DEFAULT NULL COMMENT '結束日期',
+  `PROGRESS_VALUE` decimal(10,4) NOT NULL DEFAULT 0.0000 COMMENT '進度百分比',
+  `STATUS` varchar(32) NOT NULL DEFAULT 'ACTIVE' COMMENT '狀態',
+  `CUSERID` varchar(24) NOT NULL COMMENT '建立者',
+  `CDATE` datetime NOT NULL COMMENT '建立時間',
+  `UUSERID` varchar(24) DEFAULT NULL COMMENT '更新者',
+  `UDATE` datetime DEFAULT NULL COMMENT '更新時間',
+  PRIMARY KEY (`OID`),
+  UNIQUE KEY `UK_MD_ACTION_PLAN_CODE` (`PLAN_CODE`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore Action Plan';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `md_action_plan`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `md_action_plan` WRITE;
+/*!40000 ALTER TABLE `md_action_plan` DISABLE KEYS */;
+/*!40000 ALTER TABLE `md_action_plan` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `md_action_source_link`
+--
+
+DROP TABLE IF EXISTS `md_action_source_link`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `md_action_source_link` (
+  `OID` char(36) NOT NULL COMMENT '主鍵 OID',
+  `ACTION_TYPE` varchar(32) NOT NULL COMMENT 'Action 類型 PLAN/ITEM',
+  `ACTION_OID` char(36) NOT NULL COMMENT 'Action OID',
+  `SOURCE_TYPE` varchar(32) NOT NULL COMMENT '來源類型 KPI/OKR_OBJECTIVE/OKR_KR/STRATEGY/INSIGHT',
+  `SOURCE_OID` char(36) NOT NULL COMMENT '來源 OID',
+  `LINK_REASON` varchar(1000) DEFAULT NULL COMMENT '關聯原因',
+  `CUSERID` varchar(24) NOT NULL COMMENT '建立者',
+  `CDATE` datetime NOT NULL COMMENT '建立時間',
+  `UUSERID` varchar(24) DEFAULT NULL COMMENT '更新者',
+  `UDATE` datetime DEFAULT NULL COMMENT '更新時間',
+  PRIMARY KEY (`OID`),
+  UNIQUE KEY `UK_MD_ACTION_SOURCE_LINK` (`ACTION_TYPE`,`ACTION_OID`,`SOURCE_TYPE`,`SOURCE_OID`),
+  KEY `IDX_MD_ACTION_SOURCE_ACTION` (`ACTION_TYPE`,`ACTION_OID`),
+  KEY `IDX_MD_ACTION_SOURCE_REF` (`SOURCE_TYPE`,`SOURCE_OID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore Action 來源關聯';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `md_action_source_link`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `md_action_source_link` WRITE;
+/*!40000 ALTER TABLE `md_action_source_link` DISABLE KEYS */;
+/*!40000 ALTER TABLE `md_action_source_link` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `md_aggregation_method`
+--
+
+DROP TABLE IF EXISTS `md_aggregation_method`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `md_aggregation_method` (
+  `OID` char(36) NOT NULL COMMENT '主鍵 OID',
+  `AGGR_CODE` varchar(64) NOT NULL COMMENT '彙總方法代碼',
+  `AGGR_NAME` varchar(200) NOT NULL COMMENT '彙總方法名稱',
+  `AGGR_TYPE` varchar(32) NOT NULL DEFAULT 'BUILTIN' COMMENT '彙總類型 BUILTIN/CUSTOM/SCRIPT',
+  `EXPRESSION` mediumtext DEFAULT NULL COMMENT '彙總公式或腳本',
+  `DESCRIPTION` varchar(2000) DEFAULT NULL COMMENT '彙總方法中文說明',
+  `ENABLED` varchar(1) NOT NULL DEFAULT 'Y' COMMENT '是否啟用 Y/N',
+  `CUSERID` varchar(24) NOT NULL COMMENT '建立者',
+  `CDATE` datetime NOT NULL COMMENT '建立時間',
+  `UUSERID` varchar(24) DEFAULT NULL COMMENT '更新者',
+  `UDATE` datetime DEFAULT NULL COMMENT '更新時間',
+  PRIMARY KEY (`OID`),
+  UNIQUE KEY `UK_MD_AGGR_CODE` (`AGGR_CODE`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore KPI 彙總方法';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `md_aggregation_method`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `md_aggregation_method` WRITE;
+/*!40000 ALTER TABLE `md_aggregation_method` DISABLE KEYS */;
+/*!40000 ALTER TABLE `md_aggregation_method` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `md_formula`
+--
+
+DROP TABLE IF EXISTS `md_formula`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `md_formula` (
+  `OID` char(36) NOT NULL COMMENT '主鍵 OID',
+  `FORMULA_CODE` varchar(64) NOT NULL COMMENT '公式代碼',
+  `FORMULA_NAME` varchar(200) NOT NULL COMMENT '公式名稱',
+  `FORMULA_TYPE` varchar(32) NOT NULL DEFAULT 'BUILTIN' COMMENT '公式類型 BUILTIN/CUSTOM/SCRIPT',
+  `SCRIPT_TYPE` varchar(32) NOT NULL DEFAULT 'JAVA' COMMENT '腳本類型 JAVA/GROOVY/JS/EXPR',
+  `EXPRESSION` mediumtext DEFAULT NULL COMMENT '公式內容或運算式',
+  `RETURN_TYPE` varchar(32) NOT NULL DEFAULT 'DECIMAL' COMMENT '回傳型別',
+  `VERSION_NO` int(11) NOT NULL DEFAULT 1 COMMENT '公式版本',
+  `IS_SYSTEM` varchar(1) NOT NULL DEFAULT 'N' COMMENT '是否系統內建 Y/N',
+  `IS_RECOMMENDABLE` varchar(1) NOT NULL DEFAULT 'Y' COMMENT '是否可被系統推薦 Y/N',
+  `DESCRIPTION` varchar(2000) DEFAULT NULL COMMENT '公式中文說明',
+  `EXAMPLE_TEXT` varchar(2000) DEFAULT NULL COMMENT '公式範例說明',
+  `PARAM_SCHEMA_JSON` mediumtext DEFAULT NULL COMMENT '公式參數 JSON schema',
+  `ENABLED` varchar(1) NOT NULL DEFAULT 'Y' COMMENT '是否啟用 Y/N',
+  `CUSERID` varchar(24) NOT NULL COMMENT '建立者',
+  `CDATE` datetime NOT NULL COMMENT '建立時間',
+  `UUSERID` varchar(24) DEFAULT NULL COMMENT '更新者',
+  `UDATE` datetime DEFAULT NULL COMMENT '更新時間',
+  PRIMARY KEY (`OID`),
+  UNIQUE KEY `UK_MD_FORMULA_CODE_VER` (`FORMULA_CODE`,`VERSION_NO`),
+  KEY `IDX_MD_FORMULA_RECOMMEND` (`IS_RECOMMENDABLE`,`ENABLED`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore KPI 計算公式';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `md_formula`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `md_formula` WRITE;
+/*!40000 ALTER TABLE `md_formula` DISABLE KEYS */;
+/*!40000 ALTER TABLE `md_formula` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `md_formula_recommend_rule`
+--
+
+DROP TABLE IF EXISTS `md_formula_recommend_rule`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `md_formula_recommend_rule` (
+  `OID` char(36) NOT NULL COMMENT '主鍵 OID',
+  `RULE_CODE` varchar(64) NOT NULL COMMENT '推薦規則代碼',
+  `RULE_NAME` varchar(200) NOT NULL COMMENT '推薦規則名稱',
+  `MANAGEMENT_MODE` varchar(32) NOT NULL COMMENT '管理模式 BIGGER/SMALLER/QUASI/MANUAL',
+  `COMPARE_MODE` varchar(32) DEFAULT NULL COMMENT '比較模式 TARGET/MINIMUM/MAXIMUM/RANGE/CUSTOM',
+  `PERIOD_TYPE` varchar(32) DEFAULT NULL COMMENT '適用週期類型，空值代表不限',
+  `DATA_TYPE` varchar(32) DEFAULT NULL COMMENT '資料類型 NUMBER/PERCENT/CURRENCY/BOOLEAN/MANUAL，空值代表不限',
+  `RECOMMENDED_FORMULA_OID` char(36) NOT NULL COMMENT '推薦公式 OID',
+  `PRIORITY_NO` int(11) NOT NULL DEFAULT 100 COMMENT '推薦優先順序，數字越小越優先',
+  `IS_DEFAULT` varchar(1) NOT NULL DEFAULT 'N' COMMENT '是否預設規則 Y/N',
+  `ENABLED` varchar(1) NOT NULL DEFAULT 'Y' COMMENT '是否啟用 Y/N',
+  `DESCRIPTION` varchar(2000) DEFAULT NULL COMMENT '推薦原因中文說明',
+  `CUSERID` varchar(24) NOT NULL COMMENT '建立者',
+  `CDATE` datetime NOT NULL COMMENT '建立時間',
+  `UUSERID` varchar(24) DEFAULT NULL COMMENT '更新者',
+  `UDATE` datetime DEFAULT NULL COMMENT '更新時間',
+  PRIMARY KEY (`OID`),
+  UNIQUE KEY `UK_MD_FORMULA_RECOMM_RULE` (`RULE_CODE`),
+  KEY `IDX_MD_FORMULA_RECOMM_MATCH` (`MANAGEMENT_MODE`,`COMPARE_MODE`,`DATA_TYPE`,`ENABLED`),
+  KEY `IDX_MD_FORMULA_RECOMM_FORMULA` (`RECOMMENDED_FORMULA_OID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore 公式推薦規則';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `md_formula_recommend_rule`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `md_formula_recommend_rule` WRITE;
+/*!40000 ALTER TABLE `md_formula_recommend_rule` DISABLE KEYS */;
+/*!40000 ALTER TABLE `md_formula_recommend_rule` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `md_kpi`
+--
+
+DROP TABLE IF EXISTS `md_kpi`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `md_kpi` (
+  `OID` char(36) NOT NULL COMMENT '主鍵 OID',
+  `KPI_CODE` varchar(64) NOT NULL COMMENT 'KPI 代碼',
+  `KPI_NAME` varchar(200) NOT NULL COMMENT 'KPI 名稱',
+  `DESCRIPTION` varchar(2000) DEFAULT NULL COMMENT 'KPI 說明',
+  `UNIT_NAME` varchar(50) DEFAULT NULL COMMENT '單位，例如 %, 元, 件, 天',
+  `DATA_TYPE` varchar(32) NOT NULL DEFAULT 'NUMBER' COMMENT '資料類型 NUMBER/PERCENT/CURRENCY/BOOLEAN/MANUAL',
+  `PERIOD_TYPE` varchar(32) NOT NULL DEFAULT 'MONTH' COMMENT '預設週期 DAY/WEEK/MONTH/QUARTER/HALFYEAR/YEAR',
+  `MANAGEMENT_MODE` varchar(32) NOT NULL COMMENT '管理模式 BIGGER/SMALLER/QUASI/MANUAL',
+  `COMPARE_MODE` varchar(32) NOT NULL DEFAULT 'TARGET' COMMENT '比較模式 TARGET/MINIMUM/MAXIMUM/RANGE/CUSTOM',
+  `MIN_VALUE` decimal(24,6) DEFAULT NULL COMMENT '最低值或下限門檻',
+  `TARGET_VALUE` decimal(24,6) DEFAULT NULL COMMENT '目標值',
+  `MAX_VALUE` decimal(24,6) DEFAULT NULL COMMENT '最高值或上限門檻',
+  `QUASI_RANGE` decimal(10,4) NOT NULL DEFAULT 0.0000 COMMENT '準目標容忍範圍百分比，例如 5 代表正負 5%',
+  `SCORE_CAP_MODE` varchar(32) NOT NULL DEFAULT 'CAP_100' COMMENT '分數封頂方式 CAP_100/ALLOW_OVER_100/CUSTOM',
+  `SCORING_POLICY` varchar(64) DEFAULT NULL COMMENT '內建計分策略代碼',
+  `FORMULA_OID` char(36) NOT NULL COMMENT '實際使用公式 OID',
+  `RECOMMENDED_FORMULA_OID` char(36) DEFAULT NULL COMMENT '系統推薦公式 OID',
+  `FORMULA_SELECTION_MODE` varchar(32) NOT NULL DEFAULT 'AUTO' COMMENT '公式選取方式 AUTO/MANUAL_OVERRIDE/CUSTOM',
+  `AGGR_METHOD_OID` char(36) NOT NULL COMMENT '彙總方法 OID',
+  `FORMULA_VERSION_NO` int(11) NOT NULL DEFAULT 1 COMMENT '使用公式版本',
+  `WEIGHT_VALUE` decimal(10,4) NOT NULL DEFAULT 0.0000 COMMENT '預設權重',
+  `ENABLED` varchar(1) NOT NULL DEFAULT 'Y' COMMENT '是否啟用 Y/N',
+  `CUSERID` varchar(24) NOT NULL COMMENT '建立者',
+  `CDATE` datetime NOT NULL COMMENT '建立時間',
+  `UUSERID` varchar(24) DEFAULT NULL COMMENT '更新者',
+  `UDATE` datetime DEFAULT NULL COMMENT '更新時間',
+  PRIMARY KEY (`OID`),
+  UNIQUE KEY `UK_MD_KPI_CODE` (`KPI_CODE`),
+  KEY `IDX_MD_KPI_FORMULA` (`FORMULA_OID`),
+  KEY `IDX_MD_KPI_RECOMM_FORMULA` (`RECOMMENDED_FORMULA_OID`),
+  KEY `IDX_MD_KPI_AGGR` (`AGGR_METHOD_OID`),
+  KEY `IDX_MD_KPI_MODE` (`MANAGEMENT_MODE`,`COMPARE_MODE`,`ENABLED`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore KPI 主檔';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `md_kpi`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `md_kpi` WRITE;
+/*!40000 ALTER TABLE `md_kpi` DISABLE KEYS */;
+/*!40000 ALTER TABLE `md_kpi` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `md_kpi_measure_data`
+--
+
+DROP TABLE IF EXISTS `md_kpi_measure_data`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `md_kpi_measure_data` (
+  `OID` char(36) NOT NULL COMMENT '主鍵 OID',
+  `KPI_OID` char(36) NOT NULL COMMENT 'KPI OID',
+  `PERIOD_TYPE` varchar(32) NOT NULL COMMENT '週期類型',
+  `PERIOD_KEY` varchar(32) NOT NULL COMMENT '週期鍵，例如 2026-06 或 2026-Q2',
+  `MEASURE_DATE` date DEFAULT NULL COMMENT '實際量測日期',
+  `TARGET_VALUE` decimal(24,6) DEFAULT NULL COMMENT '本期目標值',
+  `ACTUAL_VALUE` decimal(24,6) DEFAULT NULL COMMENT '本期實際值',
+  `MIN_VALUE` decimal(24,6) DEFAULT NULL COMMENT '本期最低門檻，可覆寫 KPI 主檔',
+  `MAX_VALUE` decimal(24,6) DEFAULT NULL COMMENT '本期最高門檻，可覆寫 KPI 主檔',
+  `DATA_FOR_TYPE` varchar(32) NOT NULL DEFAULT 'GLOBAL' COMMENT '資料歸屬 GLOBAL/ACCOUNT/ORG',
+  `ACCOUNT` varchar(24) DEFAULT NULL COMMENT '資料歸屬帳號',
+  `ORG_OID` char(36) DEFAULT NULL COMMENT '資料歸屬組織',
+  `SOURCE_TYPE` varchar(64) DEFAULT 'MANUAL' COMMENT '資料來源 MANUAL/API/CONNECTOR/IMPORT',
+  `SOURCE_REF` varchar(200) DEFAULT NULL COMMENT '來源參照，例如 connector job id',
+  `EVIDENCE_TEXT` varchar(2000) DEFAULT NULL COMMENT '資料證據或備註',
+  `LOCKED` varchar(1) NOT NULL DEFAULT 'N' COMMENT '是否鎖定 Y/N',
+  `CUSERID` varchar(24) NOT NULL COMMENT '建立者',
+  `CDATE` datetime NOT NULL COMMENT '建立時間',
+  `UUSERID` varchar(24) DEFAULT NULL COMMENT '更新者',
+  `UDATE` datetime DEFAULT NULL COMMENT '更新時間',
+  PRIMARY KEY (`OID`),
+  UNIQUE KEY `UK_MD_KPI_MEASURE_DATA` (`KPI_OID`,`PERIOD_TYPE`,`PERIOD_KEY`,`DATA_FOR_TYPE`,`ACCOUNT`,`ORG_OID`),
+  KEY `IDX_MD_KPI_MEASURE_KPI` (`KPI_OID`),
+  KEY `IDX_MD_KPI_MEASURE_PERIOD` (`PERIOD_TYPE`,`PERIOD_KEY`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore KPI 量測資料';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `md_kpi_measure_data`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `md_kpi_measure_data` WRITE;
+/*!40000 ALTER TABLE `md_kpi_measure_data` DISABLE KEYS */;
+/*!40000 ALTER TABLE `md_kpi_measure_data` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `md_kpi_owner`
+--
+
+DROP TABLE IF EXISTS `md_kpi_owner`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `md_kpi_owner` (
+  `OID` char(36) NOT NULL COMMENT '主鍵 OID',
+  `KPI_OID` char(36) NOT NULL COMMENT 'KPI OID',
+  `OWNER_TYPE` varchar(32) NOT NULL COMMENT 'owner 類型 ACCOUNT/ORG',
+  `ACCOUNT` varchar(24) DEFAULT NULL COMMENT 'qifu4 帳號，OWNER_TYPE=ACCOUNT 時使用',
+  `ORG_OID` char(36) DEFAULT NULL COMMENT '組織 OID，OWNER_TYPE=ORG 時使用',
+  `OWNER_ROLE` varchar(32) NOT NULL DEFAULT 'OWNER' COMMENT 'owner 角色 OWNER/VIEWER/APPROVER',
+  `CUSERID` varchar(24) NOT NULL COMMENT '建立者',
+  `CDATE` datetime NOT NULL COMMENT '建立時間',
+  `UUSERID` varchar(24) DEFAULT NULL COMMENT '更新者',
+  `UDATE` datetime DEFAULT NULL COMMENT '更新時間',
+  PRIMARY KEY (`OID`),
+  KEY `IDX_MD_KPI_OWNER_KPI` (`KPI_OID`),
+  KEY `IDX_MD_KPI_OWNER_ACCOUNT` (`ACCOUNT`),
+  KEY `IDX_MD_KPI_OWNER_ORG` (`ORG_OID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore KPI owner';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `md_kpi_owner`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `md_kpi_owner` WRITE;
+/*!40000 ALTER TABLE `md_kpi_owner` DISABLE KEYS */;
+/*!40000 ALTER TABLE `md_kpi_owner` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `md_kpi_score_snapshot`
+--
+
+DROP TABLE IF EXISTS `md_kpi_score_snapshot`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `md_kpi_score_snapshot` (
+  `OID` char(36) NOT NULL COMMENT '主鍵 OID',
+  `KPI_OID` char(36) NOT NULL COMMENT 'KPI OID',
+  `PERIOD_TYPE` varchar(32) NOT NULL COMMENT '週期類型',
+  `PERIOD_KEY` varchar(32) NOT NULL COMMENT '週期鍵',
+  `DATA_FOR_TYPE` varchar(32) NOT NULL DEFAULT 'GLOBAL' COMMENT '分數歸屬 GLOBAL/ACCOUNT/ORG',
+  `ACCOUNT` varchar(24) DEFAULT NULL COMMENT '分數歸屬帳號',
+  `ORG_OID` char(36) DEFAULT NULL COMMENT '分數歸屬組織',
+  `RAW_TARGET` decimal(24,6) DEFAULT NULL COMMENT '計算時目標值',
+  `RAW_ACTUAL` decimal(24,6) DEFAULT NULL COMMENT '計算時實際值',
+  `SCORE_VALUE` decimal(10,4) NOT NULL COMMENT '官方分數',
+  `SCORE_STATUS` varchar(32) NOT NULL DEFAULT 'UNKNOWN' COMMENT '分數狀態 GOOD/WARNING/BAD/UNKNOWN',
+  `FORMULA_OID` char(36) NOT NULL COMMENT '計算使用公式 OID',
+  `FORMULA_VERSION_NO` int(11) NOT NULL COMMENT '計算使用公式版本',
+  `AGGR_METHOD_OID` char(36) NOT NULL COMMENT '計算使用彙總方法 OID',
+  `CALCULATION_TRACE` mediumtext DEFAULT NULL COMMENT '計算過程 JSON，供稽核與解釋',
+  `CALCULATED_AT` datetime NOT NULL COMMENT '計算時間',
+  `CUSERID` varchar(24) NOT NULL COMMENT '建立者',
+  `CDATE` datetime NOT NULL COMMENT '建立時間',
+  `UUSERID` varchar(24) DEFAULT NULL COMMENT '更新者',
+  `UDATE` datetime DEFAULT NULL COMMENT '更新時間',
+  PRIMARY KEY (`OID`),
+  UNIQUE KEY `UK_MD_KPI_SCORE_SNAPSHOT` (`KPI_OID`,`PERIOD_TYPE`,`PERIOD_KEY`,`DATA_FOR_TYPE`,`ACCOUNT`,`ORG_OID`),
+  KEY `IDX_MD_KPI_SCORE_KPI` (`KPI_OID`),
+  KEY `IDX_MD_KPI_SCORE_PERIOD` (`PERIOD_TYPE`,`PERIOD_KEY`),
+  KEY `IDX_MD_KPI_SCORE_STATUS` (`SCORE_STATUS`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore KPI 分數快照';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `md_kpi_score_snapshot`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `md_kpi_score_snapshot` WRITE;
+/*!40000 ALTER TABLE `md_kpi_score_snapshot` DISABLE KEYS */;
+/*!40000 ALTER TABLE `md_kpi_score_snapshot` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `md_okr_checkin`
+--
+
+DROP TABLE IF EXISTS `md_okr_checkin`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `md_okr_checkin` (
+  `OID` char(36) NOT NULL COMMENT '主鍵 OID',
+  `KR_OID` char(36) NOT NULL COMMENT 'KR OID',
+  `CHECKIN_DATE` date NOT NULL COMMENT 'Check-in 日期',
+  `CURRENT_VALUE` decimal(24,6) DEFAULT NULL COMMENT '更新後目前值',
+  `PROGRESS_VALUE` decimal(10,4) NOT NULL DEFAULT 0.0000 COMMENT '更新後進度百分比',
+  `CONFIDENCE_SCORE` decimal(10,4) DEFAULT NULL COMMENT '信心分數',
+  `COMMENT_TEXT` varchar(2000) DEFAULT NULL COMMENT 'Check-in 說明',
+  `CUSERID` varchar(24) NOT NULL COMMENT '建立者',
+  `CDATE` datetime NOT NULL COMMENT '建立時間',
+  `UUSERID` varchar(24) DEFAULT NULL COMMENT '更新者',
+  `UDATE` datetime DEFAULT NULL COMMENT '更新時間',
+  PRIMARY KEY (`OID`),
+  KEY `IDX_MD_OKR_CHECKIN_KR` (`KR_OID`),
+  KEY `IDX_MD_OKR_CHECKIN_DATE` (`CHECKIN_DATE`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore OKR Check-in';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `md_okr_checkin`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `md_okr_checkin` WRITE;
+/*!40000 ALTER TABLE `md_okr_checkin` DISABLE KEYS */;
+/*!40000 ALTER TABLE `md_okr_checkin` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `md_okr_cycle`
+--
+
+DROP TABLE IF EXISTS `md_okr_cycle`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `md_okr_cycle` (
+  `OID` char(36) NOT NULL COMMENT '主鍵 OID',
+  `CYCLE_CODE` varchar(64) NOT NULL COMMENT '週期代碼',
+  `CYCLE_NAME` varchar(200) NOT NULL COMMENT '週期名稱',
+  `PERIOD_TYPE` varchar(32) NOT NULL COMMENT '週期類型',
+  `START_DATE` date NOT NULL COMMENT '開始日期',
+  `END_DATE` date NOT NULL COMMENT '結束日期',
+  `STATUS` varchar(32) NOT NULL DEFAULT 'ACTIVE' COMMENT '狀態 DRAFT/ACTIVE/CLOSED/ARCHIVED',
+  `CUSERID` varchar(24) NOT NULL COMMENT '建立者',
+  `CDATE` datetime NOT NULL COMMENT '建立時間',
+  `UUSERID` varchar(24) DEFAULT NULL COMMENT '更新者',
+  `UDATE` datetime DEFAULT NULL COMMENT '更新時間',
+  PRIMARY KEY (`OID`),
+  UNIQUE KEY `UK_MD_OKR_CYCLE_CODE` (`CYCLE_CODE`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore OKR 週期';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `md_okr_cycle`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `md_okr_cycle` WRITE;
+/*!40000 ALTER TABLE `md_okr_cycle` DISABLE KEYS */;
+/*!40000 ALTER TABLE `md_okr_cycle` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `md_okr_key_result`
+--
+
+DROP TABLE IF EXISTS `md_okr_key_result`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `md_okr_key_result` (
+  `OID` char(36) NOT NULL COMMENT '主鍵 OID',
+  `OBJECTIVE_OID` char(36) NOT NULL COMMENT 'Objective OID',
+  `KR_CODE` varchar(64) NOT NULL COMMENT 'KR 代碼',
+  `KR_NAME` varchar(300) NOT NULL COMMENT 'KR 名稱',
+  `KR_TYPE` varchar(32) NOT NULL COMMENT 'KR 類型 INCREASE/DECREASE/PERCENT/MILESTONE/BINARY/MANUAL',
+  `START_VALUE` decimal(24,6) DEFAULT NULL COMMENT '起始值',
+  `TARGET_VALUE` decimal(24,6) DEFAULT NULL COMMENT '目標值',
+  `CURRENT_VALUE` decimal(24,6) DEFAULT NULL COMMENT '目前值',
+  `PROGRESS_VALUE` decimal(10,4) NOT NULL DEFAULT 0.0000 COMMENT '進度百分比',
+  `WEIGHT_VALUE` decimal(10,4) NOT NULL DEFAULT 0.0000 COMMENT 'KR 權重',
+  `UNIT_NAME` varchar(50) DEFAULT NULL COMMENT '單位',
+  `SORT_NO` int(11) NOT NULL DEFAULT 0 COMMENT '排序',
+  `STATUS` varchar(32) NOT NULL DEFAULT 'ACTIVE' COMMENT '狀態',
+  `CUSERID` varchar(24) NOT NULL COMMENT '建立者',
+  `CDATE` datetime NOT NULL COMMENT '建立時間',
+  `UUSERID` varchar(24) DEFAULT NULL COMMENT '更新者',
+  `UDATE` datetime DEFAULT NULL COMMENT '更新時間',
+  PRIMARY KEY (`OID`),
+  UNIQUE KEY `UK_MD_OKR_KR_CODE` (`OBJECTIVE_OID`,`KR_CODE`),
+  KEY `IDX_MD_OKR_KR_OBJECTIVE` (`OBJECTIVE_OID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore OKR Key Result';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `md_okr_key_result`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `md_okr_key_result` WRITE;
+/*!40000 ALTER TABLE `md_okr_key_result` DISABLE KEYS */;
+/*!40000 ALTER TABLE `md_okr_key_result` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `md_okr_objective`
+--
+
+DROP TABLE IF EXISTS `md_okr_objective`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `md_okr_objective` (
+  `OID` char(36) NOT NULL COMMENT '主鍵 OID',
+  `CYCLE_OID` char(36) NOT NULL COMMENT 'OKR 週期 OID',
+  `OBJECTIVE_CODE` varchar(64) NOT NULL COMMENT 'Objective 代碼',
+  `OBJECTIVE_NAME` varchar(300) NOT NULL COMMENT 'Objective 名稱',
+  `DESCRIPTION` varchar(2000) DEFAULT NULL COMMENT 'Objective 說明',
+  `PARENT_OID` char(36) DEFAULT NULL COMMENT '上層 Objective OID',
+  `CONFIDENCE_SCORE` decimal(10,4) DEFAULT NULL COMMENT '信心分數',
+  `PROGRESS_VALUE` decimal(10,4) NOT NULL DEFAULT 0.0000 COMMENT '目前進度百分比',
+  `STATUS` varchar(32) NOT NULL DEFAULT 'ACTIVE' COMMENT '狀態',
+  `CUSERID` varchar(24) NOT NULL COMMENT '建立者',
+  `CDATE` datetime NOT NULL COMMENT '建立時間',
+  `UUSERID` varchar(24) DEFAULT NULL COMMENT '更新者',
+  `UDATE` datetime DEFAULT NULL COMMENT '更新時間',
+  PRIMARY KEY (`OID`),
+  UNIQUE KEY `UK_MD_OKR_OBJECTIVE_CODE` (`CYCLE_OID`,`OBJECTIVE_CODE`),
+  KEY `IDX_MD_OKR_OBJECTIVE_CYCLE` (`CYCLE_OID`),
+  KEY `IDX_MD_OKR_OBJECTIVE_PARENT` (`PARENT_OID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore OKR Objective';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `md_okr_objective`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `md_okr_objective` WRITE;
+/*!40000 ALTER TABLE `md_okr_objective` DISABLE KEYS */;
+/*!40000 ALTER TABLE `md_okr_objective` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `md_okr_objective_owner`
+--
+
+DROP TABLE IF EXISTS `md_okr_objective_owner`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `md_okr_objective_owner` (
+  `OID` char(36) NOT NULL COMMENT '主鍵 OID',
+  `OBJECTIVE_OID` char(36) NOT NULL COMMENT 'Objective OID',
+  `OWNER_TYPE` varchar(32) NOT NULL COMMENT 'owner 類型 ACCOUNT/ORG',
+  `ACCOUNT` varchar(24) DEFAULT NULL COMMENT 'qifu4 帳號',
+  `ORG_OID` char(36) DEFAULT NULL COMMENT '組織 OID',
+  `OWNER_ROLE` varchar(32) NOT NULL DEFAULT 'OWNER' COMMENT 'owner 角色 OWNER/VIEWER/APPROVER',
+  `CUSERID` varchar(24) NOT NULL COMMENT '建立者',
+  `CDATE` datetime NOT NULL COMMENT '建立時間',
+  `UUSERID` varchar(24) DEFAULT NULL COMMENT '更新者',
+  `UDATE` datetime DEFAULT NULL COMMENT '更新時間',
+  PRIMARY KEY (`OID`),
+  KEY `IDX_MD_OKR_OBJ_OWNER_OBJ` (`OBJECTIVE_OID`),
+  KEY `IDX_MD_OKR_OBJ_OWNER_ACCOUNT` (`ACCOUNT`),
+  KEY `IDX_MD_OKR_OBJ_OWNER_ORG` (`ORG_OID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore OKR Objective owner';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `md_okr_objective_owner`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `md_okr_objective_owner` WRITE;
+/*!40000 ALTER TABLE `md_okr_objective_owner` DISABLE KEYS */;
+/*!40000 ALTER TABLE `md_okr_objective_owner` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `md_okr_snapshot`
+--
+
+DROP TABLE IF EXISTS `md_okr_snapshot`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `md_okr_snapshot` (
+  `OID` char(36) NOT NULL COMMENT '主鍵 OID',
+  `OBJECTIVE_OID` char(36) NOT NULL COMMENT 'Objective OID',
+  `PERIOD_KEY` varchar(32) NOT NULL COMMENT '快照週期鍵',
+  `PROGRESS_VALUE` decimal(10,4) NOT NULL COMMENT 'Objective 進度百分比',
+  `CONFIDENCE_SCORE` decimal(10,4) DEFAULT NULL COMMENT '信心分數',
+  `SCORE_STATUS` varchar(32) NOT NULL DEFAULT 'UNKNOWN' COMMENT '狀態 GOOD/WARNING/BAD/UNKNOWN',
+  `CALCULATION_TRACE` mediumtext DEFAULT NULL COMMENT '計算過程 JSON',
+  `SNAPSHOT_AT` datetime NOT NULL COMMENT '快照時間',
+  `CUSERID` varchar(24) NOT NULL COMMENT '建立者',
+  `CDATE` datetime NOT NULL COMMENT '建立時間',
+  `UUSERID` varchar(24) DEFAULT NULL COMMENT '更新者',
+  `UDATE` datetime DEFAULT NULL COMMENT '更新時間',
+  PRIMARY KEY (`OID`),
+  UNIQUE KEY `UK_MD_OKR_SNAPSHOT` (`OBJECTIVE_OID`,`PERIOD_KEY`),
+  KEY `IDX_MD_OKR_SNAPSHOT_OBJ` (`OBJECTIVE_OID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore OKR 快照';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `md_okr_snapshot`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `md_okr_snapshot` WRITE;
+/*!40000 ALTER TABLE `md_okr_snapshot` DISABLE KEYS */;
+/*!40000 ALTER TABLE `md_okr_snapshot` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `md_org_member`
+--
+
+DROP TABLE IF EXISTS `md_org_member`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `md_org_member` (
+  `OID` char(36) NOT NULL COMMENT '主鍵 OID',
+  `ORG_OID` char(36) NOT NULL COMMENT '組織 OID',
+  `ACCOUNT` varchar(24) NOT NULL COMMENT 'qifu4 帳號',
+  `DISPLAY_NAME` varchar(100) DEFAULT NULL COMMENT '顯示名稱',
+  `JOB_TITLE` varchar(100) DEFAULT NULL COMMENT '職稱',
+  `IS_MANAGER` varchar(1) NOT NULL DEFAULT 'N' COMMENT '是否主管 Y/N',
+  `ENABLED` varchar(1) NOT NULL DEFAULT 'Y' COMMENT '是否啟用 Y/N',
+  `CUSERID` varchar(24) NOT NULL COMMENT '建立者',
+  `CDATE` datetime NOT NULL COMMENT '建立時間',
+  `UUSERID` varchar(24) DEFAULT NULL COMMENT '更新者',
+  `UDATE` datetime DEFAULT NULL COMMENT '更新時間',
+  PRIMARY KEY (`OID`),
+  UNIQUE KEY `UK_MD_ORG_MEMBER` (`ORG_OID`,`ACCOUNT`),
+  KEY `IDX_MD_ORG_MEMBER_ACCOUNT` (`ACCOUNT`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore 組織成員';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `md_org_member`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `md_org_member` WRITE;
+/*!40000 ALTER TABLE `md_org_member` DISABLE KEYS */;
+/*!40000 ALTER TABLE `md_org_member` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `md_org_unit`
+--
+
+DROP TABLE IF EXISTS `md_org_unit`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `md_org_unit` (
+  `OID` char(36) NOT NULL COMMENT '主鍵 OID',
+  `ORG_CODE` varchar(64) NOT NULL COMMENT '組織代碼',
+  `ORG_NAME` varchar(200) NOT NULL COMMENT '組織名稱',
+  `PARENT_OID` char(36) DEFAULT NULL COMMENT '上層組織 OID',
+  `ORG_LEVEL` int(11) NOT NULL DEFAULT 1 COMMENT '組織層級',
+  `SORT_NO` int(11) NOT NULL DEFAULT 0 COMMENT '排序',
+  `ENABLED` varchar(1) NOT NULL DEFAULT 'Y' COMMENT '是否啟用 Y/N',
+  `DESCRIPTION` varchar(1000) DEFAULT NULL COMMENT '組織說明',
+  `CUSERID` varchar(24) NOT NULL COMMENT '建立者',
+  `CDATE` datetime NOT NULL COMMENT '建立時間',
+  `UUSERID` varchar(24) DEFAULT NULL COMMENT '更新者',
+  `UDATE` datetime DEFAULT NULL COMMENT '更新時間',
+  PRIMARY KEY (`OID`),
+  UNIQUE KEY `UK_MD_ORG_UNIT_CODE` (`ORG_CODE`),
+  KEY `IDX_MD_ORG_UNIT_PARENT` (`PARENT_OID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore 組織單位';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `md_org_unit`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `md_org_unit` WRITE;
+/*!40000 ALTER TABLE `md_org_unit` DISABLE KEYS */;
+/*!40000 ALTER TABLE `md_org_unit` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `md_strategy_objective`
+--
+
+DROP TABLE IF EXISTS `md_strategy_objective`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `md_strategy_objective` (
+  `OID` char(36) NOT NULL COMMENT '主鍵 OID',
+  `THEME_OID` char(36) NOT NULL COMMENT '策略主題 OID',
+  `OBJECTIVE_CODE` varchar(64) NOT NULL COMMENT '策略目標代碼',
+  `OBJECTIVE_NAME` varchar(300) NOT NULL COMMENT '策略目標名稱',
+  `WEIGHT_VALUE` decimal(10,4) NOT NULL DEFAULT 0.0000 COMMENT '權重',
+  `SORT_NO` int(11) NOT NULL DEFAULT 0 COMMENT '排序',
+  `DESCRIPTION` varchar(2000) DEFAULT NULL COMMENT '說明',
+  `CUSERID` varchar(24) NOT NULL COMMENT '建立者',
+  `CDATE` datetime NOT NULL COMMENT '建立時間',
+  `UUSERID` varchar(24) DEFAULT NULL COMMENT '更新者',
+  `UDATE` datetime DEFAULT NULL COMMENT '更新時間',
+  PRIMARY KEY (`OID`),
+  UNIQUE KEY `UK_MD_STRATEGY_OBJECTIVE` (`THEME_OID`,`OBJECTIVE_CODE`),
+  KEY `IDX_MD_STRATEGY_OBJECTIVE_THEME` (`THEME_OID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore 策略目標';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `md_strategy_objective`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `md_strategy_objective` WRITE;
+/*!40000 ALTER TABLE `md_strategy_objective` DISABLE KEYS */;
+/*!40000 ALTER TABLE `md_strategy_objective` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `md_strategy_objective_link`
+--
+
+DROP TABLE IF EXISTS `md_strategy_objective_link`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `md_strategy_objective_link` (
+  `OID` char(36) NOT NULL COMMENT '主鍵 OID',
+  `STRATEGY_OBJECTIVE_OID` char(36) NOT NULL COMMENT '策略目標 OID',
+  `LINK_TYPE` varchar(32) NOT NULL COMMENT '連結類型 KPI/OKR_OBJECTIVE',
+  `LINK_OID` char(36) NOT NULL COMMENT '連結物件 OID',
+  `WEIGHT_VALUE` decimal(10,4) NOT NULL DEFAULT 0.0000 COMMENT '此連結權重',
+  `SORT_NO` int(11) NOT NULL DEFAULT 0 COMMENT '排序',
+  `CUSERID` varchar(24) NOT NULL COMMENT '建立者',
+  `CDATE` datetime NOT NULL COMMENT '建立時間',
+  `UUSERID` varchar(24) DEFAULT NULL COMMENT '更新者',
+  `UDATE` datetime DEFAULT NULL COMMENT '更新時間',
+  PRIMARY KEY (`OID`),
+  UNIQUE KEY `UK_MD_STRATEGY_OBJ_LINK` (`STRATEGY_OBJECTIVE_OID`,`LINK_TYPE`,`LINK_OID`),
+  KEY `IDX_MD_STRATEGY_OBJ_LINK_SO` (`STRATEGY_OBJECTIVE_OID`),
+  KEY `IDX_MD_STRATEGY_OBJ_LINK_REF` (`LINK_TYPE`,`LINK_OID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore 策略目標連結';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `md_strategy_objective_link`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `md_strategy_objective_link` WRITE;
+/*!40000 ALTER TABLE `md_strategy_objective_link` DISABLE KEYS */;
+/*!40000 ALTER TABLE `md_strategy_objective_link` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `md_strategy_snapshot`
+--
+
+DROP TABLE IF EXISTS `md_strategy_snapshot`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `md_strategy_snapshot` (
+  `OID` char(36) NOT NULL COMMENT '主鍵 OID',
+  `WORKSPACE_OID` char(36) NOT NULL COMMENT '策略工作區 OID',
+  `PERIOD_TYPE` varchar(32) NOT NULL COMMENT '週期類型',
+  `PERIOD_KEY` varchar(32) NOT NULL COMMENT '週期鍵',
+  `SCORE_VALUE` decimal(10,4) NOT NULL COMMENT '策略工作區分數',
+  `KPI_COUNT` int(11) NOT NULL DEFAULT 0 COMMENT '納入計算 KPI 數量',
+  `OKR_COUNT` int(11) NOT NULL DEFAULT 0 COMMENT '納入計算 OKR 數量',
+  `CALCULATION_TRACE` mediumtext DEFAULT NULL COMMENT '計算過程 JSON',
+  `SNAPSHOT_AT` datetime NOT NULL COMMENT '快照時間',
+  `CUSERID` varchar(24) NOT NULL COMMENT '建立者',
+  `CDATE` datetime NOT NULL COMMENT '建立時間',
+  `UUSERID` varchar(24) DEFAULT NULL COMMENT '更新者',
+  `UDATE` datetime DEFAULT NULL COMMENT '更新時間',
+  PRIMARY KEY (`OID`),
+  UNIQUE KEY `UK_MD_STRATEGY_SNAPSHOT` (`WORKSPACE_OID`,`PERIOD_TYPE`,`PERIOD_KEY`),
+  KEY `IDX_MD_STRATEGY_SNAPSHOT_WS` (`WORKSPACE_OID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore 策略快照';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `md_strategy_snapshot`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `md_strategy_snapshot` WRITE;
+/*!40000 ALTER TABLE `md_strategy_snapshot` DISABLE KEYS */;
+/*!40000 ALTER TABLE `md_strategy_snapshot` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `md_strategy_theme`
+--
+
+DROP TABLE IF EXISTS `md_strategy_theme`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `md_strategy_theme` (
+  `OID` char(36) NOT NULL COMMENT '主鍵 OID',
+  `WORKSPACE_OID` char(36) NOT NULL COMMENT '策略工作區 OID',
+  `THEME_CODE` varchar(64) NOT NULL COMMENT '策略主題代碼',
+  `THEME_NAME` varchar(200) NOT NULL COMMENT '策略主題名稱',
+  `WEIGHT_VALUE` decimal(10,4) NOT NULL DEFAULT 0.0000 COMMENT '權重',
+  `SORT_NO` int(11) NOT NULL DEFAULT 0 COMMENT '排序',
+  `DESCRIPTION` varchar(2000) DEFAULT NULL COMMENT '說明',
+  `CUSERID` varchar(24) NOT NULL COMMENT '建立者',
+  `CDATE` datetime NOT NULL COMMENT '建立時間',
+  `UUSERID` varchar(24) DEFAULT NULL COMMENT '更新者',
+  `UDATE` datetime DEFAULT NULL COMMENT '更新時間',
+  PRIMARY KEY (`OID`),
+  UNIQUE KEY `UK_MD_STRATEGY_THEME` (`WORKSPACE_OID`,`THEME_CODE`),
+  KEY `IDX_MD_STRATEGY_THEME_WS` (`WORKSPACE_OID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore 策略主題';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `md_strategy_theme`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `md_strategy_theme` WRITE;
+/*!40000 ALTER TABLE `md_strategy_theme` DISABLE KEYS */;
+/*!40000 ALTER TABLE `md_strategy_theme` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `md_strategy_workspace`
+--
+
+DROP TABLE IF EXISTS `md_strategy_workspace`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `md_strategy_workspace` (
+  `OID` char(36) NOT NULL COMMENT '主鍵 OID',
+  `WORKSPACE_CODE` varchar(64) NOT NULL COMMENT '策略工作區代碼',
+  `WORKSPACE_NAME` varchar(200) NOT NULL COMMENT '策略工作區名稱',
+  `VISION_TEXT` varchar(2000) DEFAULT NULL COMMENT '願景',
+  `MISSION_TEXT` varchar(2000) DEFAULT NULL COMMENT '使命',
+  `DESCRIPTION` varchar(2000) DEFAULT NULL COMMENT '說明',
+  `STATUS` varchar(32) NOT NULL DEFAULT 'ACTIVE' COMMENT '狀態',
+  `CUSERID` varchar(24) NOT NULL COMMENT '建立者',
+  `CDATE` datetime NOT NULL COMMENT '建立時間',
+  `UUSERID` varchar(24) DEFAULT NULL COMMENT '更新者',
+  `UDATE` datetime DEFAULT NULL COMMENT '更新時間',
+  PRIMARY KEY (`OID`),
+  UNIQUE KEY `UK_MD_STRATEGY_WORKSPACE` (`WORKSPACE_CODE`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore 策略工作區';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `md_strategy_workspace`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `md_strategy_workspace` WRITE;
+/*!40000 ALTER TABLE `md_strategy_workspace` DISABLE KEYS */;
+/*!40000 ALTER TABLE `md_strategy_workspace` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `tb_account`
@@ -573,7 +1530,7 @@ DROP TABLE IF EXISTS `tb_sys_login_log`;
 CREATE TABLE `tb_sys_login_log` (
   `OID` char(36) NOT NULL,
   `USER` varchar(24) NOT NULL,
-  `FAIL_FLAG` char(1) NOT NULL DEFAULT 'N',  
+  `FAIL_FLAG` char(1) NOT NULL DEFAULT 'N',
   `CUSERID` varchar(24) NOT NULL,
   `CDATE` datetime NOT NULL,
   `UUSERID` varchar(24) DEFAULT NULL,
@@ -609,7 +1566,7 @@ CREATE TABLE `tb_sys_mail_helper` (
   `SUBJECT` varchar(200) NOT NULL,
   `TEXT` blob DEFAULT NULL,
   `MAIL_FROM` varchar(100) NOT NULL,
-  `MAIL_TO" varchar(100) NOT NULL,
+  `MAIL_TO` varchar(100) NOT NULL,
   `MAIL_CC` varchar(1000) DEFAULT NULL,
   `MAIL_BCC` varchar(1000) DEFAULT NULL,
   `SUCCESS_FLAG` varchar(1) NOT NULL DEFAULT 'N',
@@ -682,16 +1639,26 @@ INSERT INTO `tb_sys_menu` VALUES
 ('f02898eb-4487-11ee-b50d-45ee94442a45','CORE_PROG001D0005Q','7ea68636-c93a-4669-ac42-dafc3770d20d','Y','admin','2023-08-27 11:15:13',NULL,NULL),
 ('f07acfb8-4612-11ee-9a04-71984fef28fa','CORE_PROG004D0001Q','5e055f61-bfc5-402c-93b4-f241dc17b00b','Y','admin','2023-08-29 10:22:45',NULL,NULL),
 ('f07b9309-4612-11ee-9a04-9f3e4fe17b25','CORE_PROG004D0002Q','5e055f61-bfc5-402c-93b4-f241dc17b00b','Y','admin','2023-08-29 10:22:45',NULL,NULL);
+/*!40000 ALTER TABLE `tb_sys_menu` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `tb_sys_menu_role`
+--
+
+DROP TABLE IF EXISTS `tb_sys_menu_role`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_sys_menu_role` (
   `OID` char(36) NOT NULL,
-  `PROG_ID" varchar(50) NOT NULL,
-  `ROLE" varchar(50) NOT NULL,
-  `CUSERID" varchar(24) NOT NULL,
-  `CDATE" datetime NOT NULL,
-  `UUSERID" varchar(24) DEFAULT NULL,
-  `UDATE" datetime DEFAULT NULL,
+  `PROG_ID` varchar(50) NOT NULL,
+  `ROLE` varchar(50) NOT NULL,
+  `CUSERID` varchar(24) NOT NULL,
+  `CDATE` datetime NOT NULL,
+  `UUSERID` varchar(24) DEFAULT NULL,
+  `UDATE` datetime DEFAULT NULL,
   PRIMARY KEY (`OID`),
   UNIQUE KEY `UK_1` (`PROG_ID`,`ROLE`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci;
@@ -775,6 +1742,16 @@ INSERT INTO `tb_sys_prog` VALUES
 ('e86dbb1b-6870-4827-8039-72f5e15fa4f2','CORE_PROG004D','ZD. Log','/','N','N',0,0,'CORE','FOLDER','PROPERTIES','clipboard-check-fill','admin','2017-06-03 14:21:03','admin','2023-08-29 10:14:04'),
 ('eb6e199f-c853-4fbf-acf3-0c9c77ba9953','CORE_PROG001D0002Q','ZA02 - Program','#/prog001d0002','N','N',0,0,'CORE','ITEM','G_APP_INSTALL','filetype-html','admin','2014-10-02 00:00:00','admin','2023-08-15 19:19:05'),
 ('eb786ffd-c7d1-4631-aed2-4d9d7368eb13','CORE_PROG001D0005Q','ZA05 - JasperReport','#/prog001d0005','N','N',0,0,'CORE','ITEM','APPLICATION_PDF','file-pdf','admin','2017-05-18 09:54:35','admin','2023-08-24 20:20:16');
+/*!40000 ALTER TABLE `tb_sys_prog` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `tb_sys_qfield_log`
+--
+
+DROP TABLE IF EXISTS `tb_sys_qfield_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_sys_qfield_log` (
@@ -815,15 +1792,15 @@ DROP TABLE IF EXISTS `tb_sys_template`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_sys_template` (
-  `OID" char(36) NOT NULL,
-  `TEMPLATE_ID" varchar(10) NOT NULL,
-  `TITLE" varchar(200) NOT NULL,
-  `MESSAGE" varchar(4000) NOT NULL,
-  `DESCRIPTION" varchar(200) NOT NULL,
-  `CUSERID" varchar(24) NOT NULL,
-  `CDATE" datetime NOT NULL,
-  `UUSERID" varchar(24) DEFAULT NULL,
-  `UDATE" datetime DEFAULT NULL,
+  `OID` char(36) NOT NULL,
+  `TEMPLATE_ID` varchar(10) NOT NULL,
+  `TITLE` varchar(200) NOT NULL,
+  `MESSAGE` varchar(4000) NOT NULL,
+  `DESCRIPTION` varchar(200) NOT NULL,
+  `CUSERID` varchar(24) NOT NULL,
+  `CDATE` datetime NOT NULL,
+  `UUSERID` varchar(24) DEFAULT NULL,
+  `UDATE` datetime DEFAULT NULL,
   PRIMARY KEY (`OID`),
   UNIQUE KEY `UK_1` (`TEMPLATE_ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci;
@@ -849,15 +1826,15 @@ DROP TABLE IF EXISTS `tb_sys_template_param`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_sys_template_param` (
-  `OID" char(36) NOT NULL,
-  `TEMPLATE_ID" varchar(10) NOT NULL,
-  `IS_TITLE" varchar(1) NOT NULL DEFAULT 'N',
-  `TEMPLATE_VAR" varchar(100) NOT NULL,
-  `OBJECT_VAR" varchar(100) NOT NULL,
-  `CUSERID" varchar(24) NOT NULL,
-  `CDATE" datetime NOT NULL,
-  `UUSERID" varchar(24) DEFAULT NULL,
-  `UDATE" datetime DEFAULT NULL,
+  `OID` char(36) NOT NULL,
+  `TEMPLATE_ID` varchar(10) NOT NULL,
+  `IS_TITLE` varchar(1) NOT NULL DEFAULT 'N',
+  `TEMPLATE_VAR` varchar(100) NOT NULL,
+  `OBJECT_VAR` varchar(100) NOT NULL,
+  `CUSERID` varchar(24) NOT NULL,
+  `CDATE` datetime NOT NULL,
+  `UUSERID` varchar(24) DEFAULT NULL,
+  `UDATE` datetime DEFAULT NULL,
   PRIMARY KEY (`OID`),
   UNIQUE KEY `UK_1` (`TEMPLATE_ID`,`TEMPLATE_VAR`,`IS_TITLE`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci;
@@ -883,12 +1860,12 @@ DROP TABLE IF EXISTS `tb_sys_token`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_sys_token` (
-  `OID" char(36) NOT NULL,
-  `USER_ID" varchar(24) NOT NULL,
-  `TOKEN" varchar(2048) NOT NULL,
-  `EXPIRES_DATE" datetime NOT NULL,
-  `RF_EXPIRES_DATE" datetime NOT NULL,
-  `CDATE" datetime NOT NULL,
+  `OID` char(36) NOT NULL,
+  `USER_ID` varchar(24) NOT NULL,
+  `TOKEN` varchar(2048) NOT NULL,
+  `EXPIRES_DATE` datetime NOT NULL,
+  `RF_EXPIRES_DATE` datetime NOT NULL,
+  `CDATE` datetime NOT NULL,
   PRIMARY KEY (`OID`),
   KEY `IDX_1` (`USER_ID`),
   KEY `IDX_2` (`TOKEN`(1024))
@@ -915,18 +1892,18 @@ DROP TABLE IF EXISTS `tb_sys_upload`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_sys_upload` (
-  `OID" char(36) NOT NULL,
-  `SYSTEM" varchar(10) NOT NULL,
-  `SUB_DIR" varchar(4) NOT NULL,
-  `TYPE" varchar(10) NOT NULL,
-  `FILE_NAME" varchar(50) NOT NULL,
-  `SHOW_NAME" varchar(255) NOT NULL,
-  `IS_FILE" varchar(1) NOT NULL DEFAULT 'Y',
-  `CONTENT" mediumblob DEFAULT NULL,
-  `CUSERID" varchar(24) NOT NULL,
-  `CDATE" datetime NOT NULL,
-  `UUSERID" varchar(24) DEFAULT NULL,
-  `UDATE" datetime DEFAULT NULL,
+  `OID` char(36) NOT NULL,
+  `SYSTEM` varchar(10) NOT NULL,
+  `SUB_DIR` varchar(4) NOT NULL,
+  `TYPE` varchar(10) NOT NULL,
+  `FILE_NAME` varchar(50) NOT NULL,
+  `SHOW_NAME` varchar(255) NOT NULL,
+  `IS_FILE` varchar(1) NOT NULL DEFAULT 'Y',
+  `CONTENT` mediumblob DEFAULT NULL,
+  `CUSERID` varchar(24) NOT NULL,
+  `CDATE` datetime NOT NULL,
+  `UUSERID` varchar(24) DEFAULT NULL,
+  `UDATE` datetime DEFAULT NULL,
   PRIMARY KEY (`OID`),
   KEY `IDX_1` (`SYSTEM`,`TYPE`,`SUB_DIR`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci;
@@ -952,14 +1929,14 @@ DROP TABLE IF EXISTS `tb_sys_usess`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_sys_usess` (
-  `OID" char(36) NOT NULL,
-  `SESSION_ID" varchar(64) NOT NULL,
-  `ACCOUNT" varchar(24) NOT NULL,
-  `CURRENT_ID" varchar(36) NOT NULL,
-  `CUSERID" varchar(24) NOT NULL,
-  `CDATE" datetime NOT NULL,
-  `UUSERID" varchar(24) DEFAULT NULL,
-  `UDATE" datetime DEFAULT NULL,
+  `OID` char(36) NOT NULL,
+  `SESSION_ID` varchar(64) NOT NULL,
+  `ACCOUNT` varchar(24) NOT NULL,
+  `CURRENT_ID` varchar(36) NOT NULL,
+  `CUSERID` varchar(24) NOT NULL,
+  `CDATE` datetime NOT NULL,
+  `UUSERID` varchar(24) DEFAULT NULL,
+  `UDATE` datetime DEFAULT NULL,
   PRIMARY KEY (`OID`,`SESSION_ID`),
   UNIQUE KEY `UK_1` (`ACCOUNT`,`SESSION_ID`),
   KEY `IDX_1` (`CURRENT_ID`)
@@ -986,14 +1963,14 @@ DROP TABLE IF EXISTS `tb_user_role`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_user_role` (
-  `OID" char(36) NOT NULL,
-  `ROLE" varchar(50) NOT NULL,
-  `ACCOUNT" varchar(24) NOT NULL,
-  `DESCRIPTION" varchar(500) NOT NULL,
-  `CUSERID" varchar(24) NOT NULL,
-  `CDATE" datetime NOT NULL,
-  `UUSERID" varchar(50) DEFAULT NULL,
-  `UDATE" datetime DEFAULT NULL,
+  `OID` char(36) NOT NULL,
+  `ROLE` varchar(50) NOT NULL,
+  `ACCOUNT` varchar(24) NOT NULL,
+  `DESCRIPTION` varchar(500) NOT NULL,
+  `CUSERID` varchar(24) NOT NULL,
+  `CDATE` datetime NOT NULL,
+  `UUSERID` varchar(50) DEFAULT NULL,
+  `UDATE` datetime DEFAULT NULL,
   PRIMARY KEY (`OID`),
   UNIQUE KEY `UK_1` (`ROLE`,`ACCOUNT`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci;
@@ -1025,497 +2002,4 @@ SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2026-06-08 11:47:44
-
--- MindScore Business Logic DDL
--- Date: 2026-06-10
--- Target: MySQL / MariaDB
-
--- 3. Organization Tables
-
-CREATE TABLE `md_org_unit` (
-  `OID` CHAR(36) NOT NULL COMMENT '主鍵 OID',
-  `ORG_CODE` VARCHAR(64) NOT NULL COMMENT '組織代碼',
-  `ORG_NAME` VARCHAR(200) NOT NULL COMMENT '組織名稱',
-  `PARENT_OID` CHAR(36) DEFAULT NULL COMMENT '上層組織 OID',
-  `ORG_LEVEL` INT NOT NULL DEFAULT 1 COMMENT '組織層級',
-  `SORT_NO` INT NOT NULL DEFAULT 0 COMMENT '排序',
-  `ENABLED` VARCHAR(1) NOT NULL DEFAULT 'Y' COMMENT '是否啟用 Y/N',
-  `DESCRIPTION` VARCHAR(1000) DEFAULT NULL COMMENT '組織說明',
-  `CUSERID` VARCHAR(24) NOT NULL COMMENT '建立者',
-  `CDATE` DATETIME NOT NULL COMMENT '建立時間',
-  `UUSERID` VARCHAR(24) DEFAULT NULL COMMENT '更新者',
-  `UDATE` DATETIME DEFAULT NULL COMMENT '更新時間',
-  PRIMARY KEY (`OID`),
-  UNIQUE KEY `UK_MD_ORG_UNIT_CODE` (`ORG_CODE`),
-  KEY `IDX_MD_ORG_UNIT_PARENT` (`PARENT_OID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore 組織單位';
-
-CREATE TABLE `md_org_member` (
-  `OID` CHAR(36) NOT NULL COMMENT '主鍵 OID',
-  `ORG_OID` CHAR(36) NOT NULL COMMENT '組織 OID',
-  `ACCOUNT` VARCHAR(24) NOT NULL COMMENT 'qifu4 帳號',
-  `DISPLAY_NAME` VARCHAR(100) DEFAULT NULL COMMENT '顯示名稱',
-  `JOB_TITLE` VARCHAR(100) DEFAULT NULL COMMENT '職稱',
-  `IS_MANAGER` VARCHAR(1) NOT NULL DEFAULT 'N' COMMENT '是否主管 Y/N',
-  `ENABLED` VARCHAR(1) NOT NULL DEFAULT 'Y' COMMENT '是否啟用 Y/N',
-  `CUSERID` VARCHAR(24) NOT NULL COMMENT '建立者',
-  `CDATE` DATETIME NOT NULL COMMENT '建立時間',
-  `UUSERID` VARCHAR(24) DEFAULT NULL COMMENT '更新者',
-  `UDATE` DATETIME DEFAULT NULL COMMENT '更新時間',
-  PRIMARY KEY (`OID`),
-  UNIQUE KEY `UK_MD_ORG_MEMBER` (`ORG_OID`, `ACCOUNT`),
-  KEY `IDX_MD_ORG_MEMBER_ACCOUNT` (`ACCOUNT`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore 組織成員';
-
--- 4. Formula And Aggregation Tables
-
-CREATE TABLE `md_formula` (
-  `OID` CHAR(36) NOT NULL COMMENT '主鍵 OID',
-  `FORMULA_CODE` VARCHAR(64) NOT NULL COMMENT '公式代碼',
-  `FORMULA_NAME` VARCHAR(200) NOT NULL COMMENT '公式名稱',
-  `FORMULA_TYPE` VARCHAR(32) NOT NULL DEFAULT 'BUILTIN' COMMENT '公式類型 BUILTIN/CUSTOM/SCRIPT',
-  `SCRIPT_TYPE` VARCHAR(32) NOT NULL DEFAULT 'JAVA' COMMENT '腳本類型 JAVA/GROOVY/JS/EXPR',
-  `EXPRESSION` MEDIUMTEXT DEFAULT NULL COMMENT '公式內容或運算式',
-  `RETURN_TYPE` VARCHAR(32) NOT NULL DEFAULT 'DECIMAL' COMMENT '回傳型別',
-  `VERSION_NO` INT NOT NULL DEFAULT 1 COMMENT '公式版本',
-  `IS_SYSTEM` VARCHAR(1) NOT NULL DEFAULT 'N' COMMENT '是否系統內建 Y/N',
-  `IS_RECOMMENDABLE` VARCHAR(1) NOT NULL DEFAULT 'Y' COMMENT '是否可被系統推薦 Y/N',
-  `DESCRIPTION` VARCHAR(2000) DEFAULT NULL COMMENT '公式中文說明',
-  `EXAMPLE_TEXT` VARCHAR(2000) DEFAULT NULL COMMENT '公式範例說明',
-  `PARAM_SCHEMA_JSON` MEDIUMTEXT DEFAULT NULL COMMENT '公式參數 JSON schema',
-  `ENABLED` VARCHAR(1) NOT NULL DEFAULT 'Y' COMMENT '是否啟用 Y/N',
-  `CUSERID` VARCHAR(24) NOT NULL COMMENT '建立者',
-  `CDATE` DATETIME NOT NULL COMMENT '建立時間',
-  `UUSERID` VARCHAR(24) DEFAULT NULL COMMENT '更新者',
-  `UDATE` DATETIME DEFAULT NULL COMMENT '更新時間',
-  PRIMARY KEY (`OID`),
-  UNIQUE KEY `UK_MD_FORMULA_CODE_VER` (`FORMULA_CODE`, `VERSION_NO`),
-  KEY `IDX_MD_FORMULA_RECOMMEND` (`IS_RECOMMENDABLE`, `ENABLED`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore KPI 計算公式';
-
-CREATE TABLE `md_formula_recommend_rule` (
-  `OID` CHAR(36) NOT NULL COMMENT '主鍵 OID',
-  `RULE_CODE` VARCHAR(64) NOT NULL COMMENT '推薦規則代碼',
-  `RULE_NAME` VARCHAR(200) NOT NULL COMMENT '推薦規則名稱',
-  `MANAGEMENT_MODE` VARCHAR(32) NOT NULL COMMENT '管理模式 BIGGER/SMALLER/QUASI/MANUAL',
-  `COMPARE_MODE` VARCHAR(32) DEFAULT NULL COMMENT '比較模式 TARGET/MINIMUM/MAXIMUM/RANGE/CUSTOM',
-  `PERIOD_TYPE` VARCHAR(32) DEFAULT NULL COMMENT '適用週期類型，空值代表不限',
-  `DATA_TYPE` VARCHAR(32) DEFAULT NULL COMMENT '資料類型 NUMBER/PERCENT/CURRENCY/BOOLEAN/MANUAL，空值代表不限',
-  `RECOMMENDED_FORMULA_OID` CHAR(36) NOT NULL COMMENT '推薦公式 OID',
-  `PRIORITY_NO` INT NOT NULL DEFAULT 100 COMMENT '推薦優先順序，數字越小越優先',
-  `IS_DEFAULT` VARCHAR(1) NOT NULL DEFAULT 'N' COMMENT '是否預設規則 Y/N',
-  `ENABLED` VARCHAR(1) NOT NULL DEFAULT 'Y' COMMENT '是否啟用 Y/N',
-  `DESCRIPTION` VARCHAR(2000) DEFAULT NULL COMMENT '推薦原因中文說明',
-  `CUSERID` VARCHAR(24) NOT NULL COMMENT '建立者',
-  `CDATE` DATETIME NOT NULL COMMENT '建立時間',
-  `UUSERID` VARCHAR(24) DEFAULT NULL COMMENT '更新者',
-  `UDATE` DATETIME DEFAULT NULL COMMENT '更新時間',
-  PRIMARY KEY (`OID`),
-  UNIQUE KEY `UK_MD_FORMULA_RECOMM_RULE` (`RULE_CODE`),
-  KEY `IDX_MD_FORMULA_RECOMM_MATCH` (`MANAGEMENT_MODE`, `COMPARE_MODE`, `DATA_TYPE`, `ENABLED`),
-  KEY `IDX_MD_FORMULA_RECOMM_FORMULA` (`RECOMMENDED_FORMULA_OID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore 公式推薦規則';
-
-CREATE TABLE `md_aggregation_method` (
-  `OID` CHAR(36) NOT NULL COMMENT '主鍵 OID',
-  `AGGR_CODE` VARCHAR(64) NOT NULL COMMENT '彙總方法代碼',
-  `AGGR_NAME` VARCHAR(200) NOT NULL COMMENT '彙總方法名稱',
-  `AGGR_TYPE` VARCHAR(32) NOT NULL DEFAULT 'BUILTIN' COMMENT '彙總類型 BUILTIN/CUSTOM/SCRIPT',
-  `EXPRESSION` MEDIUMTEXT DEFAULT NULL COMMENT '彙總公式或腳本',
-  `DESCRIPTION` VARCHAR(2000) DEFAULT NULL COMMENT '彙總方法中文說明',
-  `ENABLED` VARCHAR(1) NOT NULL DEFAULT 'Y' COMMENT '是否啟用 Y/N',
-  `CUSERID` VARCHAR(24) NOT NULL COMMENT '建立者',
-  `CDATE` DATETIME NOT NULL COMMENT '建立時間',
-  `UUSERID` VARCHAR(24) DEFAULT NULL COMMENT '更新者',
-  `UDATE` DATETIME DEFAULT NULL COMMENT '更新時間',
-  PRIMARY KEY (`OID`),
-  UNIQUE KEY `UK_MD_AGGR_CODE` (`AGGR_CODE`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore KPI 彙總方法';
-
--- 5. KPI Tables
-
-CREATE TABLE `md_kpi` (
-  `OID` CHAR(36) NOT NULL COMMENT '主鍵 OID',
-  `KPI_CODE` VARCHAR(64) NOT NULL COMMENT 'KPI 代碼',
-  `KPI_NAME` VARCHAR(200) NOT NULL COMMENT 'KPI 名稱',
-  `DESCRIPTION` VARCHAR(2000) DEFAULT NULL COMMENT 'KPI 說明',
-  `UNIT_NAME` VARCHAR(50) DEFAULT NULL COMMENT '單位，例如 %, 元, 件, 天',
-  `DATA_TYPE` VARCHAR(32) NOT NULL DEFAULT 'NUMBER' COMMENT '資料類型 NUMBER/PERCENT/CURRENCY/BOOLEAN/MANUAL',
-  `PERIOD_TYPE` VARCHAR(32) NOT NULL DEFAULT 'MONTH' COMMENT '預設週期 DAY/WEEK/MONTH/QUARTER/HALFYEAR/YEAR',
-  `MANAGEMENT_MODE` VARCHAR(32) NOT NULL COMMENT '管理模式 BIGGER/SMALLER/QUASI/MANUAL',
-  `COMPARE_MODE` VARCHAR(32) NOT NULL DEFAULT 'TARGET' COMMENT '比較模式 TARGET/MINIMUM/MAXIMUM/RANGE/CUSTOM',
-  `MIN_VALUE` DECIMAL(24,6) DEFAULT NULL COMMENT '最低值或下限門檻',
-  `TARGET_VALUE` DECIMAL(24,6) DEFAULT NULL COMMENT '目標值',
-  `MAX_VALUE` DECIMAL(24,6) DEFAULT NULL COMMENT '最高值或上限門檻',
-  `QUASI_RANGE` DECIMAL(10,4) NOT NULL DEFAULT 0 COMMENT '準目標容忍範圍百分比，例如 5 代表正負 5%',
-  `SCORE_CAP_MODE` VARCHAR(32) NOT NULL DEFAULT 'CAP_100' COMMENT '分數封頂方式 CAP_100/ALLOW_OVER_100/CUSTOM',
-  `SCORING_POLICY` VARCHAR(64) DEFAULT NULL COMMENT '內建計分策略代碼',
-  `FORMULA_OID` CHAR(36) NOT NULL COMMENT '實際使用公式 OID',
-  `RECOMMENDED_FORMULA_OID` CHAR(36) DEFAULT NULL COMMENT '系統推薦公式 OID',
-  `FORMULA_SELECTION_MODE` VARCHAR(32) NOT NULL DEFAULT 'AUTO' COMMENT '公式選取方式 AUTO/MANUAL_OVERRIDE/CUSTOM',
-  `AGGR_METHOD_OID` CHAR(36) NOT NULL COMMENT '彙總方法 OID',
-  `FORMULA_VERSION_NO` INT NOT NULL DEFAULT 1 COMMENT '使用公式版本',
-  `WEIGHT_VALUE` DECIMAL(10,4) NOT NULL DEFAULT 0 COMMENT '預設權重',
-  `ENABLED` VARCHAR(1) NOT NULL DEFAULT 'Y' COMMENT '是否啟用 Y/N',
-  `CUSERID` VARCHAR(24) NOT NULL COMMENT '建立者',
-  `CDATE` DATETIME NOT NULL COMMENT '建立時間',
-  `UUSERID` VARCHAR(24) DEFAULT NULL COMMENT '更新者',
-  `UDATE` DATETIME DEFAULT NULL COMMENT '更新時間',
-  PRIMARY KEY (`OID`),
-  UNIQUE KEY `UK_MD_KPI_CODE` (`KPI_CODE`),
-  KEY `IDX_MD_KPI_FORMULA` (`FORMULA_OID`),
-  KEY `IDX_MD_KPI_RECOMM_FORMULA` (`RECOMMENDED_FORMULA_OID`),
-  KEY `IDX_MD_KPI_AGGR` (`AGGR_METHOD_OID`),
-  KEY `IDX_MD_KPI_MODE` (`MANAGEMENT_MODE`, `COMPARE_MODE`, `ENABLED`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore KPI 主檔';
-
-CREATE TABLE `md_kpi_owner` (
-  `OID` CHAR(36) NOT NULL COMMENT '主鍵 OID',
-  `KPI_OID` CHAR(36) NOT NULL COMMENT 'KPI OID',
-  `OWNER_TYPE` VARCHAR(32) NOT NULL COMMENT 'owner 類型 ACCOUNT/ORG',
-  `ACCOUNT` VARCHAR(24) DEFAULT NULL COMMENT 'qifu4 帳號，OWNER_TYPE=ACCOUNT 時使用',
-  `ORG_OID` CHAR(36) DEFAULT NULL COMMENT '組織 OID，OWNER_TYPE=ORG 時使用',
-  `OWNER_ROLE` VARCHAR(32) NOT NULL DEFAULT 'OWNER' COMMENT 'owner 角色 OWNER/VIEWER/APPROVER',
-  `CUSERID` VARCHAR(24) NOT NULL COMMENT '建立者',
-  `CDATE` DATETIME NOT NULL COMMENT '建立時間',
-  `UUSERID` VARCHAR(24) DEFAULT NULL COMMENT '更新者',
-  `UDATE` DATETIME DEFAULT NULL COMMENT '更新時間',
-  PRIMARY KEY (`OID`),
-  KEY `IDX_MD_KPI_OWNER_KPI` (`KPI_OID`),
-  KEY `IDX_MD_KPI_OWNER_ACCOUNT` (`ACCOUNT`),
-  KEY `IDX_MD_KPI_OWNER_ORG` (`ORG_OID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore KPI owner';
-
-CREATE TABLE `md_kpi_measure_data` (
-  `OID` CHAR(36) NOT NULL COMMENT '主鍵 OID',
-  `KPI_OID` CHAR(36) NOT NULL COMMENT 'KPI OID',
-  `PERIOD_TYPE` VARCHAR(32) NOT NULL COMMENT '週期類型',
-  `PERIOD_KEY` VARCHAR(32) NOT NULL COMMENT '週期鍵，例如 2026-06 或 2026-Q2',
-  `MEASURE_DATE` DATE DEFAULT NULL COMMENT '實際量測日期',
-  `TARGET_VALUE` DECIMAL(24,6) DEFAULT NULL COMMENT '本期目標值',
-  `ACTUAL_VALUE` DECIMAL(24,6) DEFAULT NULL COMMENT '本期實際值',
-  `MIN_VALUE` DECIMAL(24,6) DEFAULT NULL COMMENT '本期最低門檻，可覆寫 KPI 主檔',
-  `MAX_VALUE` DECIMAL(24,6) DEFAULT NULL COMMENT '本期最高門檻，可覆寫 KPI 主檔',
-  `DATA_FOR_TYPE` VARCHAR(32) NOT NULL DEFAULT 'GLOBAL' COMMENT '資料歸屬 GLOBAL/ACCOUNT/ORG',
-  `ACCOUNT` VARCHAR(24) DEFAULT NULL COMMENT '資料歸屬帳號',
-  `ORG_OID` CHAR(36) DEFAULT NULL COMMENT '資料歸屬組織',
-  `SOURCE_TYPE` VARCHAR(64) DEFAULT 'MANUAL' COMMENT '資料來源 MANUAL/API/CONNECTOR/IMPORT',
-  `SOURCE_REF` VARCHAR(200) DEFAULT NULL COMMENT '來源參照，例如 connector job id',
-  `EVIDENCE_TEXT` VARCHAR(2000) DEFAULT NULL COMMENT '資料證據或備註',
-  `LOCKED` VARCHAR(1) NOT NULL DEFAULT 'N' COMMENT '是否鎖定 Y/N',
-  `CUSERID` VARCHAR(24) NOT NULL COMMENT '建立者',
-  `CDATE` DATETIME NOT NULL COMMENT '建立時間',
-  `UUSERID` VARCHAR(24) DEFAULT NULL COMMENT '更新者',
-  `UDATE` DATETIME DEFAULT NULL COMMENT '更新時間',
-  PRIMARY KEY (`OID`),
-  UNIQUE KEY `UK_MD_KPI_MEASURE_DATA` (`KPI_OID`, `PERIOD_TYPE`, `PERIOD_KEY`, `DATA_FOR_TYPE`, `ACCOUNT`, `ORG_OID`),
-  KEY `IDX_MD_KPI_MEASURE_KPI` (`KPI_OID`),
-  KEY `IDX_MD_KPI_MEASURE_PERIOD` (`PERIOD_TYPE`, `PERIOD_KEY`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore KPI 量測資料';
-
-CREATE TABLE `md_kpi_score_snapshot` (
-  `OID` CHAR(36) NOT NULL COMMENT '主鍵 OID',
-  `KPI_OID` CHAR(36) NOT NULL COMMENT 'KPI OID',
-  `PERIOD_TYPE` VARCHAR(32) NOT NULL COMMENT '週期類型',
-  `PERIOD_KEY` VARCHAR(32) NOT NULL COMMENT '週期鍵',
-  `DATA_FOR_TYPE` VARCHAR(32) NOT NULL DEFAULT 'GLOBAL' COMMENT '分數歸屬 GLOBAL/ACCOUNT/ORG',
-  `ACCOUNT` VARCHAR(24) DEFAULT NULL COMMENT '分數歸屬帳號',
-  `ORG_OID` CHAR(36) DEFAULT NULL COMMENT '分數歸屬組織',
-  `RAW_TARGET` DECIMAL(24,6) DEFAULT NULL COMMENT '計算時目標值',
-  `RAW_ACTUAL` DECIMAL(24,6) DEFAULT NULL COMMENT '計算時實際值',
-  `SCORE_VALUE` DECIMAL(10,4) NOT NULL COMMENT '官方分數',
-  `SCORE_STATUS` VARCHAR(32) NOT NULL DEFAULT 'UNKNOWN' COMMENT '分數狀態 GOOD/WARNING/BAD/UNKNOWN',
-  `FORMULA_OID` CHAR(36) NOT NULL COMMENT '計算使用公式 OID',
-  `FORMULA_VERSION_NO` INT NOT NULL COMMENT '計算使用公式版本',
-  `AGGR_METHOD_OID` CHAR(36) NOT NULL COMMENT '計算使用彙總方法 OID',
-  `CALCULATION_TRACE` MEDIUMTEXT DEFAULT NULL COMMENT '計算過程 JSON，供稽核與解釋',
-  `CALCULATED_AT` DATETIME NOT NULL COMMENT '計算時間',
-  `CUSERID` VARCHAR(24) NOT NULL COMMENT '建立者',
-  `CDATE` DATETIME NOT NULL COMMENT '建立時間',
-  `UUSERID` VARCHAR(24) DEFAULT NULL COMMENT '更新者',
-  `UDATE` DATETIME DEFAULT NULL COMMENT '更新時間',
-  PRIMARY KEY (`OID`),
-  UNIQUE KEY `UK_MD_KPI_SCORE_SNAPSHOT` (`KPI_OID`, `PERIOD_TYPE`, `PERIOD_KEY`, `DATA_FOR_TYPE`, `ACCOUNT`, `ORG_OID`),
-  KEY `IDX_MD_KPI_SCORE_KPI` (`KPI_OID`),
-  KEY `IDX_MD_KPI_SCORE_PERIOD` (`PERIOD_TYPE`, `PERIOD_KEY`),
-  KEY `IDX_MD_KPI_SCORE_STATUS` (`SCORE_STATUS`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore KPI 分數快照';
-
--- 6. OKR Tables
-
-CREATE TABLE `md_okr_cycle` (
-  `OID` CHAR(36) NOT NULL COMMENT '主鍵 OID',
-  `CYCLE_CODE` VARCHAR(64) NOT NULL COMMENT '週期代碼',
-  `CYCLE_NAME` VARCHAR(200) NOT NULL COMMENT '週期名稱',
-  `PERIOD_TYPE` VARCHAR(32) NOT NULL COMMENT '週期類型',
-  `START_DATE` DATE NOT NULL COMMENT '開始日期',
-  `END_DATE` DATE NOT NULL COMMENT '結束日期',
-  `STATUS` VARCHAR(32) NOT NULL DEFAULT 'ACTIVE' COMMENT '狀態 DRAFT/ACTIVE/CLOSED/ARCHIVED',
-  `CUSERID` VARCHAR(24) NOT NULL COMMENT '建立者',
-  `CDATE` DATETIME NOT NULL COMMENT '建立時間',
-  `UUSERID` VARCHAR(24) DEFAULT NULL COMMENT '更新者',
-  `UDATE` DATETIME DEFAULT NULL COMMENT '更新時間',
-  PRIMARY KEY (`OID`),
-  UNIQUE KEY `UK_MD_OKR_CYCLE_CODE` (`CYCLE_CODE`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore OKR 週期';
-
-CREATE TABLE `md_okr_objective` (
-  `OID` CHAR(36) NOT NULL COMMENT '主鍵 OID',
-  `CYCLE_OID` CHAR(36) NOT NULL COMMENT 'OKR 週期 OID',
-  `OBJECTIVE_CODE` VARCHAR(64) NOT NULL COMMENT 'Objective 代碼',
-  `OBJECTIVE_NAME` VARCHAR(300) NOT NULL COMMENT 'Objective 名稱',
-  `DESCRIPTION` VARCHAR(2000) DEFAULT NULL COMMENT 'Objective 說明',
-  `PARENT_OID` CHAR(36) DEFAULT NULL COMMENT '上層 Objective OID',
-  `CONFIDENCE_SCORE` DECIMAL(10,4) DEFAULT NULL COMMENT '信心分數',
-  `PROGRESS_VALUE` DECIMAL(10,4) NOT NULL DEFAULT 0 COMMENT '目前進度百分比',
-  `STATUS` VARCHAR(32) NOT NULL DEFAULT 'ACTIVE' COMMENT '狀態',
-  `CUSERID` VARCHAR(24) NOT NULL COMMENT '建立者',
-  `CDATE` DATETIME NOT NULL COMMENT '建立時間',
-  `UUSERID` VARCHAR(24) DEFAULT NULL COMMENT '更新者',
-  `UDATE` DATETIME DEFAULT NULL COMMENT '更新時間',
-  PRIMARY KEY (`OID`),
-  UNIQUE KEY `UK_MD_OKR_OBJECTIVE_CODE` (`CYCLE_OID`, `OBJECTIVE_CODE`),
-  KEY `IDX_MD_OKR_OBJECTIVE_CYCLE` (`CYCLE_OID`),
-  KEY `IDX_MD_OKR_OBJECTIVE_PARENT` (`PARENT_OID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore OKR Objective';
-
-CREATE TABLE `md_okr_objective_owner` (
-  `OID` CHAR(36) NOT NULL COMMENT '主鍵 OID',
-  `OBJECTIVE_OID` CHAR(36) NOT NULL COMMENT 'Objective OID',
-  `OWNER_TYPE` VARCHAR(32) NOT NULL COMMENT 'owner 類型 ACCOUNT/ORG',
-  `ACCOUNT` VARCHAR(24) DEFAULT NULL COMMENT 'qifu4 帳號',
-  `ORG_OID` CHAR(36) DEFAULT NULL COMMENT '組織 OID',
-  `OWNER_ROLE` VARCHAR(32) NOT NULL DEFAULT 'OWNER' COMMENT 'owner 角色 OWNER/VIEWER/APPROVER',
-  `CUSERID` VARCHAR(24) NOT NULL COMMENT '建立者',
-  `CDATE` DATETIME NOT NULL COMMENT '建立時間',
-  `UUSERID` VARCHAR(24) DEFAULT NULL COMMENT '更新者',
-  `UDATE` DATETIME DEFAULT NULL COMMENT '更新時間',
-  PRIMARY KEY (`OID`),
-  KEY `IDX_MD_OKR_OBJ_OWNER_OBJ` (`OBJECTIVE_OID`),
-  KEY `IDX_MD_OKR_OBJ_OWNER_ACCOUNT` (`ACCOUNT`),
-  KEY `IDX_MD_OKR_OBJ_OWNER_ORG` (`ORG_OID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore OKR Objective owner';
-
-CREATE TABLE `md_okr_key_result` (
-  `OID` CHAR(36) NOT NULL COMMENT '主鍵 OID',
-  `OBJECTIVE_OID` CHAR(36) NOT NULL COMMENT 'Objective OID',
-  `KR_CODE` VARCHAR(64) NOT NULL COMMENT 'KR 代碼',
-  `KR_NAME` VARCHAR(300) NOT NULL COMMENT 'KR 名稱',
-  `KR_TYPE` VARCHAR(32) NOT NULL COMMENT 'KR 類型 INCREASE/DECREASE/PERCENT/MILESTONE/BINARY/MANUAL',
-  `START_VALUE` DECIMAL(24,6) DEFAULT NULL COMMENT '起始值',
-  `TARGET_VALUE` DECIMAL(24,6) DEFAULT NULL COMMENT '目標值',
-  `CURRENT_VALUE` DECIMAL(24,6) DEFAULT NULL COMMENT '目前值',
-  `PROGRESS_VALUE` DECIMAL(10,4) NOT NULL DEFAULT 0 COMMENT '進度百分比',
-  `WEIGHT_VALUE` DECIMAL(10,4) NOT NULL DEFAULT 0 COMMENT 'KR 權重',
-  `UNIT_NAME` VARCHAR(50) DEFAULT NULL COMMENT '單位',
-  `SORT_NO` INT NOT NULL DEFAULT 0 COMMENT '排序',
-  `STATUS` VARCHAR(32) NOT NULL DEFAULT 'ACTIVE' COMMENT '狀態',
-  `CUSERID` VARCHAR(24) NOT NULL COMMENT '建立者',
-  `CDATE` DATETIME NOT NULL COMMENT '建立時間',
-  `UUSERID` VARCHAR(24) DEFAULT NULL COMMENT '更新者',
-  `UDATE` DATETIME DEFAULT NULL COMMENT '更新時間',
-  PRIMARY KEY (`OID`),
-  UNIQUE KEY `UK_MD_OKR_KR_CODE` (`OBJECTIVE_OID`, `KR_CODE`),
-  KEY `IDX_MD_OKR_KR_OBJECTIVE` (`OBJECTIVE_OID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore OKR Key Result';
-
-CREATE TABLE `md_okr_checkin` (
-  `OID` CHAR(36) NOT NULL COMMENT '主鍵 OID',
-  `KR_OID` CHAR(36) NOT NULL COMMENT 'KR OID',
-  `CHECKIN_DATE` DATE NOT NULL COMMENT 'Check-in 日期',
-  `CURRENT_VALUE` DECIMAL(24,6) DEFAULT NULL COMMENT '更新後目前值',
-  `PROGRESS_VALUE` DECIMAL(10,4) NOT NULL DEFAULT 0 COMMENT '更新後進度百分比',
-  `CONFIDENCE_SCORE` DECIMAL(10,4) DEFAULT NULL COMMENT '信心分數',
-  `COMMENT_TEXT` VARCHAR(2000) DEFAULT NULL COMMENT 'Check-in 說明',
-  `CUSERID` VARCHAR(24) NOT NULL COMMENT '建立者',
-  `CDATE` DATETIME NOT NULL COMMENT '建立時間',
-  `UUSERID` VARCHAR(24) DEFAULT NULL COMMENT '更新者',
-  `UDATE` DATETIME DEFAULT NULL COMMENT '更新時間',
-  PRIMARY KEY (`OID`),
-  KEY `IDX_MD_OKR_CHECKIN_KR` (`KR_OID`),
-  KEY `IDX_MD_OKR_CHECKIN_DATE` (`CHECKIN_DATE`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore OKR Check-in';
-
-CREATE TABLE `md_okr_snapshot` (
-  `OID` CHAR(36) NOT NULL COMMENT '主鍵 OID',
-  `OBJECTIVE_OID` CHAR(36) NOT NULL COMMENT 'Objective OID',
-  `PERIOD_KEY` VARCHAR(32) NOT NULL COMMENT '快照週期鍵',
-  `PROGRESS_VALUE` DECIMAL(10,4) NOT NULL COMMENT 'Objective 進度百分比',
-  `CONFIDENCE_SCORE` DECIMAL(10,4) DEFAULT NULL COMMENT '信心分數',
-  `SCORE_STATUS` VARCHAR(32) NOT NULL DEFAULT 'UNKNOWN' COMMENT '狀態 GOOD/WARNING/BAD/UNKNOWN',
-  `CALCULATION_TRACE` MEDIUMTEXT DEFAULT NULL COMMENT '計算過程 JSON',
-  `SNAPSHOT_AT` DATETIME NOT NULL COMMENT '快照時間',
-  `CUSERID` VARCHAR(24) NOT NULL COMMENT '建立者',
-  `CDATE` DATETIME NOT NULL COMMENT '建立時間',
-  `UUSERID` VARCHAR(24) DEFAULT NULL COMMENT '更新者',
-  `UDATE` DATETIME DEFAULT NULL COMMENT '更新時間',
-  PRIMARY KEY (`OID`),
-  UNIQUE KEY `UK_MD_OKR_SNAPSHOT` (`OBJECTIVE_OID`, `PERIOD_KEY`),
-  KEY `IDX_MD_OKR_SNAPSHOT_OBJ` (`OBJECTIVE_OID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore OKR 快照';
-
--- 7. Strategy Alignment Tables
-
-CREATE TABLE `md_strategy_workspace` (
-  `OID` CHAR(36) NOT NULL COMMENT '主鍵 OID',
-  `WORKSPACE_CODE` VARCHAR(64) NOT NULL COMMENT '策略工作區代碼',
-  `WORKSPACE_NAME` VARCHAR(200) NOT NULL COMMENT '策略工作區名稱',
-  `VISION_TEXT` VARCHAR(2000) DEFAULT NULL COMMENT '願景',
-  `MISSION_TEXT` VARCHAR(2000) DEFAULT NULL COMMENT '使命',
-  `DESCRIPTION` VARCHAR(2000) DEFAULT NULL COMMENT '說明',
-  `STATUS` VARCHAR(32) NOT NULL DEFAULT 'ACTIVE' COMMENT '狀態',
-  `CUSERID` VARCHAR(24) NOT NULL COMMENT '建立者',
-  `CDATE` DATETIME NOT NULL COMMENT '建立時間',
-  `UUSERID` VARCHAR(24) DEFAULT NULL COMMENT '更新者',
-  `UDATE` DATETIME DEFAULT NULL COMMENT '更新時間',
-  PRIMARY KEY (`OID`),
-  UNIQUE KEY `UK_MD_STRATEGY_WORKSPACE` (`WORKSPACE_CODE`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore 策略工作區';
-
-CREATE TABLE `md_strategy_theme` (
-  `OID` CHAR(36) NOT NULL COMMENT '主鍵 OID',
-  `WORKSPACE_OID` CHAR(36) NOT NULL COMMENT '策略工作區 OID',
-  `THEME_CODE` VARCHAR(64) NOT NULL COMMENT '策略主題代碼',
-  `THEME_NAME` VARCHAR(200) NOT NULL COMMENT '策略主題名稱',
-  `WEIGHT_VALUE` DECIMAL(10,4) NOT NULL DEFAULT 0 COMMENT '權重',
-  `SORT_NO` INT NOT NULL DEFAULT 0 COMMENT '排序',
-  `DESCRIPTION` VARCHAR(2000) DEFAULT NULL COMMENT '說明',
-  `CUSERID` VARCHAR(24) NOT NULL COMMENT '建立者',
-  `CDATE` DATETIME NOT NULL COMMENT '建立時間',
-  `UUSERID` VARCHAR(24) DEFAULT NULL COMMENT '更新者',
-  `UDATE` DATETIME DEFAULT NULL COMMENT '更新時間',
-  PRIMARY KEY (`OID`),
-  UNIQUE KEY `UK_MD_STRATEGY_THEME` (`WORKSPACE_OID`, `THEME_CODE`),
-  KEY `IDX_MD_STRATEGY_THEME_WS` (`WORKSPACE_OID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore 策略主題';
-
-CREATE TABLE `md_strategy_objective` (
-  `OID` CHAR(36) NOT NULL COMMENT '主鍵 OID',
-  `THEME_OID` CHAR(36) NOT NULL COMMENT '策略主題 OID',
-  `OBJECTIVE_CODE` VARCHAR(64) NOT NULL COMMENT '策略目標代碼',
-  `OBJECTIVE_NAME` VARCHAR(300) NOT NULL COMMENT '策略目標名稱',
-  `WEIGHT_VALUE` DECIMAL(10,4) NOT NULL DEFAULT 0 COMMENT '權重',
-  `SORT_NO` INT NOT NULL DEFAULT 0 COMMENT '排序',
-  `DESCRIPTION` VARCHAR(2000) DEFAULT NULL COMMENT '說明',
-  `CUSERID` VARCHAR(24) NOT NULL COMMENT '建立者',
-  `CDATE` DATETIME NOT NULL COMMENT '建立時間',
-  `UUSERID` VARCHAR(24) DEFAULT NULL COMMENT '更新者',
-  `UDATE` DATETIME DEFAULT NULL COMMENT '更新時間',
-  PRIMARY KEY (`OID`),
-  UNIQUE KEY `UK_MD_STRATEGY_OBJECTIVE` (`THEME_OID`, `OBJECTIVE_CODE`),
-  KEY `IDX_MD_STRATEGY_OBJECTIVE_THEME` (`THEME_OID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore 策略目標';
-
-CREATE TABLE `md_strategy_objective_link` (
-  `OID` CHAR(36) NOT NULL COMMENT '主鍵 OID',
-  `STRATEGY_OBJECTIVE_OID` CHAR(36) NOT NULL COMMENT '策略目標 OID',
-  `LINK_TYPE` VARCHAR(32) NOT NULL COMMENT '連結類型 KPI/OKR_OBJECTIVE',
-  `LINK_OID` CHAR(36) NOT NULL COMMENT '連結物件 OID',
-  `WEIGHT_VALUE` DECIMAL(10,4) NOT NULL DEFAULT 0 COMMENT '此連結權重',
-  `SORT_NO` INT NOT NULL DEFAULT 0 COMMENT '排序',
-  `CUSERID` VARCHAR(24) NOT NULL COMMENT '建立者',
-  `CDATE` DATETIME NOT NULL COMMENT '建立時間',
-  `UUSERID` VARCHAR(24) DEFAULT NULL COMMENT '更新者',
-  `UDATE` DATETIME DEFAULT NULL COMMENT '更新時間',
-  PRIMARY KEY (`OID`),
-  UNIQUE KEY `UK_MD_STRATEGY_OBJ_LINK` (`STRATEGY_OBJECTIVE_OID`, `LINK_TYPE`, `LINK_OID`),
-  KEY `IDX_MD_STRATEGY_OBJ_LINK_SO` (`STRATEGY_OBJECTIVE_OID`),
-  KEY `IDX_MD_STRATEGY_OBJ_LINK_REF` (`LINK_TYPE`, `LINK_OID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore 策略目標連結';
-
-CREATE TABLE `md_strategy_snapshot` (
-  `OID` CHAR(36) NOT NULL COMMENT '主鍵 OID',
-  `WORKSPACE_OID` CHAR(36) NOT NULL COMMENT '策略工作區 OID',
-  `PERIOD_TYPE` VARCHAR(32) NOT NULL COMMENT '週期類型',
-  `PERIOD_KEY` VARCHAR(32) NOT NULL COMMENT '週期鍵',
-  `SCORE_VALUE` DECIMAL(10,4) NOT NULL COMMENT '策略工作區分數',
-  `KPI_COUNT` INT NOT NULL DEFAULT 0 COMMENT '納入計算 KPI 數量',
-  `OKR_COUNT` INT NOT NULL DEFAULT 0 COMMENT '納入計算 OKR 數量',
-  `CALCULATION_TRACE` MEDIUMTEXT DEFAULT NULL COMMENT '計算過程 JSON',
-  `SNAPSHOT_AT` DATETIME NOT NULL COMMENT '快照時間',
-  `CUSERID` VARCHAR(24) NOT NULL COMMENT '建立者',
-  `CDATE` DATETIME NOT NULL COMMENT '建立時間',
-  `UUSERID` VARCHAR(24) DEFAULT NULL COMMENT '更新者',
-  `UDATE` DATETIME DEFAULT NULL COMMENT '更新時間',
-  PRIMARY KEY (`OID`),
-  UNIQUE KEY `UK_MD_STRATEGY_SNAPSHOT` (`WORKSPACE_OID`, `PERIOD_TYPE`, `PERIOD_KEY`),
-  KEY `IDX_MD_STRATEGY_SNAPSHOT_WS` (`WORKSPACE_OID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore 策略快照';
-
--- 8. Action / PDCA Tables
-
-CREATE TABLE `md_action_plan` (
-  `OID` CHAR(36) NOT NULL COMMENT '主鍵 OID',
-  `PLAN_CODE` VARCHAR(64) NOT NULL COMMENT 'Action Plan 代碼',
-  `PLAN_NAME` VARCHAR(300) NOT NULL COMMENT 'Action Plan 名稱',
-  `DESCRIPTION` VARCHAR(2000) DEFAULT NULL COMMENT '說明',
-  `START_DATE` DATE DEFAULT NULL COMMENT '開始日期',
-  `END_DATE` DATE DEFAULT NULL COMMENT '結束日期',
-  `PROGRESS_VALUE` DECIMAL(10,4) NOT NULL DEFAULT 0 COMMENT '進度百分比',
-  `STATUS` VARCHAR(32) NOT NULL DEFAULT 'ACTIVE' COMMENT '狀態',
-  `CUSERID` VARCHAR(24) NOT NULL COMMENT '建立者',
-  `CDATE` DATETIME NOT NULL COMMENT '建立時間',
-  `UUSERID` VARCHAR(24) DEFAULT NULL COMMENT '更新者',
-  `UDATE` DATETIME DEFAULT NULL COMMENT '更新時間',
-  PRIMARY KEY (`OID`),
-  UNIQUE KEY `UK_MD_ACTION_PLAN_CODE` (`PLAN_CODE`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore Action Plan';
-
-CREATE TABLE `md_action_item` (
-  `OID` CHAR(36) NOT NULL COMMENT '主鍵 OID',
-  `PLAN_OID` CHAR(36) NOT NULL COMMENT 'Action Plan OID',
-  `PARENT_OID` CHAR(36) DEFAULT NULL COMMENT '上層 Action Item OID',
-  `ITEM_NAME` VARCHAR(300) NOT NULL COMMENT 'Action Item 名稱',
-  `ACTION_STAGE` VARCHAR(32) NOT NULL DEFAULT 'DO' COMMENT '階段 PLAN/DO/CHECK/ACT',
-  `DESCRIPTION` VARCHAR(2000) DEFAULT NULL COMMENT '說明',
-  `START_DATE` DATE DEFAULT NULL COMMENT '開始日期',
-  `END_DATE` DATE DEFAULT NULL COMMENT '結束日期',
-  `DONE_DATE` DATE DEFAULT NULL COMMENT '完成日期',
-  `PROGRESS_VALUE` DECIMAL(10,4) NOT NULL DEFAULT 0 COMMENT '進度百分比',
-  `STATUS` VARCHAR(32) NOT NULL DEFAULT 'ACTIVE' COMMENT '狀態',
-  `SORT_NO` INT NOT NULL DEFAULT 0 COMMENT '排序',
-  `CUSERID` VARCHAR(24) NOT NULL COMMENT '建立者',
-  `CDATE` DATETIME NOT NULL COMMENT '建立時間',
-  `UUSERID` VARCHAR(24) DEFAULT NULL COMMENT '更新者',
-  `UDATE` DATETIME DEFAULT NULL COMMENT '更新時間',
-  PRIMARY KEY (`OID`),
-  KEY `IDX_MD_ACTION_ITEM_PLAN` (`PLAN_OID`),
-  KEY `IDX_MD_ACTION_ITEM_PARENT` (`PARENT_OID`),
-  KEY `IDX_MD_ACTION_ITEM_STATUS` (`STATUS`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore Action Item';
-
-CREATE TABLE `md_action_owner` (
-  `OID` CHAR(36) NOT NULL COMMENT '主鍵 OID',
-  `ACTION_TYPE` VARCHAR(32) NOT NULL COMMENT 'Action 類型 PLAN/ITEM',
-  `ACTION_OID` CHAR(36) NOT NULL COMMENT 'Action Plan 或 Action Item OID',
-  `OWNER_TYPE` VARCHAR(32) NOT NULL COMMENT 'owner 類型 ACCOUNT/ORG',
-  `ACCOUNT` VARCHAR(24) DEFAULT NULL COMMENT 'qifu4 帳號',
-  `ORG_OID` CHAR(36) DEFAULT NULL COMMENT '組織 OID',
-  `OWNER_ROLE` VARCHAR(32) NOT NULL DEFAULT 'OWNER' COMMENT 'owner 角色 OWNER/VIEWER/APPROVER',
-  `CUSERID` VARCHAR(24) NOT NULL COMMENT '建立者',
-  `CDATE` DATETIME NOT NULL COMMENT '建立時間',
-  `UUSERID` VARCHAR(24) DEFAULT NULL COMMENT '更新者',
-  `UDATE` DATETIME DEFAULT NULL COMMENT '更新時間',
-  PRIMARY KEY (`OID`),
-  KEY `IDX_MD_ACTION_OWNER_ACTION` (`ACTION_TYPE`, `ACTION_OID`),
-  KEY `IDX_MD_ACTION_OWNER_ACCOUNT` (`ACCOUNT`),
-  KEY `IDX_MD_ACTION_OWNER_ORG` (`ORG_OID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore Action owner';
-
-CREATE TABLE `md_action_source_link` (
-  `OID` CHAR(36) NOT NULL COMMENT '主鍵 OID',
-  `ACTION_TYPE` VARCHAR(32) NOT NULL COMMENT 'Action 類型 PLAN/ITEM',
-  `ACTION_OID` CHAR(36) NOT NULL COMMENT 'Action OID',
-  `SOURCE_TYPE` VARCHAR(32) NOT NULL COMMENT '來源類型 KPI/OKR_OBJECTIVE/OKR_KR/STRATEGY/INSIGHT',
-  `SOURCE_OID` CHAR(36) NOT NULL COMMENT '來源 OID',
-  `LINK_REASON` VARCHAR(1000) DEFAULT NULL COMMENT '關聯原因',
-  `CUSERID` VARCHAR(24) NOT NULL COMMENT '建立者',
-  `CDATE` DATETIME NOT NULL COMMENT '建立時間',
-  `UUSERID` VARCHAR(24) DEFAULT NULL COMMENT '更新者',
-  `UDATE` DATETIME DEFAULT NULL COMMENT '更新時間',
-  PRIMARY KEY (`OID`),
-  UNIQUE KEY `UK_MD_ACTION_SOURCE_LINK` (`ACTION_TYPE`, `ACTION_OID`, `SOURCE_TYPE`, `SOURCE_OID`),
-  KEY `IDX_MD_ACTION_SOURCE_ACTION` (`ACTION_TYPE`, `ACTION_OID`),
-  KEY `IDX_MD_ACTION_SOURCE_REF` (`SOURCE_TYPE`, `SOURCE_OID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore Action 來源關聯';
+-- Dump completed on 2026-06-11  9:00:55
