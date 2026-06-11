@@ -25,7 +25,6 @@ const { showLoading, hideLoading, confirmFire } = useSwalLoading();
 
 const pageProgramId = ref(PageConstants.QueryId);
 const dsList = ref<any[]>([]);
-const orgList = ref<any[]>([]);
 
 const tbRefresh = () => btnClear();
 const tbCreate = () => router.push(PageConstants.frontendNamespace + '/create');
@@ -86,24 +85,6 @@ const initQueryGridConfig = () => {
 	);
 };
 
-const loadOrgList = async () => {
-    try {
-        const axiosInstance = getAxiosInstance();
-        // Assume MD_PROG001D0001 has the org list
-        const response = await axiosInstance.post(import.meta.env.VITE_API_URL + '/MD_PROG001D0001/findList', {});
-        if (response.data && response.data.success == import.meta.env.VITE_SUCCESS_FLAG) {
-            orgList.value = response.data.value;
-        }
-    } catch (e: any) {
-        toast.error('無法載入組織列表');
-    }
-};
-
-const selectOrg = (orgOid: string) => {
-    queryPageStore.queryParam.orgOid = orgOid;
-    btnQuery();
-};
-
 const btnQuery = async () => {
 	showLoading();
 	dsList.value = [];
@@ -111,7 +92,6 @@ const btnQuery = async () => {
 		const axiosInstance = getAxiosInstance();
 		const response = await axiosInstance.post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/findPage', {
 			"field": {
-				"orgOid"      		: queryPageStore.queryParam.orgOid,
 				"accountLike"     	: queryPageStore.queryParam.account,
 				"displayNameLike" 	: queryPageStore.queryParam.displayName
 			},
@@ -170,8 +150,6 @@ onMounted(() => {
 		resetConfigByOld(newGridConfig, queryPageStore.gridConfig);
 	}
 	queryPageStore.gridConfig = newGridConfig;
-    
-    loadOrgList();
 	
 	if (queryPageStore.gridConfig.total > 0) {
 		btnQuery();
@@ -194,45 +172,27 @@ onMounted(() => {
 </div>
 
 <div class="row">
-    <div class="col-md-3">
-        <div class="card">
-            <div class="card-header">組織列表</div>
-            <div class="list-group list-group-flush">
-                <button 
-                    type="button" 
-                    class="list-group-item list-group-item-action" 
-                    :class="{ 'active': queryPageStore.queryParam.orgOid === '' }"
-                    @click="selectOrg('')"
-                >所有組織</button>
-                <button 
-                    v-for="org in orgList" 
-                    :key="org.oid"
-                    type="button" 
-                    class="list-group-item list-group-item-action" 
-                    :class="{ 'active': queryPageStore.queryParam.orgOid === org.oid }"
-                    @click="selectOrg(org.oid)"
-                >{{ org.orgName }}</button>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-9">
+    <div class="col-12">
         <div class="card mb-4">
           <div class="card-body">
             <div class="row g-3">
-              <div class="col-md-5">
+              <div class="col-md-6">
                 <div class="form-group form-floating">
                   <input type="text" class="form-control" id="account" placeholder="帳號" v-model="queryPageStore.queryParam.account">
                   <label for="account">帳號</label>
                 </div>
               </div>
-              <div class="col-md-5">
+              <div class="col-md-6">
                 <div class="form-group form-floating">
                   <input type="text" class="form-control" id="displayName" placeholder="名稱" v-model="queryPageStore.queryParam.displayName">
                   <label for="displayName">名稱</label>
                 </div>
               </div>
-              <div class="col-md-2">
-                <button type="button" class="btn btn-primary h-100 w-100" @click="btnQuery"><i class="bi bi-search"></i> 查詢</button>
+            </div>
+            <div class="row mt-3">
+              <div class="col-12 d-flex gap-2">
+                <button type="button" class="btn btn-primary" @click="btnQuery"><i class="bi bi-search"></i> 查詢</button>
+                <button type="button" class="btn btn-outline-secondary" @click="btnClear"><i class="bi bi-eraser"></i> 清除</button>
               </div>
             </div>
           </div>
