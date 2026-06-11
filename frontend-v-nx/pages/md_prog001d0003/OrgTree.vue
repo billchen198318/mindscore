@@ -17,14 +17,17 @@ const list = computed({
 });
 
 const onEnd = async (evt: any) => {
-    // evt.item: dragged element
-    // evt.to: target list
-    // evt.from: source list
-    // newIndex / oldIndex
+    // 獲取被移動的節點
+    const movedItem = props.modelValue[evt.newIndex];
     
-    // 這裡實作 call API 的邏輯
-    const movedItem = evt.item._underlying_vm_; // vuedraggable 綁定的資料物件
-    const newParentOid = props.parentOid || null;
+    // 從拖曳目標的 container 屬性取得正確的目標 parentOid
+    const targetParentOid = evt.to.getAttribute('data-parent-oid');
+    const newParentOid = (targetParentOid === 'null' || targetParentOid === null) ? null : targetParentOid;
+
+    if (!movedItem) {
+        toast.error("無法取得移動節點資訊");
+        return;
+    }
 
     try {
         const axiosInstance = getAxiosInstance();
@@ -35,10 +38,10 @@ const onEnd = async (evt: any) => {
         
         if (response.data && response.data.success == import.meta.env.VITE_SUCCESS_FLAG) {
             toast.success("移動成功");
-            emit('refresh'); // 通知父層刷新資料
+            emit('refresh'); 
         } else {
             toast.warning(response.data.message);
-            emit('refresh'); // 失敗則強制刷新以還原狀態
+            emit('refresh'); 
         }
     } catch (e) {
         toast.error("移動失敗");
@@ -54,6 +57,7 @@ const onEnd = async (evt: any) => {
         group="org-tree"
         item-key="oid"
         @end="onEnd"
+        :data-parent-oid="parentOid"
     >
         <template #item="{ element }">
             <div class="tree-item">

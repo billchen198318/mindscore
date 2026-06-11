@@ -64,6 +64,12 @@ public class MdOrgUnitServiceImpl extends BaseService<MdOrgUnit, String> impleme
                 result.setMessage("不能移動到自己");
                 return result;
             }
+            
+            // 防止拖曳到自己的子節點中
+            if (newParentOid != null && isDescendant(target.getOid(), newParentOid)) {
+                result.setMessage("不能移動到自己的子節點中");
+                return result;
+            }
 
             int oldLevel = target.getOrgLevel();
             int newLevel = (newParentOid == null) ? 1 : this.selectByPrimaryKey(newParentOid).getValue().getOrgLevel() + 1;
@@ -85,10 +91,24 @@ public class MdOrgUnitServiceImpl extends BaseService<MdOrgUnit, String> impleme
         }
     }
 
+    private boolean isDescendant(String targetOid, String potentialParentOid) throws ServiceException {
+        if (targetOid.equals(potentialParentOid)) return true;
+        
+        DefaultResult<MdOrgUnit> parentResult = this.selectByPrimaryKey(potentialParentOid);
+        MdOrgUnit parent = (parentResult != null) ? parentResult.getValue() : null;
+        
+        if (parent == null || parent.getParentOid() == null) return false;
+        
+        return isDescendant(targetOid, parent.getParentOid());
+    }
+
     private void updateDescendantsLevel(String parentOid, int delta) throws ServiceException {
         java.util.Map<String, Object> param = new java.util.HashMap<String, Object>();
         param.put("parentOid", parentOid);
         List<MdOrgUnit> children = this.mdOrgUnitMapper.selectListByParams(param);
+        
+        if (children == null || children.isEmpty()) return;
+
         for (MdOrgUnit child : children) {
             child.setOrgLevel(child.getOrgLevel() + delta);
             this.update(child);

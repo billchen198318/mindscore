@@ -16,6 +16,20 @@ const queryPageStore = useMdProg001d0003Store();
 const { showLoading, hideLoading } = useSwalLoading();
 const pageProgramId = ref(PageConstants.QueryId);
 
+const listToTree = (list: any[]) => {
+    const map: any = {};
+    const tree: any[] = [];
+    list.forEach(item => { map[item.oid] = { ...item, children: [] }; });
+    list.forEach(item => {
+        if (item.parentOid && map[item.parentOid]) {
+            map[item.parentOid].children.push(map[item.oid]);
+        } else {
+            tree.push(map[item.oid]);
+        }
+    });
+    return tree;
+};
+
 const loadTreeData = async () => {
     showLoading();
     try {
@@ -23,7 +37,7 @@ const loadTreeData = async () => {
         const response = await axiosInstance.post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/findTree', {});
         hideLoading();
         if (response.data && response.data.success == import.meta.env.VITE_SUCCESS_FLAG) {
-            queryPageStore.setTreeData(response.data.value);
+            queryPageStore.setTreeData(listToTree(response.data.value));
         } else {
             toast.warning(response.data.message);
         }
