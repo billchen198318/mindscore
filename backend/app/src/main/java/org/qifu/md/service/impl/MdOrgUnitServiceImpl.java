@@ -1,6 +1,7 @@
 package org.qifu.md.service.impl;
 
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.qifu.base.exception.ServiceException;
 import org.qifu.base.mapper.IBaseMapper;
 import org.qifu.base.model.DefaultResult;
@@ -55,7 +56,7 @@ public class MdOrgUnitServiceImpl extends BaseService<MdOrgUnit, String> impleme
             }
 
             // 若為根節點，newParentOid 應視為 null
-            if ("root".equals(newParentOid) || ZeroKeyProvide.OID_KEY.equals(newParentOid)) {
+            if (StringUtils.isBlank(newParentOid) || "root".equals(newParentOid) || ZeroKeyProvide.OID_KEY.equals(newParentOid)) {
                 newParentOid = null;
             }
             
@@ -97,7 +98,7 @@ public class MdOrgUnitServiceImpl extends BaseService<MdOrgUnit, String> impleme
         DefaultResult<MdOrgUnit> parentResult = this.selectByPrimaryKey(potentialParentOid);
         MdOrgUnit parent = (parentResult != null) ? parentResult.getValue() : null;
         
-        if (parent == null || parent.getParentOid() == null) return false;
+        if (parent == null || StringUtils.isBlank(parent.getParentOid())) return false;
         
         return isDescendant(targetOid, parent.getParentOid());
     }

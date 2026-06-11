@@ -1,6 +1,8 @@
 package org.qifu.md.api;
 
 import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 import org.qifu.base.exception.ControllerException;
 import org.qifu.base.exception.ServiceException;
 import org.qifu.base.model.CheckControllerFieldHandler;
@@ -9,6 +11,7 @@ import org.qifu.base.model.DefaultControllerJsonResultObj;
 import org.qifu.base.model.DefaultResult;
 import org.qifu.base.model.QueryResult;
 import org.qifu.base.model.SearchBody;
+import org.qifu.base.model.ZeroKeyProvide;
 import org.qifu.core.util.CoreApiSupport;
 import org.qifu.md.entity.MdOrgUnit;
 import org.qifu.md.service.IMdOrgUnitService;
@@ -125,6 +128,9 @@ public class MD_PROG001D0001Controller extends CoreApiSupport {
     }
 
     private void handlerCheck(DefaultControllerJsonResultObj<MdOrgUnit> result, MdOrgUnit entity) throws ControllerException, ServiceException {
+        if (StringUtils.isBlank(entity.getParentOid())) {
+        	entity.setParentOid(ZeroKeyProvide.OID_KEY);
+        }    	
         CheckControllerFieldHandler<MdOrgUnit> chk = this.getCheckControllerFieldHandler(result);
         chk.testField("orgCode", entity, "@org.apache.commons.lang3.StringUtils@isBlank(orgCode)", "請輸入組織代碼")
            .testField("orgName", entity, "@org.apache.commons.lang3.StringUtils@isBlank(orgName)", "請輸入組織名稱")

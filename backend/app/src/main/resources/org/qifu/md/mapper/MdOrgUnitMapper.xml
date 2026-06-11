@@ -33,6 +33,9 @@
 	<if test="orgName != null and orgName != ''.toString() ">
 		AND ORG_NAME = #{orgName,jdbcType=VARCHAR}
 	</if>
+	<if test="parentOid != null and parentOid != ''.toString() ">
+		AND PARENT_OID = #{parentOid,jdbcType=CHAR}
+	</if>
 	<if test="enabled != null and enabled != ''.toString() ">
 		AND ENABLED = #{enabled,jdbcType=VARCHAR}
 	</if>
@@ -159,9 +162,7 @@
       <if test="orgName != null">
         ORG_NAME = #{orgName,jdbcType=VARCHAR},
       </if>
-      <if test="parentOid != null">
-        PARENT_OID = #{parentOid,jdbcType=CHAR},
-      </if>
+      PARENT_OID = #{parentOid,jdbcType=CHAR},
       <if test="orgLevel != null">
         ORG_LEVEL = #{orgLevel,jdbcType=INTEGER},
       </if>

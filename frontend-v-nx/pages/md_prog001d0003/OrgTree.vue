@@ -16,36 +16,36 @@ const list = computed({
     set: (value) => emit('update:modelValue', value)
 });
 
-const onEnd = async (evt: any) => {
-    // 獲取被移動的節點
-    const movedItem = props.modelValue[evt.newIndex];
-    
-    // 從拖曳目標的 container 屬性取得正確的目標 parentOid
-    const targetParentOid = evt.to.getAttribute('data-parent-oid');
-    const newParentOid = (targetParentOid === 'null' || targetParentOid === null) ? null : targetParentOid;
+const onChange = async (evt: any) => {
+    if (evt.added) {
+        // 獲取被移動的節點
+        const movedItem = evt.added.element;
+        // 使用當前層級的 parentOid 作為新父節點
+        const newParentOid = props.parentOid || null;
 
-    if (!movedItem) {
-        toast.error("無法取得移動節點資訊");
-        return;
-    }
-
-    try {
-        const axiosInstance = getAxiosInstance();
-        const response = await axiosInstance.post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/move', {
-            oid: movedItem.oid,
-            parentOid: newParentOid
-        });
-        
-        if (response.data && response.data.success == import.meta.env.VITE_SUCCESS_FLAG) {
-            toast.success("移動成功");
-            emit('refresh'); 
-        } else {
-            toast.warning(response.data.message);
-            emit('refresh'); 
+        if (!movedItem) {
+            toast.error("無法取得移動節點資訊");
+            return;
         }
-    } catch (e) {
-        toast.error("移動失敗");
-        emit('refresh');
+
+        try {
+            const axiosInstance = getAxiosInstance();
+            const response = await axiosInstance.post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/move', {
+                oid: movedItem.oid,
+                parentOid: newParentOid
+            });
+            
+            if (response.data && response.data.success == import.meta.env.VITE_SUCCESS_FLAG) {
+                toast.success("移動成功");
+                emit('refresh'); 
+            } else {
+                toast.warning(response.data.message);
+                emit('refresh'); 
+            }
+        } catch (e) {
+            toast.error("移動失敗");
+            emit('refresh');
+        }
     }
 };
 </script>
@@ -56,8 +56,7 @@ const onEnd = async (evt: any) => {
         :list="list"
         group="org-tree"
         item-key="oid"
-        @end="onEnd"
-        :data-parent-oid="parentOid"
+        @change="onChange"
     >
         <template #item="{ element }">
             <div class="tree-item">
