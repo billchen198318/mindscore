@@ -58,7 +58,7 @@ public class MD_PROG001D0001Controller extends CoreApiSupport {
     public ResponseEntity<DefaultControllerJsonResultObj<List<MdOrgUnit>>> findList(@RequestBody MdOrgUnit entity) {
         DefaultControllerJsonResultObj<List<MdOrgUnit>> result = this.initDefaultJsonResult();
         try {
-            DefaultResult<List<MdOrgUnit>> listResult = this.mdOrgUnitService.selectList(null, null);
+            DefaultResult<List<MdOrgUnit>> listResult = this.mdOrgUnitService.selectList();
             this.setDefaultResponseJsonResult(listResult, result);
         } catch (ServiceException | ControllerException e) {
             this.exceptionResult(result, e);

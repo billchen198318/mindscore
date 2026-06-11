@@ -17,6 +17,7 @@ import {
 definePageMeta({ middleware: ['auth'] });
 
 const router = useRouter();
+const pageProgramId = ref(PageConstants.CreateId);
 const { showLoading, hideLoading } = useSwalLoading();
 const checkFields = ref<any>({});
 const orgList = ref<any[]>([]);
@@ -85,7 +86,7 @@ onMounted(() => {
 <div class="row">
 	<div class="col-12">
 		<Toolbar 
-			:progId="PageConstants.CreateId" 
+			:progId="pageProgramId" 
         	description="組織成員維護，新增資料作業." 
         	refreshFlag="Y"
         	@refreshMethod="btnClear"

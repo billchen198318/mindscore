@@ -62,7 +62,7 @@ const initQueryGridConfig = () => {
 		[
 			{
 				'method'  : (val: any) => { 
-					const url = getUrlPrefixFromProgItem(getProgItem(PageConstants.EditId)) + '/edit/' + val;
+					const url = getUrlPrefixFromProgItem(getProgItem(PageConstants.EditId)) + '/' + val;
 					router.push(url);
 				},
 				'icon'    : 'pen',
