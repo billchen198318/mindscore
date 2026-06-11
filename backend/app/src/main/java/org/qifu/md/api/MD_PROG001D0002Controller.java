@@ -109,8 +109,11 @@ public class MD_PROG001D0002Controller extends CoreApiSupport {
     public ResponseEntity<DefaultControllerJsonResultObj<Boolean>> doDelete(@RequestBody MdOrgMember entity) {
         DefaultControllerJsonResultObj<Boolean> result = this.initDefaultJsonResult();
         try {
+        	throw new ServiceException("太多角表改了,之後再補");        	
+        	/*
             DefaultResult<Boolean> delResult = this.mdOrgMemberService.delete(entity);
             this.setDefaultResponseJsonResult(delResult, result);
+            */
         } catch (ServiceException | ControllerException e) {
             this.exceptionResult(result, e);
         }

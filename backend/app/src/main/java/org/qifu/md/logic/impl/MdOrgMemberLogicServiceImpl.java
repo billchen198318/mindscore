@@ -67,6 +67,10 @@ public class MdOrgMemberLogicServiceImpl implements IMdOrgMemberLogicService {
 
         // 3. 建立組織成員
         this.mdOrgMemberService.insert(entity);
+        
+        
+        // 非AD登入, 需要再補發 password 修正 url 部份
+        
     }
 	
 }
