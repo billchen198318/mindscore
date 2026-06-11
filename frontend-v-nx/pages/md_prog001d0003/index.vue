@@ -4,6 +4,7 @@ import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
 
 import Toolbar from '@/components/Toolbar.vue';
+import OrgTree from './OrgTree.vue';
 import { PageConstants } from './config';
 import { useMdProg001d0003Store } from './QueryPageStore'; 
 import { getAxiosInstance } from '../../components/BaseHelper';
@@ -51,9 +52,7 @@ onMounted(() => {
 
 <div class="card mb-4">
   <div class="card-body">
-    <p>這裡將呈現組織結構樹狀圖，並支援拖拉功能。</p>
-    <!-- TODO: Implement Tree Component here -->
-    <pre>{{ queryPageStore.treeData }}</pre>
+    <OrgTree v-model="queryPageStore.treeData" @refresh="loadTreeData" />
   </div>
 </div>
 </template>
