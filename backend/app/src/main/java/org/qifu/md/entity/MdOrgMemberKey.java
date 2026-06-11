@@ -17,7 +17,7 @@ public class MdOrgMemberKey implements java.io.Serializable {
 		this.oid = oid;
 	}
 
-	@EntityUK(name = "org_oid")
+	@EntityUK(name = "orgOid")
 	public String getOrgOid() {
 		return orgOid;
 	}

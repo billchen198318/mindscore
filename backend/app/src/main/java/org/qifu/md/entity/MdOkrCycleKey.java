@@ -18,7 +18,7 @@ public class MdOkrCycleKey implements java.io.Serializable {
 		this.oid = oid;
 	}
 	
-	@EntityUK(name = "cycle_code")
+	@EntityUK(name = "cycleCode")
 	public String getCycleCode() {
 		return cycleCode;
 	}

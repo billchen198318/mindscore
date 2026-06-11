@@ -19,7 +19,7 @@ public class MdStrategyThemeKey implements java.io.Serializable {
 		this.oid = oid;
 	}
 	
-	@EntityUK(name = "workspace_oid")
+	@EntityUK(name = "workspaceOid")
 	public String getWorkspaceOid() {
 		return workspaceOid;
 	}
@@ -28,7 +28,7 @@ public class MdStrategyThemeKey implements java.io.Serializable {
 		this.workspaceOid = workspaceOid;
 	}
 	
-	@EntityUK(name = "theme_code")
+	@EntityUK(name = "themeCode")
 	public String getThemeCode() {
 		return themeCode;
 	}

@@ -18,7 +18,7 @@ public class MdKpiKey implements java.io.Serializable {
 		this.oid = oid;
 	}
 	
-	@EntityUK(name = "kpi_code")
+	@EntityUK(name = "kpiCode")
 	public String getKpiCode() {
 		return kpiCode;
 	}

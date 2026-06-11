@@ -19,7 +19,7 @@ public class MdOkrSnapshotKey implements java.io.Serializable {
 		this.oid = oid;
 	}
 	
-	@EntityUK(name = "objective_oid")
+	@EntityUK(name = "objectiveOid")
 	public String getObjectiveOid() {
 		return objectiveOid;
 	}
@@ -28,7 +28,7 @@ public class MdOkrSnapshotKey implements java.io.Serializable {
 		this.objectiveOid = objectiveOid;
 	}
 	
-	@EntityUK(name = "period_key")
+	@EntityUK(name = "periodKey")
 	public String getPeriodKey() {
 		return periodKey;
 	}

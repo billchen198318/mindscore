@@ -16,7 +16,7 @@ public class MdActionPlanKey implements java.io.Serializable {
 		this.oid = oid;
 	}
 
-	@EntityUK(name = "plan_code")
+	@EntityUK(name = "planCode")
 	public String getPlanCode() {
 		return planCode;
 	}
