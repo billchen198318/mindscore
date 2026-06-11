@@ -114,6 +114,7 @@ public class MD_PROG001D0002Controller extends CoreApiSupport {
         CheckControllerFieldHandler<MdOrgMember> chk = this.getCheckControllerFieldHandler(result);
         chk.testField("orgOid", entity, "@org.apache.commons.lang3.StringUtils@isBlank(orgOid)", "請選擇組織")
            .testField("account", entity, "@org.apache.commons.lang3.StringUtils@isBlank(account)", "請輸入帳號")
+           .testField("displayName", entity, "@org.apache.commons.lang3.StringUtils@isBlank(displayName)", "請輸入名稱")
            .throwHtmlMessage();
     }
 }

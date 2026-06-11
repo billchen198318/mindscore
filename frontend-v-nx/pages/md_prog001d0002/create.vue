@@ -128,11 +128,12 @@ onMounted(() => {
         <label for="displayName" class="form-label">名稱</label>
         <input 
           type="text" 
-          class="form-control" 
+          :class="['form-control', checkInvalid('displayName', checkFields) ? 'is-invalid' : '']" 
           id="displayName" 
           placeholder="輸入名稱" 
           v-model="formParam.displayName"
         >
+        <div v-if="checkInvalid('displayName', checkFields)" class="invalid-feedback">{{ invalidFeedback('displayName', checkFields) }}</div>
       </div>
       <div class="col-md-6">
         <label for="jobTitle" class="form-label">職稱</label>
