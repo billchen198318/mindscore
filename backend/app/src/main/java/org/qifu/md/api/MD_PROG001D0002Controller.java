@@ -1,0 +1,119 @@
+package org.qifu.md.api;
+
+import java.util.List;
+import org.qifu.base.exception.ControllerException;
+import org.qifu.base.exception.ServiceException;
+import org.qifu.base.model.CheckControllerFieldHandler;
+import org.qifu.base.model.ControllerMethodAuthority;
+import org.qifu.base.model.DefaultControllerJsonResultObj;
+import org.qifu.base.model.DefaultResult;
+import org.qifu.base.model.QueryResult;
+import org.qifu.base.model.SearchBody;
+import org.qifu.core.util.CoreApiSupport;
+import org.qifu.md.entity.MdOrgMember;
+import org.qifu.md.service.IMdOrgMemberService;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+@Tag(name = "MD_PROG001D0002", description = "組織成員管理")
+@RestController
+@ResponseBody
+@RequestMapping("/api/MD_PROG001D0002")
+public class MD_PROG001D0002Controller extends CoreApiSupport {
+    private static final long serialVersionUID = 1L;
+
+    private final IMdOrgMemberService<MdOrgMember, String> mdOrgMemberService;
+
+    public MD_PROG001D0002Controller(IMdOrgMemberService<MdOrgMember, String> mdOrgMemberService) {
+        super();
+        this.mdOrgMemberService = mdOrgMemberService;
+    }
+
+    @ControllerMethodAuthority(programId = "MD_PROG001D0002Q", check = true)
+    @Operation(summary = "MD_PROG001D0002 - findPage", description = "查詢組織成員資料")
+    @PostMapping(value = "/findPage", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<QueryResult<List<MdOrgMember>>> findPage(@RequestBody SearchBody searchBody) {
+        QueryResult<List<MdOrgMember>> result = this.initResult();
+        try {
+            QueryResult<List<MdOrgMember>> queryResult = this.mdOrgMemberService.findPage(
+                    this.queryParameter(searchBody).fullLink("account").fullLink("displayName").value(),
+                    searchBody.getPageOf().orderBy("ORG_OID").sortTypeAsc());
+            this.setQueryResponseJsonResult(queryResult, result, searchBody.getPageOf());
+        } catch (ServiceException | ControllerException e) {
+            this.noSuccessResult(result, e);
+        }
+        return ResponseEntity.ok().body(result);
+    }
+
+    @ControllerMethodAuthority(programId = "MD_PROG001D0002C", check = true)
+    @Operation(summary = "MD_PROG001D0002 - save", description = "新增組織成員資料")
+    @PostMapping(value = "/save", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<DefaultControllerJsonResultObj<MdOrgMember>> doSave(@RequestBody MdOrgMember entity) {
+        DefaultControllerJsonResultObj<MdOrgMember> result = this.initDefaultJsonResult();
+        try {
+            this.handlerCheck(result, entity);
+            DefaultResult<MdOrgMember> cResult = this.mdOrgMemberService.insert(entity);
+            this.setDefaultResponseJsonResult(cResult, result);
+        } catch (ServiceException | ControllerException e) {
+            this.exceptionResult(result, e);
+        }
+        return ResponseEntity.ok().body(result);
+    }
+
+    @ControllerMethodAuthority(programId = "MD_PROG001D0002E", check = true)
+    @Operation(summary = "MD_PROG001D0002 - load", description = "讀取組織成員資料")
+    @PostMapping(value = "/load", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<DefaultControllerJsonResultObj<MdOrgMember>> doLoad(@RequestBody MdOrgMember entity) {
+        DefaultControllerJsonResultObj<MdOrgMember> result = this.initDefaultJsonResult();
+        try {
+            DefaultResult<MdOrgMember> lResult = this.mdOrgMemberService.selectByEntityPrimaryKey(entity);
+            this.setDefaultResponseJsonResult(lResult, result);
+        } catch (ServiceException | ControllerException e) {
+            this.exceptionResult(result, e);
+        }
+        return ResponseEntity.ok().body(result);
+    }
+
+    @ControllerMethodAuthority(programId = "MD_PROG001D0002U", check = true)
+    @Operation(summary = "MD_PROG001D0002 - update", description = "更新組織成員資料")
+    @PostMapping(value = "/update", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<DefaultControllerJsonResultObj<MdOrgMember>> doUpdate(@RequestBody MdOrgMember entity) {
+        DefaultControllerJsonResultObj<MdOrgMember> result = this.initDefaultJsonResult();
+        try {
+            this.handlerCheck(result, entity);
+            DefaultResult<MdOrgMember> uResult = this.mdOrgMemberService.update(entity);
+            this.setDefaultResponseJsonResult(uResult, result);
+        } catch (ServiceException | ControllerException e) {
+            this.exceptionResult(result, e);
+        }
+        return ResponseEntity.ok().body(result);
+    }
+
+    @ControllerMethodAuthority(programId = "MD_PROG001D0002D", check = true)
+    @Operation(summary = "MD_PROG001D0002 - delete", description = "刪除組織成員資料")
+    @PostMapping(value = "/delete", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<DefaultControllerJsonResultObj<Boolean>> doDelete(@RequestBody MdOrgMember entity) {
+        DefaultControllerJsonResultObj<Boolean> result = this.initDefaultJsonResult();
+        try {
+            DefaultResult<Boolean> delResult = this.mdOrgMemberService.delete(entity);
+            this.setDefaultResponseJsonResult(delResult, result);
+        } catch (ServiceException | ControllerException e) {
+            this.exceptionResult(result, e);
+        }
+        return ResponseEntity.ok().body(result);
+    }
+
+    private void handlerCheck(DefaultControllerJsonResultObj<MdOrgMember> result, MdOrgMember entity) throws ControllerException, ServiceException {
+        CheckControllerFieldHandler<MdOrgMember> chk = this.getCheckControllerFieldHandler(result);
+        chk.testField("orgOid", entity, "@org.apache.commons.lang3.StringUtils@isBlank(orgOid)", "請選擇組織")
+           .testField("account", entity, "@org.apache.commons.lang3.StringUtils@isBlank(account)", "請輸入帳號")
+           .throwHtmlMessage();
+    }
+}
