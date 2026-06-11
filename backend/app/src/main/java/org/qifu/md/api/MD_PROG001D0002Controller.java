@@ -9,8 +9,10 @@ import org.qifu.base.model.DefaultControllerJsonResultObj;
 import org.qifu.base.model.DefaultResult;
 import org.qifu.base.model.QueryResult;
 import org.qifu.base.model.SearchBody;
+import org.qifu.base.model.YesNo;
 import org.qifu.core.util.CoreApiSupport;
 import org.qifu.md.entity.MdOrgMember;
+import org.qifu.md.logic.IMdOrgMemberLogicService;
 import org.qifu.md.service.IMdOrgMemberService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -28,12 +30,15 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequestMapping("/api/MD_PROG001D0002")
 public class MD_PROG001D0002Controller extends CoreApiSupport {
     private static final long serialVersionUID = 1L;
-
+    
     private final IMdOrgMemberService<MdOrgMember, String> mdOrgMemberService;
 
-    public MD_PROG001D0002Controller(IMdOrgMemberService<MdOrgMember, String> mdOrgMemberService) {
+    private final IMdOrgMemberLogicService mdOrgMemberLogicService;
+
+    public MD_PROG001D0002Controller(IMdOrgMemberService<MdOrgMember, String> mdOrgMemberService, IMdOrgMemberLogicService mdOrgMemberLogicService) {
         super();
         this.mdOrgMemberService = mdOrgMemberService;
+        this.mdOrgMemberLogicService = mdOrgMemberLogicService;
     }
 
     @ControllerMethodAuthority(programId = "MD_PROG001D0002Q", check = true)
@@ -59,8 +64,10 @@ public class MD_PROG001D0002Controller extends CoreApiSupport {
         DefaultControllerJsonResultObj<MdOrgMember> result = this.initDefaultJsonResult();
         try {
             this.handlerCheck(result, entity);
-            DefaultResult<MdOrgMember> cResult = this.mdOrgMemberService.insert(entity);
-            this.setDefaultResponseJsonResult(cResult, result);
+            this.mdOrgMemberLogicService.createMemberWithAccount(entity);
+            result.setSuccess(YesNo.YES);
+            result.setMessage("新增成功");
+            result.setValue(entity);
         } catch (ServiceException | ControllerException e) {
             this.exceptionResult(result, e);
         }
