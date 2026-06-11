@@ -7,6 +7,7 @@ import 'vue3-toastify/dist/index.css';
 import Toolbar from '@/components/Toolbar.vue';
 import Grid from '@/components/Grid.vue';
 import GridPagination from '@/components/GridPagination.vue';
+import HiddenQueryFieldAlertInfo from '@/components/HiddenQueryFieldAlertInfo.vue';
 import { PageConstants } from './config';
 import { getGridConfig, setConfigRow, setConfigPage, setConfigTotal, resetConfigByOld } from '../../components/GridHelper';
 import { useMdProg001d0002Store } from './QueryPageStore'; 
@@ -25,9 +26,11 @@ const { showLoading, hideLoading, confirmFire } = useSwalLoading();
 
 const pageProgramId = ref(PageConstants.QueryId);
 const dsList = ref<any[]>([]);
+const qFieldShow = ref(true);
 
 const tbRefresh = () => btnClear();
 const tbCreate = () => router.push(PageConstants.frontendNamespace + '/create');
+const tbQueryFieldShow = () => qFieldShow.value = !qFieldShow.value;
 
 const btnClear = () => {
 	queryPageStore.clearData();
@@ -167,13 +170,17 @@ onMounted(() => {
         @refreshMethod="tbRefresh"
         createFlag="Y"
         @createMethod="tbCreate"
+        queryFieldShowSwitchFlag="Y"
+        @queryFieldShowSwitcMethod="tbQueryFieldShow"
     />
   </div>
 </div>
 
+<HiddenQueryFieldAlertInfo :dataSource="dsList" :queryFieldShowFlag="qFieldShow" />
+
 <div class="row">
     <div class="col-12">
-        <div class="card mb-4">
+        <div v-show="qFieldShow" class="card mb-4">
           <div class="card-body">
             <div class="row g-3">
               <div class="col-md-6">
