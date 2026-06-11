@@ -43,7 +43,7 @@ public class MD_PROG001D0002Controller extends CoreApiSupport {
         QueryResult<List<MdOrgMember>> result = this.initResult();
         try {
             QueryResult<List<MdOrgMember>> queryResult = this.mdOrgMemberService.findPage(
-                    this.queryParameter(searchBody).fullLink("account").fullLink("displayName").value(),
+                    this.queryParameter(searchBody).fullEquals("orgOid").fullLink("accountLike").fullLink("displayNameLike").value(),
                     searchBody.getPageOf().orderBy("ORG_OID").sortTypeAsc());
             this.setQueryResponseJsonResult(queryResult, result, searchBody.getPageOf());
         } catch (ServiceException | ControllerException e) {
