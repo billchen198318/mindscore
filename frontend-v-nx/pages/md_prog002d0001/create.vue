@@ -195,14 +195,6 @@ const btnSave = async () => {
       </div>
 
       <div class="col-md-3">
-        <label for="isSystem" class="form-label">系統公式</label>
-        <select :class="['form-select', checkInvalid('isSystem', checkFields) ? 'is-invalid' : '']" id="isSystem" v-model="formParam.isSystem">
-          <option value="Y">是</option>
-          <option value="N">否</option>
-        </select>
-        <div v-if="checkInvalid('isSystem', checkFields)" class="invalid-feedback">{{ invalidFeedback('isSystem', checkFields) }}</div>
-      </div>
-      <div class="col-md-3">
         <label for="isRecommendable" class="form-label">可推薦</label>
         <select :class="['form-select', checkInvalid('isRecommendable', checkFields) ? 'is-invalid' : '']" id="isRecommendable" v-model="formParam.isRecommendable">
           <option value="Y">是</option>

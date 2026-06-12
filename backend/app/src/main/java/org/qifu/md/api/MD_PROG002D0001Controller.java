@@ -154,6 +154,7 @@ public class MD_PROG002D0001Controller extends CoreApiSupport {
     }
 
     private void handlerCheck(DefaultControllerJsonResultObj<MdFormula> result, MdFormula entity) throws ControllerException, ServiceException {
+        this.syncSystemFlag(entity);
         CheckControllerFieldHandler<MdFormula> chk = this.getCheckControllerFieldHandler(result);
         chk.testField("formulaCode", entity, "@org.apache.commons.lang3.StringUtils@isBlank(formulaCode)", "請輸入Formula代碼")
            .testField("formulaCode", entity, "!@org.qifu.util.SimpleUtils@checkBeTrueOfAZaz09Id(formulaCode)", "Formula代碼只允許輸入0-9,a-z,A-Z,-,_,.")
@@ -167,6 +168,10 @@ public class MD_PROG002D0001Controller extends CoreApiSupport {
            .testField("isRecommendable", entity, "@org.apache.commons.lang3.StringUtils@isBlank(isRecommendable)", "請選擇是否可推薦")
            .testField("enabled", entity, "@org.apache.commons.lang3.StringUtils@isBlank(enabled)", "請選擇是否啟用")
            .throwHtmlMessage();
+    }
+
+    private void syncSystemFlag(MdFormula entity) {
+        entity.setIsSystem(StringUtils.equals("BUILTIN", entity.getFormulaType()) ? "Y" : "N");
     }
 
     private void checkBuiltinReadonly(MdFormula entity) throws ServiceException, ControllerException {
