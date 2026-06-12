@@ -21,6 +21,7 @@ public class AggregationMethodUtils {
     private static final String METHOD_MAX = "MAX";
     private static final String METHOD_MIN = "MIN";
     private static final String METHOD_CNT = "CNT";
+    private static final String METHOD_DISTINCT = "DISTINCT";
 
     protected AggregationMethodUtils() {
         throw new IllegalStateException("Utils class: AggregationMethodUtils");
@@ -42,7 +43,8 @@ public class AggregationMethodUtils {
                 new SupportedMethod(METHOD_AVG, "AVG", "scores == null || scores.isEmpty() ? 0 : scores.sum() / scores.size()", "Average all score values."),
                 new SupportedMethod(METHOD_MAX, "MAX", "scores == null || scores.isEmpty() ? 0 : scores.max()", "Maximum score value."),
                 new SupportedMethod(METHOD_MIN, "MIN", "scores == null || scores.isEmpty() ? 0 : scores.min()", "Minimum score value."),
-                new SupportedMethod(METHOD_CNT, "Count", "scores == null ? 0 : scores.size()", "Count score values."));
+                new SupportedMethod(METHOD_CNT, "Count", "scores == null ? 0 : scores.size()", "Count score values."),
+                new SupportedMethod(METHOD_DISTINCT, "Distinct Count", "scores == null ? 0 : scores.collect { it.stripTrailingZeros() }.unique().size()", "Count distinct score values."));
     }
 
     public static BigDecimal executeBuiltin(String aggrCode, List<BigDecimal> scores) {
@@ -79,6 +81,13 @@ public class AggregationMethodUtils {
         }
         if (Strings.CS.contains(aggrCode, "CNT")) {
             return BigDecimal.valueOf(scores.size());
+        }
+        if (Strings.CS.contains(aggrCode, "DISTINCT")) {
+            long distinctCount = scores.stream()
+                    .map(BigDecimal::stripTrailingZeros)
+                    .distinct()
+                    .count();
+            return BigDecimal.valueOf(distinctCount);
         }
         return BigDecimal.ZERO;
     }
