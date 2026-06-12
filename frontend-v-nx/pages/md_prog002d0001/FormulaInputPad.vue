@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ref } from 'vue';
+
 defineProps<{
     disabled?: boolean;
 }>();
@@ -6,7 +8,26 @@ defineProps<{
 const emit = defineEmits<{
     insert: [value: string];
     clear: [];
+    test: [values: FormulaTestValues];
 }>();
+
+type FormulaTestValues = {
+    actual: number;
+    target: number;
+    kpiMax: number;
+    kpiMin: number;
+    kpiTarget: number;
+    kpiWeight: number;
+};
+
+const testValues = ref<FormulaTestValues>({
+    actual: 70,
+    target: 100,
+    kpiMax: 100,
+    kpiMin: 0,
+    kpiTarget: 80,
+    kpiWeight: 1
+});
 
 const inputGroups = [
     {
@@ -60,6 +81,33 @@ const inputGroups = [
     <button type="button" class="btn btn-sm btn-outline-secondary" :disabled="disabled" @click="emit('clear')">清空公式</button>
   </div>
   <div class="card-body">
+    <div class="row g-2 mb-3">
+      <div class="col-md-2">
+        <label class="form-label small">actual</label>
+        <input type="number" class="form-control form-control-sm" v-model.number="testValues.actual" :disabled="disabled">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small">target</label>
+        <input type="number" class="form-control form-control-sm" v-model.number="testValues.target" :disabled="disabled">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small">kpi.max</label>
+        <input type="number" class="form-control form-control-sm" v-model.number="testValues.kpiMax" :disabled="disabled">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small">kpi.min</label>
+        <input type="number" class="form-control form-control-sm" v-model.number="testValues.kpiMin" :disabled="disabled">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small">kpi.target</label>
+        <input type="number" class="form-control form-control-sm" v-model.number="testValues.kpiTarget" :disabled="disabled">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small">kpi.weight</label>
+        <input type="number" class="form-control form-control-sm" v-model.number="testValues.kpiWeight" :disabled="disabled">
+      </div>
+    </div>
+
     <div v-for="group in inputGroups" :key="group.title" class="mb-3">
       <div class="small text-secondary mb-2">{{ group.title }}</div>
       <div class="d-flex flex-wrap gap-2">
@@ -74,6 +122,7 @@ const inputGroups = [
         </button>
       </div>
     </div>
+    <button type="button" class="btn btn-sm btn-warning" :disabled="disabled" @click="emit('test', testValues)">TEST</button>
     <div class="form-text">
       按鈕會插入到 Expression 游標位置。$P{...} 為公式參數 token，後續執行器會依 KPI 或量測資料解析成實際值。
     </div>

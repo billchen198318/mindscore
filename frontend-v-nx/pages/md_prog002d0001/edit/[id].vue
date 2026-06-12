@@ -71,6 +71,35 @@ const clearExpressionValue = () => {
     formParam.value.expression = '';
 };
 
+const btnTestFormula = async (testValues: any) => {
+    if (isBuiltin.value) {
+        return;
+    }
+    checkFields.value = {};
+    showLoading();
+    try {
+        const axiosInstance = getAxiosInstance();
+        const response = await axiosInstance.post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/test', {
+            scriptType : formParam.value.scriptType,
+            expression : formParam.value.expression,
+            ...testValues
+        });
+        hideLoading();
+        if (response.data) {
+            if (import.meta.env.VITE_SUCCESS_FLAG != response.data.success) {
+                toast.warning(escapeQifuHtmlMsg(response.data.message));
+                return;
+            }
+            toast.success(response.data.message);
+        } else {
+            toast.error('error, null');
+        }
+    } catch (e: any) {
+        hideLoading();
+        alert(e);
+    }
+};
+
 const btnClear = () => {
     if (isBuiltin.value) {
         return;
@@ -227,7 +256,7 @@ onMounted(() => {
         <textarea ref="expressionTextarea" class="form-control" id="expression" rows="5" v-model="formParam.expression" :readonly="isBuiltin"></textarea>
       </div>
       <div class="col-md-12">
-        <FormulaInputPad :disabled="isBuiltin" @insert="insertExpressionValue" @clear="clearExpressionValue" />
+        <FormulaInputPad :disabled="isBuiltin" @insert="insertExpressionValue" @clear="clearExpressionValue" @test="btnTestFormula" />
       </div>
       <div class="col-md-12">
         <label for="paramSchemaJson" class="form-label">參數規格 JSON</label>
