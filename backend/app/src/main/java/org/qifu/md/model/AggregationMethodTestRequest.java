@@ -3,6 +3,9 @@ package org.qifu.md.model;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.qifu.md.entity.MdKpi;
+import org.qifu.md.entity.MdKpiMeasureData;
+
 public class AggregationMethodTestRequest implements java.io.Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -11,6 +14,8 @@ public class AggregationMethodTestRequest implements java.io.Serializable {
     private String methodCode;
     private String expression;
     private List<BigDecimal> scores;
+    private MdKpi kpi;
+    private List<MdKpiMeasureData> measureDataList;
 
     public String getAggrType() {
         return aggrType;
@@ -50,5 +55,21 @@ public class AggregationMethodTestRequest implements java.io.Serializable {
 
     public void setScores(List<BigDecimal> scores) {
         this.scores = scores;
+    }
+
+    public MdKpi getKpi() {
+        return kpi;
+    }
+
+    public void setKpi(MdKpi kpi) {
+        this.kpi = kpi;
+    }
+
+    public List<MdKpiMeasureData> getMeasureDataList() {
+        return measureDataList;
+    }
+
+    public void setMeasureDataList(List<MdKpiMeasureData> measureDataList) {
+        this.measureDataList = measureDataList;
     }
 }
