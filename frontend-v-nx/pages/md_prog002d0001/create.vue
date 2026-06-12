@@ -170,8 +170,9 @@ const btnSave = async () => {
         <textarea class="form-control" id="expression" rows="5" v-model="formParam.expression"></textarea>
       </div>
       <div class="col-md-12">
-        <label for="paramSchemaJson" class="form-label">Param Schema JSON</label>
+        <label for="paramSchemaJson" class="form-label">參數規格 JSON</label>
         <textarea class="form-control" id="paramSchemaJson" rows="4" v-model="formParam.paramSchemaJson"></textarea>
+        <div class="form-text">描述公式需要的輸入參數，供未來公式測試、KPI綁定與執行前驗證使用；不是公式內容，公式請填在 Expression。</div>
       </div>
       <div class="col-md-12">
         <label for="exampleText" class="form-label">範例說明</label>
