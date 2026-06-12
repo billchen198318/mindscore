@@ -182,7 +182,7 @@ CREATE TABLE `md_aggregation_method` (
   `OID` char(36) NOT NULL COMMENT '主鍵 OID',
   `AGGR_CODE` varchar(64) NOT NULL COMMENT '彙總方法代碼',
   `AGGR_NAME` varchar(200) NOT NULL COMMENT '彙總方法名稱',
-  `AGGR_TYPE` varchar(32) NOT NULL DEFAULT 'CUSTOM' COMMENT '彙總類型 BUILTIN/CUSTOM',
+  `AGGR_TYPE` varchar(32) NOT NULL DEFAULT 'BUILTIN' COMMENT '彙總類型 BUILTIN/CUSTOM/SCRIPT',
   `EXPRESSION` mediumtext DEFAULT NULL COMMENT '彙總公式或腳本',
   `DESCRIPTION` varchar(2000) DEFAULT NULL COMMENT '彙總方法中文說明',
   `ENABLED` varchar(1) NOT NULL DEFAULT 'Y' COMMENT '是否啟用 Y/N',
@@ -218,8 +218,8 @@ CREATE TABLE `md_formula` (
   `OID` char(36) NOT NULL COMMENT '主鍵 OID',
   `FORMULA_CODE` varchar(64) NOT NULL COMMENT '公式代碼',
   `FORMULA_NAME` varchar(200) NOT NULL COMMENT '公式名稱',
-  `FORMULA_TYPE` varchar(32) NOT NULL DEFAULT 'CUSTOM' COMMENT '公式類型 BUILTIN/CUSTOM',
-  `SCRIPT_TYPE` varchar(32) NOT NULL DEFAULT 'JAVA' COMMENT '腳本類型目前只有GROOVY',
+  `FORMULA_TYPE` varchar(32) NOT NULL DEFAULT 'BUILTIN' COMMENT '公式類型 BUILTIN/CUSTOM/SCRIPT',
+  `SCRIPT_TYPE` varchar(32) NOT NULL DEFAULT 'JAVA' COMMENT '腳本類型 JAVA/GROOVY/JS/EXPR',
   `EXPRESSION` mediumtext DEFAULT NULL COMMENT '公式內容或運算式',
   `RETURN_TYPE` varchar(32) NOT NULL DEFAULT 'DECIMAL' COMMENT '回傳型別',
   `VERSION_NO` int(11) NOT NULL DEFAULT 1 COMMENT '公式版本',
@@ -1642,8 +1642,9 @@ INSERT INTO `tb_sys_menu` VALUES
 ('947d412f-6558-11f1-8ea0-5d8cbc8c4b4c','MD_PROG001D0002Q','91f90746-6558-11f1-8ea0-31612e6b0ce2','Y','admin','2026-06-11 13:44:14',NULL,NULL),
 ('947db660-6558-11f1-8ea0-f1e5fa666cce','MD_PROG001D0003Q','91f90746-6558-11f1-8ea0-31612e6b0ce2','Y','admin','2026-06-11 13:44:14',NULL,NULL),
 ('9972c249-2985-49ac-9b8b-f6c25c65fd4e','CORE_PROG002D0003Q','79e1cf24-2522-4cdf-abcc-6455b47d545b','Y','admin','2017-05-10 14:20:12',NULL,NULL),
+('9b540b2f-6627-11f1-80c0-a924d46b10e0','MD_PROG002D0001Q','bef9d6cc-6605-11f1-81b4-6babbff1c7f5','Y','admin','2026-06-12 14:26:12',NULL,NULL),
+('9b54a770-6627-11f1-80c0-a52ecbf3b149','MD_PROG002D0002Q','bef9d6cc-6605-11f1-81b4-6babbff1c7f5','Y','admin','2026-06-12 14:26:12',NULL,NULL),
 ('bef9d6cc-6605-11f1-81b4-6babbff1c7f5','MD_PROG002D','00000000-0000-0000-0000-000000000000','Y','admin','2026-06-12 10:23:49',NULL,NULL),
-('befa9a1d-6605-11f1-81b4-eb6a785fe73e','MD_PROG002D0001Q','bef9d6cc-6605-11f1-81b4-6babbff1c7f5','Y','admin','2026-06-12 10:23:49',NULL,NULL),
 ('c5349a26-6d6e-4d94-b817-82be6d14d5ed','CORE_PROG002D0001Q','79e1cf24-2522-4cdf-abcc-6455b47d545b','Y','admin','2017-05-10 14:20:12',NULL,NULL),
 ('f0242c17-4487-11ee-b50d-a593cf4a05bf','CORE_PROG001D0001Q','7ea68636-c93a-4669-ac42-dafc3770d20d','Y','admin','2023-08-27 11:15:13',NULL,NULL),
 ('f0253d88-4487-11ee-b50d-7f3d9b9812d0','CORE_PROG001D0002Q','7ea68636-c93a-4669-ac42-dafc3770d20d','Y','admin','2023-08-27 11:15:13',NULL,NULL),
@@ -1734,6 +1735,7 @@ INSERT INTO `tb_sys_prog` VALUES
 ('1e393fe3-8bbc-482c-aa23-bbb22a1dbafb','CORE_PROG001D0005A','ZA05 - JasperReport (Create)','#/prog001d0005/create','N','N',0,0,'CORE','ITEM','APPLICATION_PDF','file-pdf','admin','2017-05-18 09:55:46','admin','2023-08-24 20:20:27'),
 ('22560527-90fb-4e5a-a89b-353d2aa1d433','CORE_PROG001D0005E','ZA05 - JasperReport (Edit)','#/prog001d0005/edit','Y','N',0,0,'CORE','ITEM','APPLICATION_PDF','file-pdf','admin','2017-05-18 09:56:27','admin','2023-08-24 20:20:40'),
 ('25aabd77-6558-11f1-8ea0-49b47cb32597','MD_PROG001D0002E','AA02 - 成員維護 (編輯)','#/md_prog001d0002/edit','Y','N',0,0,'CORE','ITEM','SYSTEM','person','admin','2026-06-11 13:41:08','admin','2026-06-11 13:42:20'),
+('2e8bde04-b188-4440-8f27-15a75ef1a094','MD_PROG002D0002A','AB02 - 彙總方法 (建立)','#/md_prog002d0002/create','N','N',0,0,'CORE','ITEM','SYSTEM','calculator-fill','admin','2026-06-12 14:24:38',NULL,NULL),
 ('3630ee1b-6169-452f-821f-5c015dfb84d5','CORE_PROG001D','ZA. Config','/','N','N',0,0,'CORE','FOLDER','PROPERTIES','gear-fill','admin','2014-10-02 00:00:00','admin','2023-08-15 19:16:31'),
 ('3862b6d0-0551-45d8-8dd1-cd988a5e8e50','CORE_PROG004D0002Q','ZD02 - Token log','#/prog004d0002','N','N',0,0,'CORE','ITEM','PROPERTIES','clipboard-check','admin','2017-06-03 14:22:29','admin','2023-08-29 10:23:05'),
 ('3ca500d9-6558-11f1-8ea0-61333ff04564','MD_PROG001D0003Q','AA03 - 組織架構','#/md_prog001d0003','N','N',0,0,'CORE','ITEM','SYSTEM','house-fill','admin','2026-06-11 13:41:47',NULL,NULL),
@@ -1762,10 +1764,12 @@ INSERT INTO `tb_sys_prog` VALUES
 ('da7d969a-5efb-4e84-9eab-4fdae236f28c','CORE_PROG002D0002Q','ZB02 - User role','#/prog002d0002','N','N',0,0,'CORE','ITEM','PERSON','person-check','admin','2017-05-08 21:34:39','admin','2023-08-28 19:54:25'),
 ('dda67b1d-e3a2-4534-835a-c62d9e8421f3','CORE_PROG001D0005S01Q','ZA05 - JasperReport (Parameter)','#/prog001d0005/setparam','Y','N',0,0,'CORE','ITEM','APPLICATION_PDF','file-pdf','admin','2017-05-18 09:57:26','admin','2023-08-24 20:21:02'),
 ('e32b9329-bb38-46d7-8552-2307bac77724','CORE_PROG001D0002A','ZA02 - Program (Create)','#/prog001d0002/create','N','N',0,0,'CORE','ITEM','G_APP_INSTALL','filetype-html','admin','2014-10-02 00:00:00','admin','2023-08-15 19:19:42'),
+('e5faf3e8-3c61-43cf-b748-d60dd6f34b6d','MD_PROG002D0002Q','AB02 - 彙總方法','#/md_prog002d0002','N','N',0,0,'CORE','ITEM','SYSTEM','calculator-fill','admin','2026-06-12 14:24:38',NULL,NULL),
 ('e86dbb1b-6870-4827-8039-72f5e15fa4f2','CORE_PROG004D','ZD. Log','/','N','N',0,0,'CORE','FOLDER','PROPERTIES','clipboard-check-fill','admin','2017-06-03 14:21:03','admin','2023-08-29 10:14:04'),
 ('eb6e199f-c853-4fbf-acf3-0c9c77ba9953','CORE_PROG001D0002Q','ZA02 - Program','#/prog001d0002','N','N',0,0,'CORE','ITEM','G_APP_INSTALL','filetype-html','admin','2014-10-02 00:00:00','admin','2023-08-15 19:19:05'),
 ('eb786ffd-c7d1-4631-aed2-4d9d7368eb13','CORE_PROG001D0005Q','ZA05 - JasperReport','#/prog001d0005','N','N',0,0,'CORE','ITEM','APPLICATION_PDF','file-pdf','admin','2017-05-18 09:54:35','admin','2023-08-24 20:20:16'),
 ('eb8ecb3d-6557-11f1-8ea0-a313029ec7da','MD_PROG001D0001Q','AA01 - 組織單位','#/md_prog001d0001','N','N',0,0,'CORE','ITEM','SYSTEM','house','admin','2026-06-11 13:39:31',NULL,NULL),
+('f2f984fa-963c-42ed-b281-2047b863399d','MD_PROG002D0002E','AB02 - 彙總方法 (編輯)','#/md_prog002d0002/edit','Y','N',0,0,'CORE','ITEM','SYSTEM','calculator-fill','admin','2026-06-12 14:24:38',NULL,NULL),
 ('f9ed13df-6557-11f1-8ea0-ebb67d5fab5b','MD_PROG001D0001A','AA01 - 組織單位 (建立)','#/md_prog001d0001/create','N','N',0,0,'CORE','ITEM','SYSTEM','house','admin','2026-06-11 13:39:55',NULL,NULL);
 /*!40000 ALTER TABLE `tb_sys_prog` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -2028,4 +2032,4 @@ SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2026-06-12 10:27:23
+-- Dump completed on 2026-06-12 14:29:15

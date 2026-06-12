@@ -2,7 +2,7 @@ package org.qifu.md.api;
 
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.qifu.base.exception.ControllerException;
 import org.qifu.base.exception.ServiceException;
 import org.qifu.base.model.CheckControllerFieldHandler;
@@ -171,13 +171,13 @@ public class MD_PROG002D0001Controller extends CoreApiSupport {
     }
 
     private void syncSystemFlag(MdFormula entity) {
-        entity.setIsSystem(StringUtils.equals("BUILTIN", entity.getFormulaType()) ? "Y" : "N");
+        entity.setIsSystem(Strings.CS.equals("BUILTIN", entity.getFormulaType()) ? "Y" : "N");
     }
 
     private void checkBuiltinReadonly(MdFormula entity) throws ServiceException, ControllerException {
         DefaultResult<MdFormula> loadResult = this.mdFormulaService.selectByEntityPrimaryKey(entity);
         MdFormula dbEntity = loadResult.getValue();
-        if (dbEntity != null && StringUtils.equals("BUILTIN", dbEntity.getFormulaType())) {
+        if (dbEntity != null && Strings.CS.equals("BUILTIN", dbEntity.getFormulaType())) {
             throw new ControllerException("BUILTIN公式為系統內建資料，不能由維護畫面修改或刪除。");
         }
     }
