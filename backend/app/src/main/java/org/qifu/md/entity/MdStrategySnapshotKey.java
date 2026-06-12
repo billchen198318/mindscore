@@ -20,7 +20,7 @@ public class MdStrategySnapshotKey implements java.io.Serializable {
 		this.oid = oid;
 	}
 	
-	@EntityUK(name = "workspace_oid")
+	@EntityUK(name = "workspaceOid")
 	public String getWorkspaceOid() {
 		return workspaceOid;
 	}
@@ -29,7 +29,7 @@ public class MdStrategySnapshotKey implements java.io.Serializable {
 		this.workspaceOid = workspaceOid;
 	}
 	
-	@EntityUK(name = "period_type")
+	@EntityUK(name = "periodType")
 	public String getPeriodType() {
 		return periodType;
 	}
@@ -38,7 +38,7 @@ public class MdStrategySnapshotKey implements java.io.Serializable {
 		this.periodType = periodType;
 	}
 	
-	@EntityUK(name = "period_key")
+	@EntityUK(name = "periodKey")
 	public String getPeriodKey() {
 		return periodKey;
 	}

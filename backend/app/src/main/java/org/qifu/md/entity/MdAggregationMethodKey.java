@@ -16,7 +16,7 @@ public class MdAggregationMethodKey implements java.io.Serializable {
 		this.oid = oid;
 	}
 
-	@EntityUK(name = "aggr_code")
+	@EntityUK(name = "aggrCode")
 	public String getAggrCode() {
 		return aggrCode;
 	}

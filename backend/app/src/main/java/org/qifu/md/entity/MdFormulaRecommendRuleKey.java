@@ -16,7 +16,7 @@ public class MdFormulaRecommendRuleKey implements java.io.Serializable {
 		this.oid = oid;
 	}
 
-	@EntityUK(name = "rule_code")
+	@EntityUK(name = "ruleCode")
 	public String getRuleCode() {
 		return ruleCode;
 	}

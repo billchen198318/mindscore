@@ -17,7 +17,7 @@ public class MdFormulaKey implements java.io.Serializable {
 		this.oid = oid;
 	}
 
-	@EntityUK(name = "formula_code")
+	@EntityUK(name = "formulaCode")
 	public String getFormulaCode() {
 		return formulaCode;
 	}
@@ -25,7 +25,7 @@ public class MdFormulaKey implements java.io.Serializable {
 		this.formulaCode = formulaCode;
 	}
 
-	@EntityUK(name = "version_no")
+	@EntityUK(name = "versionNo")
 	public Integer getVersionNo() {
 		return versionNo;
 	}

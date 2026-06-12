@@ -19,7 +19,7 @@ public class MdStrategyObjectiveKey implements java.io.Serializable {
 		this.oid = oid;
 	}
 	
-	@EntityUK(name = "theme_oid")
+	@EntityUK(name = "themeOid")
 	public String getThemeOid() {
 		return themeOid;
 	}
@@ -28,7 +28,7 @@ public class MdStrategyObjectiveKey implements java.io.Serializable {
 		this.themeOid = themeOid;
 	}
 	
-	@EntityUK(name = "objective_code")
+	@EntityUK(name = "objectiveCode")
 	public String getObjectiveCode() {
 		return objectiveCode;
 	}

@@ -57,7 +57,14 @@
     WHERE 1=1
 	
 	<include refid="baseConditions" />
-		
+	
+	<if test="accountLike != null and accountLike != ''.toString() ">
+		AND ACCOUNT like #{accountLike,jdbcType=VARCHAR}
+	</if>	
+	<if test="displayNameLike != null and displayNameLike != ''.toString() ">
+		AND DISPLAY_NAME like #{displayNameLike,jdbcType=VARCHAR}
+	</if>	
+			
 	<include refid="org.qifu.core.mapper.DB1Config.sql2"/>
   </select>  
   

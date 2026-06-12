@@ -1630,6 +1630,10 @@ INSERT INTO `tb_sys_menu` VALUES
 ('7aa1208a-5fc2-11f1-afe9-33fb6c1b9ce7','CORE_PROG005D','00000000-0000-0000-0000-000000000000','Y','admin','2026-06-04 11:07:11',NULL,NULL),
 ('7aa2590b-5fc2-11f1-afe9-73b1551d818b','CORE_PROG005D0001Q','7aa1208a-5fc2-11f1-afe9-33fb6c1b9ce7','Y','admin','2026-06-04 11:07:11',NULL,NULL),
 ('7ea68636-c93a-4669-ac42-dafc3770d20d','CORE_PROG001D','00000000-0000-0000-0000-000000000000','Y','admin','2017-04-20 11:24:53',NULL,NULL),
+('91f90746-6558-11f1-8ea0-31612e6b0ce2','MD_PROG001D','00000000-0000-0000-0000-000000000000','Y','admin','2026-06-11 13:44:10',NULL,NULL),
+('947ccbfe-6558-11f1-8ea0-db03aa0e50b5','MD_PROG001D0001Q','91f90746-6558-11f1-8ea0-31612e6b0ce2','Y','admin','2026-06-11 13:44:14',NULL,NULL),
+('947d412f-6558-11f1-8ea0-5d8cbc8c4b4c','MD_PROG001D0002Q','91f90746-6558-11f1-8ea0-31612e6b0ce2','Y','admin','2026-06-11 13:44:14',NULL,NULL),
+('947db660-6558-11f1-8ea0-f1e5fa666cce','MD_PROG001D0003Q','91f90746-6558-11f1-8ea0-31612e6b0ce2','Y','admin','2026-06-11 13:44:14',NULL,NULL),
 ('9972c249-2985-49ac-9b8b-f6c25c65fd4e','CORE_PROG002D0003Q','79e1cf24-2522-4cdf-abcc-6455b47d545b','Y','admin','2017-05-10 14:20:12',NULL,NULL),
 ('c5349a26-6d6e-4d94-b817-82be6d14d5ed','CORE_PROG002D0001Q','79e1cf24-2522-4cdf-abcc-6455b47d545b','Y','admin','2017-05-10 14:20:12',NULL,NULL),
 ('f0242c17-4487-11ee-b50d-a593cf4a05bf','CORE_PROG001D0001Q','7ea68636-c93a-4669-ac42-dafc3770d20d','Y','admin','2023-08-27 11:15:13',NULL,NULL),
@@ -1714,12 +1718,16 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `tb_sys_prog` WRITE;
 /*!40000 ALTER TABLE `tb_sys_prog` DISABLE KEYS */;
 INSERT INTO `tb_sys_prog` VALUES
+('078a5671-6558-11f1-8ea0-91de96b88a3d','MD_PROG001D0001E','AA01 - 組織單位 (編輯)','#/md_prog001d0001/edit','Y','N',0,0,'CORE','ITEM','SYSTEM','house','admin','2026-06-11 13:40:18','admin','2026-06-11 13:42:11'),
+('132d76b3-6558-11f1-8ea0-ad52a9ef6410','MD_PROG001D0002Q','AA02 - 成員維護','#/md_prog001d0002','N','N',0,0,'CORE','ITEM','SYSTEM','person','admin','2026-06-11 13:40:37',NULL,NULL),
 ('186b1fb1-749f-4b6f-97d1-6b7fb8115345','CORE_PROG001D0004E','ZA04 - Freemarker樣板 (Edit)','#/prog001d0004/edit','Y','N',0,0,'CORE','ITEM','TEMPLATE','file-text','admin','2017-05-12 10:40:10','admin','2023-08-16 21:48:56'),
 ('1b11c7eb-6133-48fb-87f0-dfbd098ce914','CORE_PROG001D0001E','ZA01 - System site (Edit)','#/prog001d0001/edit','Y','N',0,0,'CORE','ITEM','COMPUTER','globe2','admin','2014-10-02 00:00:00','admin','2021-01-20 08:20:58'),
 ('1e393fe3-8bbc-482c-aa23-bbb22a1dbafb','CORE_PROG001D0005A','ZA05 - JasperReport (Create)','#/prog001d0005/create','N','N',0,0,'CORE','ITEM','APPLICATION_PDF','file-pdf','admin','2017-05-18 09:55:46','admin','2023-08-24 20:20:27'),
 ('22560527-90fb-4e5a-a89b-353d2aa1d433','CORE_PROG001D0005E','ZA05 - JasperReport (Edit)','#/prog001d0005/edit','Y','N',0,0,'CORE','ITEM','APPLICATION_PDF','file-pdf','admin','2017-05-18 09:56:27','admin','2023-08-24 20:20:40'),
+('25aabd77-6558-11f1-8ea0-49b47cb32597','MD_PROG001D0002E','AA02 - 成員維護 (編輯)','#/md_prog001d0002/edit','Y','N',0,0,'CORE','ITEM','SYSTEM','person','admin','2026-06-11 13:41:08','admin','2026-06-11 13:42:20'),
 ('3630ee1b-6169-452f-821f-5c015dfb84d5','CORE_PROG001D','ZA. Config','/','N','N',0,0,'CORE','FOLDER','PROPERTIES','gear-fill','admin','2014-10-02 00:00:00','admin','2023-08-15 19:16:31'),
 ('3862b6d0-0551-45d8-8dd1-cd988a5e8e50','CORE_PROG004D0002Q','ZD02 - Token log','#/prog004d0002','N','N',0,0,'CORE','ITEM','PROPERTIES','clipboard-check','admin','2017-06-03 14:22:29','admin','2023-08-29 10:23:05'),
+('3ca500d9-6558-11f1-8ea0-61333ff04564','MD_PROG001D0003Q','AA03 - 組織架構','#/md_prog001d0003','N','N',0,0,'CORE','ITEM','SYSTEM','house-fill','admin','2026-06-11 13:41:47',NULL,NULL),
 ('41fa29d8-3a53-4fbd-b2b1-cdbfd0729767','CORE_PROG001D0004Q','ZA04 - Freemarker樣板','#/prog001d0004','N','N',0,0,'CORE','ITEM','TEMPLATE','file-text','admin','2017-05-12 10:36:41','admin','2023-08-16 21:48:29'),
 ('5e082c7c-1730-4176-89c6-93e235707deb','CORE_PROG002D0001A','ZB01 - Role (Create)','#/prog002d0001/create','N','N',0,0,'CORE','ITEM','PEOPLE','person-square','admin','2017-05-09 11:15:50','admin','2023-08-27 16:46:40'),
 ('61aea7ff-7a42-4a92-9a0b-4a0dfe60858b','CORE_PROG004D0001Q','ZD01 - Event log','#/prog004d0001','N','N',0,0,'CORE','ITEM','PROPERTIES','clipboard-pulse','admin','2017-06-03 14:22:07','admin','2023-08-29 10:17:34'),
@@ -1728,6 +1736,7 @@ INSERT INTO `tb_sys_prog` VALUES
 ('72e6e0d1-1818-47d3-99f9-5134fb211b79','CORE_PROG002D','ZB. Role authority','/','N','N',0,0,'CORE','FOLDER','SHARED','person-square','admin','2017-05-08 21:27:52','admin','2023-08-27 16:47:03'),
 ('7746f746-961f-44c2-9b66-fa43c0f49838','CORE_PROG001D0004S01Q','ZA04 - Freemarker樣板 (Parameter)','#/prog001d0004/setparam','Y','N',0,0,'CORE','ITEM','TEMPLATE','file-text','admin','2017-05-12 10:42:04','admin','2023-08-16 21:49:12'),
 ('7d9ddc45-3eab-4f61-8c0a-d5505c0cc748','CORE_PROG001D0004A','ZA04 - Freemarker樣板 (Create)','#/prog001d0004/create','N','N',0,0,'CORE','ITEM','TEMPLATE','file-text','admin','2017-05-12 10:39:20','admin','2023-08-16 21:48:49'),
+('7f2dc78f-6558-11f1-8ea0-97f9dc9b5779','MD_PROG001D0002A','AA02 - 成員維護 (建立)','#/md_prog001d0002/create','N','N',0,0,'CORE','ITEM','SYSTEM','person','admin','2026-06-11 13:43:39',NULL,NULL),
 ('8499957e-6da9-4160-c2ec-dfb7dbc202fe','CORE_PROG001D0002E','ZA02 - Program (Edit)','#/prog001d0002/edit','Y','N',0,0,'CORE','ITEM','G_APP_INSTALL','filetype-html','admin','2014-10-02 00:00:00','admin','2023-08-15 19:19:17'),
 ('87f9ae6a-1dd2-4585-b31d-9533bdda8fd5','CORE_PROG005D0001Q','ZE01 - MQTT Dashboard','#/prog005d0001','N','N',0,0,'CORE','ITEM','PROPERTIES','speedometer2','admin','2026-06-04 11:00:54',NULL,NULL),
 ('ac5bcfd0-4abd-11e4-916c-0800200c9a66','CORE_PROG001D0001A','ZA01 - System site (Create)','#/prog001d0001/create','N','N',0,0,'CORE','ITEM','COMPUTER','globe2','admin','2014-10-02 00:00:00','admin','2021-01-20 08:20:45'),
@@ -1736,12 +1745,15 @@ INSERT INTO `tb_sys_prog` VALUES
 ('b978f706-4c5f-40f8-83b1-395492f141d4','CORE_PROG002D0001Q','ZB01 - Role','#/prog002d0001','N','N',0,0,'CORE','ITEM','PEOPLE','person-square','admin','2017-05-08 21:32:50','admin','2023-08-27 16:46:27'),
 ('bfeb7935-334f-4a94-9666-f77433793a8a','CORE_PROG005D','ZE. MQTT','/','N','N',0,0,'CORE','FOLDER','PROPERTIES','gear-fill','admin','2026-06-04 11:00:54',NULL,NULL),
 ('c96ebde8-7044-4b05-a155-68a0c2605619','CORE_PROG002D0003Q','ZB03 - Role for menu','#/prog002d0003','N','N',0,0,'CORE','ITEM','FOLDER','menu-app-fill','admin','2017-05-08 21:37:01','admin','2023-08-28 19:54:34'),
+('da69253b-6557-11f1-8ea0-3792e4bd3499','MD_PROG001D','AA. 基本資料','#','N','N',0,0,'CORE','FOLDER','SYSTEM','folder','admin','2026-06-11 13:39:02',NULL,NULL),
 ('da7d969a-5efb-4e84-9eab-4fdae236f28c','CORE_PROG002D0002Q','ZB02 - User role','#/prog002d0002','N','N',0,0,'CORE','ITEM','PERSON','person-check','admin','2017-05-08 21:34:39','admin','2023-08-28 19:54:25'),
 ('dda67b1d-e3a2-4534-835a-c62d9e8421f3','CORE_PROG001D0005S01Q','ZA05 - JasperReport (Parameter)','#/prog001d0005/setparam','Y','N',0,0,'CORE','ITEM','APPLICATION_PDF','file-pdf','admin','2017-05-18 09:57:26','admin','2023-08-24 20:21:02'),
 ('e32b9329-bb38-46d7-8552-2307bac77724','CORE_PROG001D0002A','ZA02 - Program (Create)','#/prog001d0002/create','N','N',0,0,'CORE','ITEM','G_APP_INSTALL','filetype-html','admin','2014-10-02 00:00:00','admin','2023-08-15 19:19:42'),
 ('e86dbb1b-6870-4827-8039-72f5e15fa4f2','CORE_PROG004D','ZD. Log','/','N','N',0,0,'CORE','FOLDER','PROPERTIES','clipboard-check-fill','admin','2017-06-03 14:21:03','admin','2023-08-29 10:14:04'),
 ('eb6e199f-c853-4fbf-acf3-0c9c77ba9953','CORE_PROG001D0002Q','ZA02 - Program','#/prog001d0002','N','N',0,0,'CORE','ITEM','G_APP_INSTALL','filetype-html','admin','2014-10-02 00:00:00','admin','2023-08-15 19:19:05'),
-('eb786ffd-c7d1-4631-aed2-4d9d7368eb13','CORE_PROG001D0005Q','ZA05 - JasperReport','#/prog001d0005','N','N',0,0,'CORE','ITEM','APPLICATION_PDF','file-pdf','admin','2017-05-18 09:54:35','admin','2023-08-24 20:20:16');
+('eb786ffd-c7d1-4631-aed2-4d9d7368eb13','CORE_PROG001D0005Q','ZA05 - JasperReport','#/prog001d0005','N','N',0,0,'CORE','ITEM','APPLICATION_PDF','file-pdf','admin','2017-05-18 09:54:35','admin','2023-08-24 20:20:16'),
+('eb8ecb3d-6557-11f1-8ea0-a313029ec7da','MD_PROG001D0001Q','AA01 - 組織單位','#/md_prog001d0001','N','N',0,0,'CORE','ITEM','SYSTEM','house','admin','2026-06-11 13:39:31',NULL,NULL),
+('f9ed13df-6557-11f1-8ea0-ebb67d5fab5b','MD_PROG001D0001A','AA01 - 組織單位 (建立)','#/md_prog001d0001/create','N','N',0,0,'CORE','ITEM','SYSTEM','house','admin','2026-06-11 13:39:55',NULL,NULL);
 /*!40000 ALTER TABLE `tb_sys_prog` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -2002,4 +2014,4 @@ SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2026-06-11  9:00:55
+-- Dump completed on 2026-06-11 13:47:26

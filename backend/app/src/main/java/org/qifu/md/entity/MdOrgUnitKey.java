@@ -16,7 +16,7 @@ public class MdOrgUnitKey implements java.io.Serializable {
 		this.oid = oid;
 	}
 
-	@EntityUK(name = "org_code")
+	@EntityUK(name = "orgCode")
 	public String getOrgCode() {
 		return orgCode;
 	}

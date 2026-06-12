@@ -23,7 +23,7 @@ public class MdKpiScoreSnapshotKey implements java.io.Serializable {
 		this.oid = oid;
 	}
 	
-	@EntityUK(name = "kpi_oid")
+	@EntityUK(name = "kpiOid")
 	public String getKpiOid() {
 		return kpiOid;
 	}
@@ -32,7 +32,7 @@ public class MdKpiScoreSnapshotKey implements java.io.Serializable {
 		this.kpiOid = kpiOid;
 	}
 	
-	@EntityUK(name = "period_type")
+	@EntityUK(name = "periodType")
 	public String getPeriodType() {
 		return periodType;
 	}
@@ -41,7 +41,7 @@ public class MdKpiScoreSnapshotKey implements java.io.Serializable {
 		this.periodType = periodType;
 	}
 	
-	@EntityUK(name = "period_key")
+	@EntityUK(name = "periodKey")
 	public String getPeriodKey() {
 		return periodKey;
 	}
@@ -50,7 +50,7 @@ public class MdKpiScoreSnapshotKey implements java.io.Serializable {
 		this.periodKey = periodKey;
 	}
 	
-	@EntityUK(name = "data_for_type")
+	@EntityUK(name = "dataForType")
 	public String getDataForType() {
 		return dataForType;
 	}
@@ -68,7 +68,7 @@ public class MdKpiScoreSnapshotKey implements java.io.Serializable {
 		this.account = account;
 	}
 	
-	@EntityUK(name = "org_oid")
+	@EntityUK(name = "orgOid")
 	public String getOrgOid() {
 		return orgOid;
 	}

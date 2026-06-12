@@ -19,7 +19,7 @@ public class MdOkrKeyResultKey implements java.io.Serializable {
 		this.oid = oid;
 	}
 	
-	@EntityUK(name = "objective_oid")
+	@EntityUK(name = "objectiveOid")
 	public String getObjectiveOid() {
 		return objectiveOid;
 	}
@@ -28,7 +28,7 @@ public class MdOkrKeyResultKey implements java.io.Serializable {
 		this.objectiveOid = objectiveOid;
 	}
 	
-	@EntityUK(name = "kr_code")
+	@EntityUK(name = "krCode")
 	public String getKrCode() {
 		return krCode;
 	}

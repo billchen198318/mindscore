@@ -20,7 +20,7 @@ public class MdStrategyObjectiveLinkKey implements java.io.Serializable {
 		this.oid = oid;
 	}
 	
-	@EntityUK(name = "strategy_objective_oid")
+	@EntityUK(name = "strategyObjectiveOid")
 	public String getStrategyObjectiveOid() {
 		return strategyObjectiveOid;
 	}
@@ -29,7 +29,7 @@ public class MdStrategyObjectiveLinkKey implements java.io.Serializable {
 		this.strategyObjectiveOid = strategyObjectiveOid;
 	}
 	
-	@EntityUK(name = "link_type")
+	@EntityUK(name = "linkType")
 	public String getLinkType() {
 		return linkType;
 	}
@@ -38,7 +38,7 @@ public class MdStrategyObjectiveLinkKey implements java.io.Serializable {
 		this.linkType = linkType;
 	}
 	
-	@EntityUK(name = "link_oid")
+	@EntityUK(name = "linkOid")
 	public String getLinkOid() {
 		return linkOid;
 	}
