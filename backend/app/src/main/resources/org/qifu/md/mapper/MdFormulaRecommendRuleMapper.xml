@@ -34,8 +34,32 @@
 	<if test="ruleCode != null and ruleCode != ''.toString() ">
 		AND RULE_CODE = #{ruleCode,jdbcType=VARCHAR}
 	</if>
+	<if test="ruleCodeLike != null and ruleCodeLike != ''.toString() ">
+		AND RULE_CODE like #{ruleCodeLike,jdbcType=VARCHAR}
+	</if>
 	<if test="ruleName != null and ruleName != ''.toString() ">
 		AND RULE_NAME = #{ruleName,jdbcType=VARCHAR}
+	</if>
+	<if test="ruleNameLike != null and ruleNameLike != ''.toString() ">
+		AND RULE_NAME like #{ruleNameLike,jdbcType=VARCHAR}
+	</if>
+	<if test="managementMode != null and managementMode != ''.toString() ">
+		AND MANAGEMENT_MODE = #{managementMode,jdbcType=VARCHAR}
+	</if>
+	<if test="compareMode != null and compareMode != ''.toString() ">
+		AND COMPARE_MODE = #{compareMode,jdbcType=VARCHAR}
+	</if>
+	<if test="periodType != null and periodType != ''.toString() ">
+		AND PERIOD_TYPE = #{periodType,jdbcType=VARCHAR}
+	</if>
+	<if test="dataType != null and dataType != ''.toString() ">
+		AND DATA_TYPE = #{dataType,jdbcType=VARCHAR}
+	</if>
+	<if test="recommendedFormulaOid != null and recommendedFormulaOid != ''.toString() ">
+		AND RECOMMENDED_FORMULA_OID = #{recommendedFormulaOid,jdbcType=CHAR}
+	</if>
+	<if test="isDefault != null and isDefault != ''.toString() ">
+		AND IS_DEFAULT = #{isDefault,jdbcType=VARCHAR}
 	</if>
 	<if test="enabled != null and enabled != ''.toString() ">
 		AND ENABLED = #{enabled,jdbcType=VARCHAR}
