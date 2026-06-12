@@ -6,6 +6,7 @@ import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
 
 import Toolbar from '@/components/Toolbar.vue';
+import AggregationMethodInputPad from '../AggregationMethodInputPad.vue';
 import { PageConstants } from '../config';
 import {
     getAxiosInstance,
@@ -37,6 +38,50 @@ const formParam = ref({
 });
 
 const btnBack = () => router.back();
+
+const selectAggregationMethod = (method: any) => {
+    if (isBuiltin.value) {
+        return;
+    }
+    formParam.value.expression = method.expression;
+    if (!formParam.value.aggrName) {
+        formParam.value.aggrName = method.label + ' Aggregation';
+    }
+};
+
+const clearExpressionValue = () => {
+    if (isBuiltin.value) {
+        return;
+    }
+    formParam.value.expression = '';
+};
+
+const btnTestAggregation = async (scores: number[]) => {
+    checkFields.value = {};
+    showLoading();
+    try {
+        const axiosInstance = getAxiosInstance();
+        const response = await axiosInstance.post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/test', {
+            aggrCode : formParam.value.aggrCode,
+            aggrType : formParam.value.aggrType,
+            expression : formParam.value.expression,
+            scores : scores
+        });
+        hideLoading();
+        if (response.data) {
+            if (import.meta.env.VITE_SUCCESS_FLAG != response.data.success) {
+                toast.warning(escapeQifuHtmlMsg(response.data.message));
+                return;
+            }
+            toast.success(response.data.message);
+        } else {
+            toast.error('error, null');
+        }
+    } catch (e: any) {
+        hideLoading();
+        alert(e);
+    }
+};
 
 const loadData = async () => {
     showLoading();
@@ -140,6 +185,14 @@ onMounted(() => {
       <div class="col-md-12">
         <label for="expression" class="form-label">彙總公式或腳本 (Expression)</label>
         <textarea class="form-control" id="expression" rows="5" v-model="formParam.expression" :readonly="isBuiltin"></textarea>
+      </div>
+      <div class="col-md-12">
+        <AggregationMethodInputPad
+            :disabled="isBuiltin"
+            @select="selectAggregationMethod"
+            @clear="clearExpressionValue"
+            @test="btnTestAggregation"
+        />
       </div>
 
       <div class="col-md-12">

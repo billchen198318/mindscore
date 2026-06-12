@@ -77,6 +77,20 @@ public class MdPROG002D0002Controller extends CoreApiSupport {
         return ResponseEntity.ok().body(result);
     }
 
+    @ControllerMethodAuthority(programId = "MD_PROG002D0002Q", check = true)
+    @Operation(summary = "MD_PROG002D0002 - supportedMethods", description = "Aggregation Method supported method list")
+    @PostMapping(value = "/supportedMethods", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<DefaultControllerJsonResultObj<List<AggregationMethodUtils.SupportedMethod>>> supportedMethods() {
+        DefaultControllerJsonResultObj<List<AggregationMethodUtils.SupportedMethod>> result = this.initDefaultJsonResult();
+        try {
+            result.setValue(AggregationMethodUtils.getSupportedMethods());
+            result.setSuccess(YesNoKeyProvide.YES);
+        } catch (Exception e) {
+            this.exceptionResult(result, e);
+        }
+        return ResponseEntity.ok().body(result);
+    }
+
     @ControllerMethodAuthority(programId = "MD_PROG002D0002C", check = true)
     @Operation(summary = "MD_PROG002D0002 - save", description = "Aggregation Method create")
     @PostMapping(value = "/save", produces = {MediaType.APPLICATION_JSON_VALUE})

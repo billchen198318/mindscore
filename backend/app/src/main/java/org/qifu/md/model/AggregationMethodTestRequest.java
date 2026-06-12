@@ -7,6 +7,8 @@ public class AggregationMethodTestRequest implements java.io.Serializable {
     private static final long serialVersionUID = 1L;
 
     private String aggrType;
+    private String aggrCode;
+    private String methodCode;
     private String expression;
     private List<BigDecimal> scores;
 
@@ -16,6 +18,22 @@ public class AggregationMethodTestRequest implements java.io.Serializable {
 
     public void setAggrType(String aggrType) {
         this.aggrType = aggrType;
+    }
+
+    public String getAggrCode() {
+        return aggrCode;
+    }
+
+    public void setAggrCode(String aggrCode) {
+        this.aggrCode = aggrCode;
+    }
+
+    public String getMethodCode() {
+        return methodCode;
+    }
+
+    public void setMethodCode(String methodCode) {
+        this.methodCode = methodCode;
     }
 
     public String getExpression() {
