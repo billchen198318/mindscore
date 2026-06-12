@@ -34,8 +34,10 @@ const orgList = ref<any[]>([]);
 const memberList = ref<any[]>([]);
 const orgOwnerList = ref<any[]>([]);
 const accountOwnerList = ref<any[]>([]);
-const selectedOrgOid = ref('');
-const selectedAccount = ref('');
+const pleaseSelectId = import.meta.env.VITE_PLEASE_SELECT_ID;
+const pleaseSelectLabel = import.meta.env.VITE_PLEASE_SELECT_LABEL;
+const selectedOrgOid = ref(pleaseSelectId);
+const selectedAccount = ref(pleaseSelectId);
 const { showLoading, hideLoading } = useSwalLoading();
 
 const defaultForm = () => ({
@@ -53,10 +55,10 @@ const defaultForm = () => ({
     quasiRange : 0,
     scoreCapMode : 'CAP_100',
     scoringPolicy : '',
-    formulaOid : '',
-    recommendedFormulaOid : '',
+    formulaOid : pleaseSelectId,
+    recommendedFormulaOid : pleaseSelectId,
     formulaSelectionMode : 'AUTO',
-    aggrMethodOid : '',
+    aggrMethodOid : pleaseSelectId,
     formulaVersionNo : 1,
     weightValue : 0,
     enabled : 'Y'
@@ -148,11 +150,11 @@ const loadMemberList = async () => {
 };
 
 const addOrgOwner = () => {
-    if (!selectedOrgOid.value || orgOwnerList.value.some((item: any) => item.orgOid === selectedOrgOid.value)) {
+    if (selectedOrgOid.value === pleaseSelectId || orgOwnerList.value.some((item: any) => item.orgOid === selectedOrgOid.value)) {
         return;
     }
     orgOwnerList.value.push({ ownerType: 'ORG', orgOid: selectedOrgOid.value, ownerRole: 'OWNER' });
-    selectedOrgOid.value = '';
+    selectedOrgOid.value = pleaseSelectId;
 };
 
 const removeOrgOwner = (idx: number) => {
@@ -160,11 +162,11 @@ const removeOrgOwner = (idx: number) => {
 };
 
 const addAccountOwner = () => {
-    if (!selectedAccount.value || accountOwnerList.value.some((item: any) => item.account === selectedAccount.value)) {
+    if (selectedAccount.value === pleaseSelectId || accountOwnerList.value.some((item: any) => item.account === selectedAccount.value)) {
         return;
     }
     accountOwnerList.value.push({ ownerType: 'ACCOUNT', account: selectedAccount.value, ownerRole: 'OWNER' });
-    selectedAccount.value = '';
+    selectedAccount.value = pleaseSelectId;
 };
 
 const removeAccountOwner = (idx: number) => {
@@ -174,7 +176,7 @@ const removeAccountOwner = (idx: number) => {
 const normalizePayload = () => ({
     kpi: {
         ...formParam.value,
-        recommendedFormulaOid : formParam.value.recommendedFormulaOid || null,
+        recommendedFormulaOid : formParam.value.recommendedFormulaOid === pleaseSelectId ? null : formParam.value.recommendedFormulaOid,
         scoringPolicy : formParam.value.scoringPolicy || null,
         description : formParam.value.description || null,
         unitName : formParam.value.unitName || null
@@ -190,8 +192,8 @@ const btnClear = () => {
     formParam.value = defaultForm();
     orgOwnerList.value = [];
     accountOwnerList.value = [];
-    selectedOrgOid.value = '';
-    selectedAccount.value = '';
+    selectedOrgOid.value = pleaseSelectId;
+    selectedAccount.value = pleaseSelectId;
 };
 
 const btnSave = async () => {
@@ -339,7 +341,7 @@ onMounted(async () => {
       <div class="col-md-6">
         <label for="formulaOid" class="form-label">計算公式</label>
         <select :class="['form-select', checkInvalid('formulaOid', checkFields) ? 'is-invalid' : '']" id="formulaOid" v-model="formParam.formulaOid">
-          <option value="">請選擇</option>
+          <option :value="pleaseSelectId">{{ pleaseSelectLabel }}</option>
           <option v-for="item in formulaList" :key="item.oid" :value="item.oid">{{ item.formulaCode }} - {{ item.formulaName }}</option>
         </select>
         <div v-if="checkInvalid('formulaOid', checkFields)" class="invalid-feedback">{{ invalidFeedback('formulaOid', checkFields) }}</div>
@@ -347,14 +349,14 @@ onMounted(async () => {
       <div class="col-md-6">
         <label for="recommendedFormulaOid" class="form-label">推薦公式</label>
         <select class="form-select" id="recommendedFormulaOid" v-model="formParam.recommendedFormulaOid">
-          <option value="">不指定</option>
+          <option :value="pleaseSelectId">{{ pleaseSelectLabel }}</option>
           <option v-for="item in formulaList" :key="item.oid" :value="item.oid">{{ item.formulaCode }} - {{ item.formulaName }}</option>
         </select>
       </div>
       <div class="col-md-6">
         <label for="aggrMethodOid" class="form-label">彙總方法</label>
         <select :class="['form-select', checkInvalid('aggrMethodOid', checkFields) ? 'is-invalid' : '']" id="aggrMethodOid" v-model="formParam.aggrMethodOid">
-          <option value="">請選擇</option>
+          <option :value="pleaseSelectId">{{ pleaseSelectLabel }}</option>
           <option v-for="item in aggrList" :key="item.oid" :value="item.oid">{{ item.aggrCode }} - {{ item.aggrName }}</option>
         </select>
         <div v-if="checkInvalid('aggrMethodOid', checkFields)" class="invalid-feedback">{{ invalidFeedback('aggrMethodOid', checkFields) }}</div>
@@ -368,7 +370,7 @@ onMounted(async () => {
         <label for="orgOwner" class="form-label">負責單位</label>
         <div class="input-group">
           <select class="form-select" id="orgOwner" v-model="selectedOrgOid">
-            <option value="">請選擇</option>
+            <option :value="pleaseSelectId">{{ pleaseSelectLabel }}</option>
             <option v-for="item in orgList" :key="item.oid" :value="item.oid">{{ item.orgCode }} - {{ item.orgName }}</option>
           </select>
           <button type="button" class="btn btn-outline-primary" @click="addOrgOwner"><i class="bi bi-plus"></i></button>
@@ -384,7 +386,7 @@ onMounted(async () => {
         <label for="accountOwner" class="form-label">負責人</label>
         <div class="input-group">
           <select class="form-select" id="accountOwner" v-model="selectedAccount">
-            <option value="">請選擇</option>
+            <option :value="pleaseSelectId">{{ pleaseSelectLabel }}</option>
             <option v-for="item in memberList" :key="item.account" :value="item.account">{{ item.account }}<template v-if="item.displayName"> - {{ item.displayName }}</template></option>
           </select>
           <button type="button" class="btn btn-outline-primary" @click="addAccountOwner"><i class="bi bi-plus"></i></button>

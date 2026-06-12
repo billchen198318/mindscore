@@ -8,6 +8,7 @@ import org.qifu.base.model.CheckControllerFieldHandler;
 import org.qifu.base.model.ControllerMethodAuthority;
 import org.qifu.base.model.DefaultControllerJsonResultObj;
 import org.qifu.base.model.DefaultResult;
+import org.qifu.base.model.PleaseSelect;
 import org.qifu.base.model.QueryResult;
 import org.qifu.base.model.SearchBody;
 import org.qifu.core.util.CoreApiSupport;
@@ -189,18 +190,18 @@ public class MdPROG003D0001Controller extends CoreApiSupport {
         chk.testField("kpiCode", entity, "@org.apache.commons.lang3.StringUtils@isBlank(kpiCode)", "請輸入KPI代碼")
            .testField("kpiCode", entity, "!@org.qifu.util.SimpleUtils@checkBeTrueOfAZaz09Id(kpiCode)", "KPI代碼只允許輸入0-9,a-z,A-Z,-,_,.")
            .testField("kpiName", entity, "@org.apache.commons.lang3.StringUtils@isBlank(kpiName)", "請輸入KPI名稱")
-           .testField("dataType", entity, "@org.apache.commons.lang3.StringUtils@isBlank(dataType)", "請選擇資料型態")
-           .testField("periodType", entity, "@org.apache.commons.lang3.StringUtils@isBlank(periodType)", "請選擇週期")
-           .testField("managementMode", entity, "@org.apache.commons.lang3.StringUtils@isBlank(managementMode)", "請選擇管理模式")
-           .testField("compareMode", entity, "@org.apache.commons.lang3.StringUtils@isBlank(compareMode)", "請選擇比較模式")
-           .testField("scoreCapMode", entity, "@org.apache.commons.lang3.StringUtils@isBlank(scoreCapMode)", "請選擇分數封頂方式")
-           .testField("formulaOid", entity, "@org.apache.commons.lang3.StringUtils@isBlank(formulaOid)", "請選擇公式")
-           .testField("formulaSelectionMode", entity, "@org.apache.commons.lang3.StringUtils@isBlank(formulaSelectionMode)", "請選擇公式選取方式")
-           .testField("aggrMethodOid", entity, "@org.apache.commons.lang3.StringUtils@isBlank(aggrMethodOid)", "請選擇彙總方法")
+           .testField("dataType", PleaseSelect.noSelect(entity.getDataType()), "請選擇資料型態")
+           .testField("periodType", PleaseSelect.noSelect(entity.getPeriodType()), "請選擇週期")
+           .testField("managementMode", PleaseSelect.noSelect(entity.getManagementMode()), "請選擇管理模式")
+           .testField("compareMode", PleaseSelect.noSelect(entity.getCompareMode()), "請選擇比較模式")
+           .testField("scoreCapMode", PleaseSelect.noSelect(entity.getScoreCapMode()), "請選擇分數封頂方式")
+           .testField("formulaOid", PleaseSelect.noSelect(entity.getFormulaOid()), "請選擇公式")
+           .testField("formulaSelectionMode", PleaseSelect.noSelect(entity.getFormulaSelectionMode()), "請選擇公式選取方式")
+           .testField("aggrMethodOid", PleaseSelect.noSelect(entity.getAggrMethodOid()), "請選擇彙總方法")
            .testField("formulaVersionNo", entity, "formulaVersionNo == null || formulaVersionNo < 1", "公式版本需大於0")
            .testField("weightValue", entity, "weightValue == null", "請輸入權重")
            .testField("quasiRange", entity, "quasiRange == null", "請輸入準目標容忍範圍")
-           .testField("enabled", entity, "@org.apache.commons.lang3.StringUtils@isBlank(enabled)", "請選擇是否啟用")
+           .testField("enabled", PleaseSelect.noSelect(entity.getEnabled()), "請選擇是否啟用")
            .throwHtmlMessage();
     }
 }

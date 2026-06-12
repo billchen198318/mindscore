@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.qifu.base.exception.ServiceException;
 import org.qifu.base.message.BaseSystemMessage;
 import org.qifu.base.model.DefaultResult;
+import org.qifu.base.model.PleaseSelect;
 import org.qifu.base.model.ServiceMethodAuthority;
 import org.qifu.base.model.ServiceMethodType;
 import org.qifu.base.model.YesNo;
@@ -144,7 +145,7 @@ public class KpiMasterLogicServiceImpl implements IKpiMasterLogicService {
         normalized.setOwnerRole(StringUtils.defaultIfBlank(owner.getOwnerRole(), OWNER_ROLE_OWNER));
 
         if (OWNER_TYPE_ORG.equals(owner.getOwnerType())) {
-            if (StringUtils.isBlank(owner.getOrgOid())) {
+            if (PleaseSelect.noSelect(owner.getOrgOid())) {
                 return null;
             }
             normalized.setOwnerType(OWNER_TYPE_ORG);
@@ -152,7 +153,7 @@ public class KpiMasterLogicServiceImpl implements IKpiMasterLogicService {
             return normalized;
         }
         if (OWNER_TYPE_ACCOUNT.equals(owner.getOwnerType())) {
-            if (StringUtils.isBlank(owner.getAccount())) {
+            if (PleaseSelect.noSelect(owner.getAccount())) {
                 return null;
             }
             normalized.setOwnerType(OWNER_TYPE_ACCOUNT);
