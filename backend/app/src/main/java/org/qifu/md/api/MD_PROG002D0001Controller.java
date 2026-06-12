@@ -2,6 +2,7 @@ package org.qifu.md.api;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.qifu.base.exception.ControllerException;
 import org.qifu.base.exception.ServiceException;
 import org.qifu.base.model.CheckControllerFieldHandler;
@@ -109,6 +110,7 @@ public class MD_PROG002D0001Controller extends CoreApiSupport {
         DefaultControllerJsonResultObj<MdFormula> result = this.initDefaultJsonResult();
         try {
             this.handlerCheck(result, entity);
+            this.checkBuiltinReadonly(entity);
             DefaultResult<MdFormula> uResult = this.mdFormulaService.update(entity);
             this.setDefaultResponseJsonResult(uResult, result);
         } catch (ServiceException | ControllerException e) {
@@ -123,6 +125,7 @@ public class MD_PROG002D0001Controller extends CoreApiSupport {
     public ResponseEntity<DefaultControllerJsonResultObj<Boolean>> doDelete(@RequestBody MdFormula entity) {
         DefaultControllerJsonResultObj<Boolean> result = this.initDefaultJsonResult();
         try {
+            this.checkBuiltinReadonly(entity);
             DefaultResult<Boolean> delResult = this.mdFormulaService.delete(entity);
             this.setDefaultResponseJsonResult(delResult, result);
         } catch (ServiceException | ControllerException e) {
@@ -138,11 +141,20 @@ public class MD_PROG002D0001Controller extends CoreApiSupport {
            .testField("formulaName", entity, "@org.apache.commons.lang3.StringUtils@isBlank(formulaName)", "請輸入Formula名稱")
            .testField("formulaType", entity, "@org.apache.commons.lang3.StringUtils@isBlank(formulaType)", "請選擇Formula類型")
            .testField("scriptType", entity, "@org.apache.commons.lang3.StringUtils@isBlank(scriptType)", "請選擇Script類型")
+           .testField("scriptType", entity, "!@org.apache.commons.lang3.StringUtils@equals(scriptType, 'GROOVY')", "Script類型只允許GROOVY")
            .testField("returnType", entity, "@org.apache.commons.lang3.StringUtils@isBlank(returnType)", "請選擇回傳類型")
            .testField("versionNo", entity, "versionNo == null || versionNo < 1", "版本號需大於0")
            .testField("isSystem", entity, "@org.apache.commons.lang3.StringUtils@isBlank(isSystem)", "請選擇是否系統公式")
            .testField("isRecommendable", entity, "@org.apache.commons.lang3.StringUtils@isBlank(isRecommendable)", "請選擇是否可推薦")
            .testField("enabled", entity, "@org.apache.commons.lang3.StringUtils@isBlank(enabled)", "請選擇是否啟用")
            .throwHtmlMessage();
+    }
+
+    private void checkBuiltinReadonly(MdFormula entity) throws ServiceException, ControllerException {
+        DefaultResult<MdFormula> loadResult = this.mdFormulaService.selectByEntityPrimaryKey(entity);
+        MdFormula dbEntity = loadResult.getValue();
+        if (dbEntity != null && StringUtils.equals("BUILTIN", dbEntity.getFormulaType())) {
+            throw new ControllerException("BUILTIN公式為系統內建資料，不能由維護畫面修改或刪除。");
+        }
     }
 }

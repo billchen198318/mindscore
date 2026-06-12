@@ -27,6 +27,7 @@ const { showLoading, hideLoading, confirmFire } = useSwalLoading();
 const pageProgramId = ref(PageConstants.QueryId);
 const dsList = ref<any[]>([]);
 const qFieldShow = ref(true);
+const formulaTypeName = (formulaType: string) => formulaType === 'BUILTIN' ? '系統提供' : formulaType === 'CUSTOM' ? '使用者自訂' : formulaType;
 
 const tbRefresh = () => btnClear();
 const tbCreate = () => router.push(PageConstants.frontendNamespace + '/create');
@@ -115,7 +116,7 @@ const btnQuery = async () => {
                 toast.warning(response.data.message);
                 return;
             }
-            dsList.value = response.data.value;
+            dsList.value = response.data.value.map((item: any) => ({ ...item, formulaType: formulaTypeName(item.formulaType) }));
             setConfigTotal(queryPageStore.gridConfig, response.data.pageOf.countSize);
         } else {
             toast.error('error, null');
@@ -202,11 +203,10 @@ onMounted(() => {
         <div class="form-group form-floating">
           <select class="form-select" id="formulaType" v-model="queryPageStore.queryParam.formulaType">
             <option value="">全部</option>
-            <option value="BUILTIN">BUILTIN</option>
-            <option value="CUSTOM">CUSTOM</option>
-            <option value="SCRIPT">SCRIPT</option>
+            <option value="BUILTIN">系統提供</option>
+            <option value="CUSTOM">使用者自訂</option>
           </select>
-          <label for="formulaType">Formula類型</label>
+          <label for="formulaType">公式來源類型</label>
         </div>
       </div>
       <div class="col-md-3">

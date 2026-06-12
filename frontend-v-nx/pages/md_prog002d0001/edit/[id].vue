@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useSwalLoading } from '@/composables/useSwalLoading';
 import { toast } from 'vue3-toastify';
@@ -23,13 +23,15 @@ const route = useRoute();
 const pageProgramId = ref(PageConstants.EditId);
 const checkFields = ref<any>({});
 const { showLoading, hideLoading } = useSwalLoading();
+const isBuiltin = computed(() => formParam.value.formulaType === 'BUILTIN');
+const formulaTypeDisplay = computed(() => formParam.value.formulaType === 'BUILTIN' ? '系統提供' : '使用者自訂');
 
 const formParam = ref({
     oid : route.params.id as string,
     formulaCode : '',
     formulaName : '',
-    formulaType : 'BUILTIN',
-    scriptType : 'JAVA',
+    formulaType : 'CUSTOM',
+    scriptType : 'GROOVY',
     expression : '',
     returnType : 'DECIMAL',
     versionNo : 1,
@@ -44,6 +46,9 @@ const formParam = ref({
 const btnBack = () => router.back();
 
 const btnClear = () => {
+    if (isBuiltin.value) {
+        return;
+    }
     checkFields.value = {};
     formParam.value.formulaName = '';
     formParam.value.expression = '';
@@ -77,6 +82,10 @@ const loadData = async () => {
 };
 
 const btnUpdate = async () => {
+    if (isBuiltin.value) {
+        toast.warning('BUILTIN公式為系統內建資料，不能由維護畫面修改。');
+        return;
+    }
     checkFields.value = {};
     showLoading();
     try {
@@ -114,7 +123,7 @@ onMounted(() => {
             @refreshMethod="loadData"
             backFlag="Y"
             @backMethod="btnBack"
-            saveFlag="Y"
+            :saveFlag="isBuiltin ? 'N' : 'Y'"
             @saveMethod="btnUpdate"
         />
     </div>
@@ -129,37 +138,31 @@ onMounted(() => {
       </div>
       <div class="col-md-4">
         <label for="formulaName" class="form-label">Formula名稱</label>
-        <input type="text" :class="['form-control', checkInvalid('formulaName', checkFields) ? 'is-invalid' : '']" id="formulaName" v-model="formParam.formulaName">
+        <input type="text" :class="['form-control', checkInvalid('formulaName', checkFields) ? 'is-invalid' : '']" id="formulaName" v-model="formParam.formulaName" :readonly="isBuiltin">
         <div v-if="checkInvalid('formulaName', checkFields)" class="invalid-feedback">{{ invalidFeedback('formulaName', checkFields) }}</div>
       </div>
       <div class="col-md-4">
         <label for="versionNo" class="form-label">版本號</label>
-        <input type="number" min="1" :class="['form-control', checkInvalid('versionNo', checkFields) ? 'is-invalid' : '']" id="versionNo" v-model.number="formParam.versionNo">
+        <input type="number" min="1" :class="['form-control', checkInvalid('versionNo', checkFields) ? 'is-invalid' : '']" id="versionNo" v-model.number="formParam.versionNo" :readonly="isBuiltin">
         <div v-if="checkInvalid('versionNo', checkFields)" class="invalid-feedback">{{ invalidFeedback('versionNo', checkFields) }}</div>
       </div>
 
       <div class="col-md-3">
-        <label for="formulaType" class="form-label">Formula類型</label>
-        <select :class="['form-select', checkInvalid('formulaType', checkFields) ? 'is-invalid' : '']" id="formulaType" v-model="formParam.formulaType">
-          <option value="BUILTIN">BUILTIN</option>
-          <option value="CUSTOM">CUSTOM</option>
-          <option value="SCRIPT">SCRIPT</option>
-        </select>
+        <label for="formulaType" class="form-label">公式來源類型</label>
+        <input type="text" class="form-control" id="formulaType" :value="formulaTypeDisplay" readonly>
+        <div class="form-text">公式來源類型由建立來源決定，不能在維護畫面切換。</div>
         <div v-if="checkInvalid('formulaType', checkFields)" class="invalid-feedback">{{ invalidFeedback('formulaType', checkFields) }}</div>
       </div>
       <div class="col-md-3">
         <label for="scriptType" class="form-label">Script類型</label>
-        <select :class="['form-select', checkInvalid('scriptType', checkFields) ? 'is-invalid' : '']" id="scriptType" v-model="formParam.scriptType">
-          <option value="JAVA">JAVA</option>
+        <select :class="['form-select', checkInvalid('scriptType', checkFields) ? 'is-invalid' : '']" id="scriptType" v-model="formParam.scriptType" :disabled="isBuiltin">
           <option value="GROOVY">GROOVY</option>
-          <option value="JS">JS</option>
-          <option value="EXPR">EXPR</option>
         </select>
         <div v-if="checkInvalid('scriptType', checkFields)" class="invalid-feedback">{{ invalidFeedback('scriptType', checkFields) }}</div>
       </div>
       <div class="col-md-3">
         <label for="returnType" class="form-label">回傳類型</label>
-        <select :class="['form-select', checkInvalid('returnType', checkFields) ? 'is-invalid' : '']" id="returnType" v-model="formParam.returnType">
+        <select :class="['form-select', checkInvalid('returnType', checkFields) ? 'is-invalid' : '']" id="returnType" v-model="formParam.returnType" :disabled="isBuiltin">
           <option value="DECIMAL">DECIMAL</option>
           <option value="INTEGER">INTEGER</option>
           <option value="BOOLEAN">BOOLEAN</option>
@@ -169,7 +172,7 @@ onMounted(() => {
       </div>
       <div class="col-md-3">
         <label for="enabled" class="form-label">啟用</label>
-        <select :class="['form-select', checkInvalid('enabled', checkFields) ? 'is-invalid' : '']" id="enabled" v-model="formParam.enabled">
+        <select :class="['form-select', checkInvalid('enabled', checkFields) ? 'is-invalid' : '']" id="enabled" v-model="formParam.enabled" :disabled="isBuiltin">
           <option value="Y">是</option>
           <option value="N">否</option>
         </select>
@@ -178,7 +181,7 @@ onMounted(() => {
 
       <div class="col-md-3">
         <label for="isSystem" class="form-label">系統公式</label>
-        <select :class="['form-select', checkInvalid('isSystem', checkFields) ? 'is-invalid' : '']" id="isSystem" v-model="formParam.isSystem">
+        <select :class="['form-select', checkInvalid('isSystem', checkFields) ? 'is-invalid' : '']" id="isSystem" v-model="formParam.isSystem" :disabled="isBuiltin">
           <option value="Y">是</option>
           <option value="N">否</option>
         </select>
@@ -186,7 +189,7 @@ onMounted(() => {
       </div>
       <div class="col-md-3">
         <label for="isRecommendable" class="form-label">可推薦</label>
-        <select :class="['form-select', checkInvalid('isRecommendable', checkFields) ? 'is-invalid' : '']" id="isRecommendable" v-model="formParam.isRecommendable">
+        <select :class="['form-select', checkInvalid('isRecommendable', checkFields) ? 'is-invalid' : '']" id="isRecommendable" v-model="formParam.isRecommendable" :disabled="isBuiltin">
           <option value="Y">是</option>
           <option value="N">否</option>
         </select>
@@ -195,24 +198,24 @@ onMounted(() => {
 
       <div class="col-md-12">
         <label for="expression" class="form-label">Expression</label>
-        <textarea class="form-control" id="expression" rows="5" v-model="formParam.expression"></textarea>
+        <textarea class="form-control" id="expression" rows="5" v-model="formParam.expression" :readonly="isBuiltin"></textarea>
       </div>
       <div class="col-md-12">
         <label for="paramSchemaJson" class="form-label">Param Schema JSON</label>
-        <textarea class="form-control" id="paramSchemaJson" rows="4" v-model="formParam.paramSchemaJson"></textarea>
+        <textarea class="form-control" id="paramSchemaJson" rows="4" v-model="formParam.paramSchemaJson" :readonly="isBuiltin"></textarea>
       </div>
       <div class="col-md-12">
         <label for="exampleText" class="form-label">範例說明</label>
-        <textarea class="form-control" id="exampleText" rows="3" v-model="formParam.exampleText"></textarea>
+        <textarea class="form-control" id="exampleText" rows="3" v-model="formParam.exampleText" :readonly="isBuiltin"></textarea>
       </div>
       <div class="col-md-12">
         <label for="description" class="form-label">說明</label>
-        <textarea class="form-control" id="description" rows="3" v-model="formParam.description"></textarea>
+        <textarea class="form-control" id="description" rows="3" v-model="formParam.description" :readonly="isBuiltin"></textarea>
       </div>
     </div>
     <div class="mt-4 d-flex gap-2">
-      <button type="button" class="btn btn-primary" @click="btnUpdate"><i class="bi bi-save"></i> 儲存</button>
-      <button type="button" class="btn btn-outline-secondary" @click="btnClear"><i class="bi bi-eraser"></i> 清除</button>
+      <button type="button" class="btn btn-primary" @click="btnUpdate" :disabled="isBuiltin"><i class="bi bi-save"></i> 儲存</button>
+      <button type="button" class="btn btn-outline-secondary" @click="btnClear" :disabled="isBuiltin"><i class="bi bi-eraser"></i> 清除</button>
     </div>
   </div>
 </div>

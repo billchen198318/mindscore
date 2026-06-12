@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useSwalLoading } from '@/composables/useSwalLoading';
 import { toast } from 'vue3-toastify';
@@ -20,12 +20,13 @@ const router = useRouter();
 const pageProgramId = ref(PageConstants.CreateId);
 const checkFields = ref<any>({});
 const { showLoading, hideLoading } = useSwalLoading();
+const formulaTypeDisplay = computed(() => formParam.value.formulaType === 'BUILTIN' ? '系統提供' : '使用者自訂');
 
 const formParam = ref({
     formulaCode : '',
     formulaName : '',
-    formulaType : 'BUILTIN',
-    scriptType : 'JAVA',
+    formulaType : 'CUSTOM',
+    scriptType : 'GROOVY',
     expression : '',
     returnType : 'DECIMAL',
     versionNo : 1,
@@ -43,8 +44,8 @@ const btnClear = () => {
     checkFields.value = {};
     formParam.value.formulaCode = '';
     formParam.value.formulaName = '';
-    formParam.value.formulaType = 'BUILTIN';
-    formParam.value.scriptType = 'JAVA';
+    formParam.value.formulaType = 'CUSTOM';
+    formParam.value.scriptType = 'GROOVY';
     formParam.value.expression = '';
     formParam.value.returnType = 'DECIMAL';
     formParam.value.versionNo = 1;
@@ -117,21 +118,14 @@ const btnSave = async () => {
       </div>
 
       <div class="col-md-3">
-        <label for="formulaType" class="form-label">Formula類型</label>
-        <select :class="['form-select', checkInvalid('formulaType', checkFields) ? 'is-invalid' : '']" id="formulaType" v-model="formParam.formulaType">
-          <option value="BUILTIN">BUILTIN</option>
-          <option value="CUSTOM">CUSTOM</option>
-          <option value="SCRIPT">SCRIPT</option>
-        </select>
-        <div v-if="checkInvalid('formulaType', checkFields)" class="invalid-feedback">{{ invalidFeedback('formulaType', checkFields) }}</div>
+        <label for="formulaType" class="form-label">公式來源類型</label>
+        <input type="text" class="form-control" id="formulaType" :value="formulaTypeDisplay" readonly>
+        <div class="form-text">新增公式一律為 CUSTOM；BUILTIN 只能由系統資料建立。</div>
       </div>
       <div class="col-md-3">
         <label for="scriptType" class="form-label">Script類型</label>
         <select :class="['form-select', checkInvalid('scriptType', checkFields) ? 'is-invalid' : '']" id="scriptType" v-model="formParam.scriptType">
-          <option value="JAVA">JAVA</option>
           <option value="GROOVY">GROOVY</option>
-          <option value="JS">JS</option>
-          <option value="EXPR">EXPR</option>
         </select>
         <div v-if="checkInvalid('scriptType', checkFields)" class="invalid-feedback">{{ invalidFeedback('scriptType', checkFields) }}</div>
       </div>
