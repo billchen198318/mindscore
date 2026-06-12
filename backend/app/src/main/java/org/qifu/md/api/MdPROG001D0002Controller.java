@@ -28,14 +28,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @ResponseBody
 @RequestMapping("/api/MD_PROG001D0002")
-public class MD_PROG001D0002Controller extends CoreApiSupport {
+public class MdPROG001D0002Controller extends CoreApiSupport {
     private static final long serialVersionUID = 1L;
     
     private final IMdOrgMemberService<MdOrgMember, String> mdOrgMemberService;
 
     private final IMdOrgMemberLogicService mdOrgMemberLogicService;
 
-    public MD_PROG001D0002Controller(IMdOrgMemberService<MdOrgMember, String> mdOrgMemberService, IMdOrgMemberLogicService mdOrgMemberLogicService) {
+    public MdPROG001D0002Controller(IMdOrgMemberService<MdOrgMember, String> mdOrgMemberService, IMdOrgMemberLogicService mdOrgMemberLogicService) {
         super();
         this.mdOrgMemberService = mdOrgMemberService;
         this.mdOrgMemberLogicService = mdOrgMemberLogicService;

@@ -32,12 +32,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @ResponseBody
 @RequestMapping("/api/MD_PROG002D0002")
-public class MD_PROG002D0002Controller extends CoreApiSupport {
+public class MdPROG002D0002Controller extends CoreApiSupport {
     private static final long serialVersionUID = 1L;
 
     private final IMdAggregationMethodService<MdAggregationMethod, String> mdAggregationMethodService;
 
-    public MD_PROG002D0002Controller(IMdAggregationMethodService<MdAggregationMethod, String> mdAggregationMethodService) {
+    public MdPROG002D0002Controller(IMdAggregationMethodService<MdAggregationMethod, String> mdAggregationMethodService) {
         super();
         this.mdAggregationMethodService = mdAggregationMethodService;
     }

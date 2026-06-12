@@ -32,12 +32,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @ResponseBody
 @RequestMapping("/api/MD_PROG002D0001")
-public class MD_PROG002D0001Controller extends CoreApiSupport {
+public class MdPROG002D0001Controller extends CoreApiSupport {
     private static final long serialVersionUID = 1L;
 
     private final IMdFormulaService<MdFormula, String> mdFormulaService;
 
-    public MD_PROG002D0001Controller(IMdFormulaService<MdFormula, String> mdFormulaService) {
+    public MdPROG002D0001Controller(IMdFormulaService<MdFormula, String> mdFormulaService) {
         super();
         this.mdFormulaService = mdFormulaService;
     }
