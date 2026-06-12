@@ -30,6 +30,12 @@ const pageProgramId = ref(PageConstants.CreateId);
 const checkFields = ref<any>({});
 const formulaList = ref<any[]>([]);
 const aggrList = ref<any[]>([]);
+const orgList = ref<any[]>([]);
+const memberList = ref<any[]>([]);
+const orgOwnerList = ref<any[]>([]);
+const accountOwnerList = ref<any[]>([]);
+const selectedOrgOid = ref('');
+const selectedAccount = ref('');
 const { showLoading, hideLoading } = useSwalLoading();
 
 const defaultForm = () => ({
@@ -59,6 +65,16 @@ const defaultForm = () => ({
 const formParam = ref<any>(defaultForm());
 
 const btnBack = () => router.back();
+
+const orgName = (orgOid: string) => {
+    const item = orgList.value.find((org: any) => org.oid === orgOid);
+    return item ? item.orgCode + ' - ' + item.orgName : orgOid;
+};
+
+const accountName = (account: string) => {
+    const item = memberList.value.find((member: any) => member.account === account);
+    return item ? item.account + (item.displayName ? ' - ' + item.displayName : '') : account;
+};
 
 const loadFormulaList = async () => {
     try {
@@ -92,17 +108,90 @@ const loadAggrList = async () => {
     }
 };
 
+const loadOrgList = async () => {
+    try {
+        const axiosInstance = getAxiosInstance();
+        const response = await axiosInstance.post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/findOrgList', {});
+        if (response.data) {
+            if (import.meta.env.VITE_SUCCESS_FLAG != response.data.success) {
+                toast.warning(escapeQifuHtmlMsg(response.data.message));
+                return;
+            }
+            orgList.value = (response.data.value || []).filter((item: any) => item.enabled === 'Y');
+        }
+    } catch (e: any) {
+        toast.warning(e?.message || e);
+    }
+};
+
+const loadMemberList = async () => {
+    try {
+        const axiosInstance = getAxiosInstance();
+        const response = await axiosInstance.post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/findMemberList', {});
+        if (response.data) {
+            if (import.meta.env.VITE_SUCCESS_FLAG != response.data.success) {
+                toast.warning(escapeQifuHtmlMsg(response.data.message));
+                return;
+            }
+            const seen: Record<string, boolean> = {};
+            memberList.value = (response.data.value || []).filter((item: any) => {
+                if (item.enabled !== 'Y' || !item.account || seen[item.account]) {
+                    return false;
+                }
+                seen[item.account] = true;
+                return true;
+            });
+        }
+    } catch (e: any) {
+        toast.warning(e?.message || e);
+    }
+};
+
+const addOrgOwner = () => {
+    if (!selectedOrgOid.value || orgOwnerList.value.some((item: any) => item.orgOid === selectedOrgOid.value)) {
+        return;
+    }
+    orgOwnerList.value.push({ ownerType: 'ORG', orgOid: selectedOrgOid.value, ownerRole: 'OWNER' });
+    selectedOrgOid.value = '';
+};
+
+const removeOrgOwner = (idx: number) => {
+    orgOwnerList.value.splice(idx, 1);
+};
+
+const addAccountOwner = () => {
+    if (!selectedAccount.value || accountOwnerList.value.some((item: any) => item.account === selectedAccount.value)) {
+        return;
+    }
+    accountOwnerList.value.push({ ownerType: 'ACCOUNT', account: selectedAccount.value, ownerRole: 'OWNER' });
+    selectedAccount.value = '';
+};
+
+const removeAccountOwner = (idx: number) => {
+    accountOwnerList.value.splice(idx, 1);
+};
+
 const normalizePayload = () => ({
-    ...formParam.value,
-    recommendedFormulaOid : formParam.value.recommendedFormulaOid || null,
-    scoringPolicy : formParam.value.scoringPolicy || null,
-    description : formParam.value.description || null,
-    unitName : formParam.value.unitName || null
+    kpi: {
+        ...formParam.value,
+        recommendedFormulaOid : formParam.value.recommendedFormulaOid || null,
+        scoringPolicy : formParam.value.scoringPolicy || null,
+        description : formParam.value.description || null,
+        unitName : formParam.value.unitName || null
+    },
+    ownerList: [
+        ...orgOwnerList.value,
+        ...accountOwnerList.value
+    ]
 });
 
 const btnClear = () => {
     checkFields.value = {};
     formParam.value = defaultForm();
+    orgOwnerList.value = [];
+    accountOwnerList.value = [];
+    selectedOrgOid.value = '';
+    selectedAccount.value = '';
 };
 
 const btnSave = async () => {
@@ -130,7 +219,7 @@ const btnSave = async () => {
 };
 
 onMounted(async () => {
-    await Promise.all([loadFormulaList(), loadAggrList()]);
+    await Promise.all([loadFormulaList(), loadAggrList(), loadOrgList(), loadMemberList()]);
 });
 </script>
 
@@ -273,6 +362,39 @@ onMounted(async () => {
       <div class="col-md-6">
         <label for="scoringPolicy" class="form-label">計分政策</label>
         <input type="text" class="form-control" id="scoringPolicy" v-model="formParam.scoringPolicy">
+      </div>
+
+      <div class="col-md-6">
+        <label for="orgOwner" class="form-label">負責單位</label>
+        <div class="input-group">
+          <select class="form-select" id="orgOwner" v-model="selectedOrgOid">
+            <option value="">請選擇</option>
+            <option v-for="item in orgList" :key="item.oid" :value="item.oid">{{ item.orgCode }} - {{ item.orgName }}</option>
+          </select>
+          <button type="button" class="btn btn-outline-primary" @click="addOrgOwner"><i class="bi bi-plus"></i></button>
+        </div>
+        <div class="mt-2 d-flex flex-wrap gap-2">
+          <span v-for="(item, idx) in orgOwnerList" :key="item.orgOid" class="badge text-bg-secondary d-inline-flex align-items-center gap-2">
+            {{ orgName(item.orgOid) }}
+            <button type="button" class="btn-close btn-close-white" aria-label="Remove" @click="removeOrgOwner(idx)"></button>
+          </span>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <label for="accountOwner" class="form-label">負責人</label>
+        <div class="input-group">
+          <select class="form-select" id="accountOwner" v-model="selectedAccount">
+            <option value="">請選擇</option>
+            <option v-for="item in memberList" :key="item.account" :value="item.account">{{ item.account }}<template v-if="item.displayName"> - {{ item.displayName }}</template></option>
+          </select>
+          <button type="button" class="btn btn-outline-primary" @click="addAccountOwner"><i class="bi bi-plus"></i></button>
+        </div>
+        <div class="mt-2 d-flex flex-wrap gap-2">
+          <span v-for="(item, idx) in accountOwnerList" :key="item.account" class="badge text-bg-secondary d-inline-flex align-items-center gap-2">
+            {{ accountName(item.account) }}
+            <button type="button" class="btn-close btn-close-white" aria-label="Remove" @click="removeAccountOwner(idx)"></button>
+          </span>
+        </div>
       </div>
 
       <div class="col-md-12">

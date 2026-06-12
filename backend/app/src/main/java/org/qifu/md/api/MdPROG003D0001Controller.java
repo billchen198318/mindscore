@@ -12,7 +12,13 @@ import org.qifu.base.model.QueryResult;
 import org.qifu.base.model.SearchBody;
 import org.qifu.core.util.CoreApiSupport;
 import org.qifu.md.entity.MdKpi;
+import org.qifu.md.entity.MdOrgMember;
+import org.qifu.md.entity.MdOrgUnit;
+import org.qifu.md.logic.IKpiMasterLogicService;
+import org.qifu.md.model.KpiMasterRequest;
 import org.qifu.md.service.IMdKpiService;
+import org.qifu.md.service.IMdOrgMemberService;
+import org.qifu.md.service.IMdOrgUnitService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,10 +38,19 @@ public class MdPROG003D0001Controller extends CoreApiSupport {
     private static final long serialVersionUID = 1L;
 
     private final IMdKpiService<MdKpi, String> mdKpiService;
+    private final IMdOrgUnitService<MdOrgUnit, String> mdOrgUnitService;
+    private final IMdOrgMemberService<MdOrgMember, String> mdOrgMemberService;
+    private final IKpiMasterLogicService kpiMasterLogicService;
 
-    public MdPROG003D0001Controller(IMdKpiService<MdKpi, String> mdKpiService) {
+    public MdPROG003D0001Controller(IMdKpiService<MdKpi, String> mdKpiService,
+            IMdOrgUnitService<MdOrgUnit, String> mdOrgUnitService,
+            IMdOrgMemberService<MdOrgMember, String> mdOrgMemberService,
+            IKpiMasterLogicService kpiMasterLogicService) {
         super();
         this.mdKpiService = mdKpiService;
+        this.mdOrgUnitService = mdOrgUnitService;
+        this.mdOrgMemberService = mdOrgMemberService;
+        this.kpiMasterLogicService = kpiMasterLogicService;
     }
 
     @ControllerMethodAuthority(programId = "MD_PROG003D0001Q", check = true)
@@ -77,14 +92,42 @@ public class MdPROG003D0001Controller extends CoreApiSupport {
         return ResponseEntity.ok().body(result);
     }
 
+    @ControllerMethodAuthority(programId = "MD_PROG003D0001Q", check = true)
+    @Operation(summary = "MD_PROG003D0001 - findOrgList", description = "KPI Master organization option list")
+    @PostMapping(value = "/findOrgList", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<DefaultControllerJsonResultObj<List<MdOrgUnit>>> findOrgList(@RequestBody MdOrgUnit entity) {
+        DefaultControllerJsonResultObj<List<MdOrgUnit>> result = this.initDefaultJsonResult();
+        try {
+            DefaultResult<List<MdOrgUnit>> listResult = this.mdOrgUnitService.selectList("ORG_CODE", "ASC");
+            this.setDefaultResponseJsonResult(listResult, result);
+        } catch (ServiceException | ControllerException e) {
+            this.exceptionResult(result, e);
+        }
+        return ResponseEntity.ok().body(result);
+    }
+
+    @ControllerMethodAuthority(programId = "MD_PROG003D0001Q", check = true)
+    @Operation(summary = "MD_PROG003D0001 - findMemberList", description = "KPI Master member option list")
+    @PostMapping(value = "/findMemberList", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<DefaultControllerJsonResultObj<List<MdOrgMember>>> findMemberList(@RequestBody MdOrgMember entity) {
+        DefaultControllerJsonResultObj<List<MdOrgMember>> result = this.initDefaultJsonResult();
+        try {
+            DefaultResult<List<MdOrgMember>> listResult = this.mdOrgMemberService.selectList("ACCOUNT", "ASC");
+            this.setDefaultResponseJsonResult(listResult, result);
+        } catch (ServiceException | ControllerException e) {
+            this.exceptionResult(result, e);
+        }
+        return ResponseEntity.ok().body(result);
+    }
+
     @ControllerMethodAuthority(programId = "MD_PROG003D0001A", check = true)
     @Operation(summary = "MD_PROG003D0001 - save", description = "KPI Master create")
     @PostMapping(value = "/save", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<DefaultControllerJsonResultObj<MdKpi>> doSave(@RequestBody MdKpi entity) {
-        DefaultControllerJsonResultObj<MdKpi> result = this.initDefaultJsonResult();
+    public ResponseEntity<DefaultControllerJsonResultObj<KpiMasterRequest>> doSave(@RequestBody KpiMasterRequest request) {
+        DefaultControllerJsonResultObj<KpiMasterRequest> result = this.initDefaultJsonResult();
         try {
-            this.handlerCheck(result, entity);
-            DefaultResult<MdKpi> cResult = this.mdKpiService.insert(entity);
+            this.handlerCheck(result, request);
+            DefaultResult<KpiMasterRequest> cResult = this.kpiMasterLogicService.create(request);
             this.setDefaultResponseJsonResult(cResult, result);
         } catch (ServiceException | ControllerException e) {
             this.exceptionResult(result, e);
@@ -95,10 +138,10 @@ public class MdPROG003D0001Controller extends CoreApiSupport {
     @ControllerMethodAuthority(programId = "MD_PROG003D0001E", check = true)
     @Operation(summary = "MD_PROG003D0001 - load", description = "KPI Master load")
     @PostMapping(value = "/load", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<DefaultControllerJsonResultObj<MdKpi>> doLoad(@RequestBody MdKpi entity) {
-        DefaultControllerJsonResultObj<MdKpi> result = this.initDefaultJsonResult();
+    public ResponseEntity<DefaultControllerJsonResultObj<KpiMasterRequest>> doLoad(@RequestBody MdKpi entity) {
+        DefaultControllerJsonResultObj<KpiMasterRequest> result = this.initDefaultJsonResult();
         try {
-            DefaultResult<MdKpi> lResult = this.mdKpiService.selectByEntityPrimaryKey(entity);
+            DefaultResult<KpiMasterRequest> lResult = this.kpiMasterLogicService.load(entity);
             this.setDefaultResponseJsonResult(lResult, result);
         } catch (ServiceException | ControllerException e) {
             this.exceptionResult(result, e);
@@ -109,11 +152,11 @@ public class MdPROG003D0001Controller extends CoreApiSupport {
     @ControllerMethodAuthority(programId = "MD_PROG003D0001E", check = true)
     @Operation(summary = "MD_PROG003D0001 - update", description = "KPI Master update")
     @PostMapping(value = "/update", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<DefaultControllerJsonResultObj<MdKpi>> doUpdate(@RequestBody MdKpi entity) {
-        DefaultControllerJsonResultObj<MdKpi> result = this.initDefaultJsonResult();
+    public ResponseEntity<DefaultControllerJsonResultObj<KpiMasterRequest>> doUpdate(@RequestBody KpiMasterRequest request) {
+        DefaultControllerJsonResultObj<KpiMasterRequest> result = this.initDefaultJsonResult();
         try {
-            this.handlerCheck(result, entity);
-            DefaultResult<MdKpi> uResult = this.mdKpiService.update(entity);
+            this.handlerCheck(result, request);
+            DefaultResult<KpiMasterRequest> uResult = this.kpiMasterLogicService.update(request);
             this.setDefaultResponseJsonResult(uResult, result);
         } catch (ServiceException | ControllerException e) {
             this.exceptionResult(result, e);
@@ -127,7 +170,7 @@ public class MdPROG003D0001Controller extends CoreApiSupport {
     public ResponseEntity<DefaultControllerJsonResultObj<Boolean>> doDelete(@RequestBody MdKpi entity) {
         DefaultControllerJsonResultObj<Boolean> result = this.initDefaultJsonResult();
         try {
-            DefaultResult<Boolean> delResult = this.mdKpiService.delete(entity);
+            DefaultResult<Boolean> delResult = this.kpiMasterLogicService.delete(entity);
             this.setDefaultResponseJsonResult(delResult, result);
         } catch (ServiceException | ControllerException e) {
             this.exceptionResult(result, e);
@@ -135,8 +178,14 @@ public class MdPROG003D0001Controller extends CoreApiSupport {
         return ResponseEntity.ok().body(result);
     }
 
-    private void handlerCheck(DefaultControllerJsonResultObj<MdKpi> result, MdKpi entity) throws ControllerException, ServiceException {
-        CheckControllerFieldHandler<MdKpi> chk = this.getCheckControllerFieldHandler(result);
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private void handlerCheck(DefaultControllerJsonResultObj<KpiMasterRequest> result, KpiMasterRequest request) throws ControllerException, ServiceException {
+        MdKpi entity = request == null ? null : request.getKpi();
+        if (entity == null) {
+            result.getCheckFields().put("kpiCode", "請輸入KPI資料");
+            throw new ControllerException("請輸入KPI資料");
+        }
+        CheckControllerFieldHandler<MdKpi> chk = CheckControllerFieldHandler.build((DefaultControllerJsonResultObj) result);
         chk.testField("kpiCode", entity, "@org.apache.commons.lang3.StringUtils@isBlank(kpiCode)", "請輸入KPI代碼")
            .testField("kpiCode", entity, "!@org.qifu.util.SimpleUtils@checkBeTrueOfAZaz09Id(kpiCode)", "KPI代碼只允許輸入0-9,a-z,A-Z,-,_,.")
            .testField("kpiName", entity, "@org.apache.commons.lang3.StringUtils@isBlank(kpiName)", "請輸入KPI名稱")
