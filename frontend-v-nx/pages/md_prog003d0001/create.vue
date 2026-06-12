@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useSwalLoading } from '@/composables/useSwalLoading';
 import { toast } from 'vue3-toastify';
@@ -34,6 +34,11 @@ const orgList = ref<any[]>([]);
 const memberList = ref<any[]>([]);
 const orgOwnerList = ref<any[]>([]);
 const accountOwnerList = ref<any[]>([]);
+const formulaPreview = ref<any>(null);
+const recommendedRule = ref<any>(null);
+const userChangedFormula = ref(false);
+const applyingRecommendation = ref(false);
+const suppressNextFormulaWatch = ref(false);
 const pleaseSelectId = import.meta.env.VITE_PLEASE_SELECT_ID;
 const pleaseSelectLabel = import.meta.env.VITE_PLEASE_SELECT_LABEL;
 const selectedOrgOid = ref(pleaseSelectId);
@@ -76,6 +81,59 @@ const orgName = (orgOid: string) => {
 const accountName = (account: string) => {
     const item = memberList.value.find((member: any) => member.account === account);
     return item ? item.account + (item.displayName ? ' - ' + item.displayName : '') : account;
+};
+
+const findFormula = (oid: string) => formulaList.value.find((item: any) => item.oid === oid) || null;
+
+const updateFormulaPreview = () => {
+    formulaPreview.value = findFormula(formParam.value.formulaOid);
+};
+
+const syncFormulaSelectionMode = () => {
+    if (formParam.value.formulaOid === pleaseSelectId || formParam.value.recommendedFormulaOid === pleaseSelectId) {
+        return;
+    }
+    formParam.value.formulaSelectionMode = formParam.value.formulaOid === formParam.value.recommendedFormulaOid ? 'AUTO' : 'MANUAL_OVERRIDE';
+};
+
+const recommendFormula = async () => {
+    if (!formParam.value.managementMode || !formParam.value.compareMode) {
+        return;
+    }
+    try {
+        const axiosInstance = getAxiosInstance();
+        const response = await axiosInstance.post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/recommendFormula', {
+            managementMode : formParam.value.managementMode,
+            compareMode : formParam.value.compareMode,
+            periodType : formParam.value.periodType,
+            dataType : formParam.value.dataType
+        });
+        if (!response.data) {
+            return;
+        }
+        if (import.meta.env.VITE_SUCCESS_FLAG != response.data.success) {
+            toast.warning(escapeQifuHtmlMsg(response.data.message));
+            return;
+        }
+        const value = response.data.value || {};
+        const oldRecommendedFormulaOid = formParam.value.recommendedFormulaOid;
+        const oldFormulaOid = formParam.value.formulaOid;
+        const recommendedFormulaOid = value.recommendedFormulaOid || pleaseSelectId;
+        recommendedRule.value = value.rule || null;
+        formParam.value.recommendedFormulaOid = recommendedFormulaOid;
+
+        if (!userChangedFormula.value || oldFormulaOid === pleaseSelectId || oldFormulaOid === oldRecommendedFormulaOid) {
+            applyingRecommendation.value = true;
+            suppressNextFormulaWatch.value = true;
+            formParam.value.formulaOid = recommendedFormulaOid;
+            userChangedFormula.value = false;
+            applyingRecommendation.value = false;
+        }
+        updateFormulaPreview();
+        syncFormulaSelectionMode();
+    } catch (e: any) {
+        toast.warning(e?.message || e);
+    }
 };
 
 const loadFormulaList = async () => {
@@ -192,8 +250,12 @@ const btnClear = () => {
     formParam.value = defaultForm();
     orgOwnerList.value = [];
     accountOwnerList.value = [];
+    formulaPreview.value = null;
+    recommendedRule.value = null;
+    userChangedFormula.value = false;
     selectedOrgOid.value = pleaseSelectId;
     selectedAccount.value = pleaseSelectId;
+    recommendFormula();
 };
 
 const btnSave = async () => {
@@ -222,7 +284,39 @@ const btnSave = async () => {
 
 onMounted(async () => {
     await Promise.all([loadFormulaList(), loadAggrList(), loadOrgList(), loadMemberList()]);
+    await recommendFormula();
+    updateFormulaPreview();
 });
+
+watch(
+    () => [formParam.value.managementMode, formParam.value.compareMode, formParam.value.periodType, formParam.value.dataType],
+    () => {
+        recommendFormula();
+    }
+);
+
+watch(
+    () => formParam.value.formulaOid,
+    () => {
+        updateFormulaPreview();
+        if (suppressNextFormulaWatch.value) {
+            suppressNextFormulaWatch.value = false;
+            syncFormulaSelectionMode();
+            return;
+        }
+        if (!applyingRecommendation.value) {
+            userChangedFormula.value = true;
+        }
+        syncFormulaSelectionMode();
+    }
+);
+
+watch(
+    () => formParam.value.recommendedFormulaOid,
+    () => {
+        syncFormulaSelectionMode();
+    }
+);
 </script>
 
 <template>
@@ -364,6 +458,23 @@ onMounted(async () => {
       <div class="col-md-6">
         <label for="scoringPolicy" class="form-label">計分政策</label>
         <input type="text" class="form-control" id="scoringPolicy" v-model="formParam.scoringPolicy">
+      </div>
+
+      <div v-if="formulaPreview" class="col-md-12">
+        <div class="border rounded p-3 bg-light">
+          <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
+            <div>
+              <div class="fw-semibold">公式預覽</div>
+              <div class="small text-muted">{{ formulaPreview.formulaCode }} - {{ formulaPreview.formulaName }}</div>
+            </div>
+            <span v-if="formParam.formulaOid === formParam.recommendedFormulaOid" class="badge text-bg-success">推薦</span>
+            <span v-else class="badge text-bg-warning">手動選擇</span>
+          </div>
+          <div v-if="recommendedRule" class="small text-muted mb-2">推薦規則：{{ recommendedRule.ruleCode }} - {{ recommendedRule.ruleName }}</div>
+          <div v-if="formulaPreview.description" class="mb-2">{{ formulaPreview.description }}</div>
+          <pre v-if="formulaPreview.expression" class="mb-2 p-2 bg-white border rounded small text-break">{{ formulaPreview.expression }}</pre>
+          <div v-if="formulaPreview.exampleText" class="small text-muted">{{ formulaPreview.exampleText }}</div>
+        </div>
       </div>
 
       <div class="col-md-6">
