@@ -82,8 +82,10 @@ const initQueryGridConfig = () => {
 		[
 			{ label: '<i class="bi bi-hand-index-thumb"></i>', field: 'oid', labHtml: true },
 			{ label: '帳號', field: 'account' },
+			{ label: '編號', field: 'employeeId' },
 			{ label: '名稱', field: 'displayName' },
-			{ label: '職稱', field: 'jobTitle' }
+			{ label: '職稱', field: 'jobTitle' },
+			{ label: '主管', field: 'isManager' }
 		]    
 	);
 };
@@ -96,7 +98,9 @@ const btnQuery = async () => {
 		const response = await axiosInstance.post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/findPage', {
 			"field": {
 				"accountLike"     	: queryPageStore.queryParam.account,
-				"displayNameLike" 	: queryPageStore.queryParam.displayName
+				"displayNameLike" 	: queryPageStore.queryParam.displayName,
+				"employeeIdLike" 	: queryPageStore.queryParam.employeeId,
+				"emailLike" 		: queryPageStore.queryParam.email
 			},
 			"pageOf": {
 				"select"  : queryPageStore.gridConfig.page,
@@ -183,13 +187,19 @@ onMounted(() => {
         <div v-show="qFieldShow" class="card mb-4">
           <div class="card-body">
             <div class="row g-3">
-              <div class="col-md-6">
+              <div class="col-md-4">
                 <div class="form-group form-floating">
                   <input type="text" class="form-control" id="account" placeholder="帳號" v-model="queryPageStore.queryParam.account">
                   <label for="account">帳號</label>
                 </div>
               </div>
-              <div class="col-md-6">
+              <div class="col-md-4">
+                <div class="form-group form-floating">
+                  <input type="text" class="form-control" id="employeeId" placeholder="編號" v-model="queryPageStore.queryParam.employeeId">
+                  <label for="employeeId">編號</label>
+                </div>
+              </div>
+              <div class="col-md-4">
                 <div class="form-group form-floating">
                   <input type="text" class="form-control" id="displayName" placeholder="名稱" v-model="queryPageStore.queryParam.displayName">
                   <label for="displayName">名稱</label>

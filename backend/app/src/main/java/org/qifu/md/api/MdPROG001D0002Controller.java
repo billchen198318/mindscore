@@ -7,6 +7,7 @@ import org.qifu.base.model.CheckControllerFieldHandler;
 import org.qifu.base.model.ControllerMethodAuthority;
 import org.qifu.base.model.DefaultControllerJsonResultObj;
 import org.qifu.base.model.DefaultResult;
+import org.qifu.base.model.PleaseSelect;
 import org.qifu.base.model.QueryResult;
 import org.qifu.base.model.SearchBody;
 import org.qifu.base.model.YesNo;
@@ -28,14 +29,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @ResponseBody
 @RequestMapping("/api/MD_PROG001D0002")
-public class MD_PROG001D0002Controller extends CoreApiSupport {
+public class MdPROG001D0002Controller extends CoreApiSupport {
     private static final long serialVersionUID = 1L;
     
     private final IMdOrgMemberService<MdOrgMember, String> mdOrgMemberService;
 
     private final IMdOrgMemberLogicService mdOrgMemberLogicService;
 
-    public MD_PROG001D0002Controller(IMdOrgMemberService<MdOrgMember, String> mdOrgMemberService, IMdOrgMemberLogicService mdOrgMemberLogicService) {
+    public MdPROG001D0002Controller(IMdOrgMemberService<MdOrgMember, String> mdOrgMemberService, IMdOrgMemberLogicService mdOrgMemberLogicService) {
         super();
         this.mdOrgMemberService = mdOrgMemberService;
         this.mdOrgMemberLogicService = mdOrgMemberLogicService;
@@ -48,7 +49,13 @@ public class MD_PROG001D0002Controller extends CoreApiSupport {
         QueryResult<List<MdOrgMember>> result = this.initResult();
         try {
             QueryResult<List<MdOrgMember>> queryResult = this.mdOrgMemberService.findPage(
-                    this.queryParameter(searchBody).fullEquals("orgOid").fullLink("accountLike").fullLink("displayNameLike").value(),
+                    this.queryParameter(searchBody)
+                    	.fullEquals("orgOid")
+                    	.fullLink("accountLike")
+                    	.fullLink("displayNameLike")
+                    	.fullLink("employeeIdLike")
+                    	.fullLink("emailLike")
+                    	.value(),
                     searchBody.getPageOf().orderBy("ORG_OID").sortTypeAsc());
             this.setQueryResponseJsonResult(queryResult, result, searchBody.getPageOf());
         } catch (ServiceException | ControllerException e) {
@@ -122,9 +129,12 @@ public class MD_PROG001D0002Controller extends CoreApiSupport {
 
     private void handlerCheck(DefaultControllerJsonResultObj<MdOrgMember> result, MdOrgMember entity) throws ControllerException, ServiceException {
         CheckControllerFieldHandler<MdOrgMember> chk = this.getCheckControllerFieldHandler(result);
-        chk.testField("orgOid", entity, "@org.apache.commons.lang3.StringUtils@isBlank(orgOid)", "請選擇組織")
+        chk.testField("orgOid", PleaseSelect.noSelect(entity.getOrgOid()), "請選擇組織")
            .testField("account", entity, "@org.apache.commons.lang3.StringUtils@isBlank(account)", "請輸入帳號")
            .testField("displayName", entity, "@org.apache.commons.lang3.StringUtils@isBlank(displayName)", "請輸入名稱")
+           .testField("employeeId", entity, "@org.apache.commons.lang3.StringUtils@isBlank(employeeId)", "請輸入員工編號")
+           .testField("email", entity, "@org.apache.commons.lang3.StringUtils@isBlank(email)", "請輸入Email")
+           .testField("email", entity, "!@org.apache.commons.validator.routines.EmailValidator@getInstance().isValid(email)", "Email格式不正確")
            .throwHtmlMessage();
     }
 }

@@ -23,12 +23,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @ResponseBody
 @RequestMapping("/api/MD_PROG001D0003")
-public class MD_PROG001D0003Controller extends CoreApiSupport {
+public class MdPROG001D0003Controller extends CoreApiSupport {
     private static final long serialVersionUID = 1L;
 
     private final IMdOrgUnitService<MdOrgUnit, String> mdOrgUnitService;
 
-    public MD_PROG001D0003Controller(IMdOrgUnitService<MdOrgUnit, String> mdOrgUnitService) {
+    public MdPROG001D0003Controller(IMdOrgUnitService<MdOrgUnit, String> mdOrgUnitService) {
         super();
         this.mdOrgUnitService = mdOrgUnitService;
     }

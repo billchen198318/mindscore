@@ -9,6 +9,8 @@ import org.qifu.base.model.UpdateUserField;
 public class MdOrgMember extends MdOrgMemberKey {
 	private static final long serialVersionUID = -1516142759902640286L;
 	private String displayName;
+	private String employeeId;
+	private String email;
 	private String jobTitle;
 	private String isManager;
 	private String enabled;
@@ -22,6 +24,20 @@ public class MdOrgMember extends MdOrgMemberKey {
 	}
 	public void setDisplayName(String displayName) {
 		this.displayName = displayName;
+	}
+
+	public String getEmployeeId() {
+		return employeeId;
+	}
+	public void setEmployeeId(String employeeId) {
+		this.employeeId = employeeId;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 	public String getJobTitle() {

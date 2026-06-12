@@ -1,20 +1,19 @@
 import { defineStore } from 'pinia';
 import { getInitGridConfigVariable, type GridConfig } from '@/components/GridHelper';
 
-export const getMdProg001d0002Store = function() {
-    return useMdProg001d0002Store();
+export const getMdProg002d0002Store = function() {
+    return useMdProg002d0002Store();
 }
 
-export const useMdProg001d0002Store = defineStore('md_prog001d0002', {
+export const useMdProg002d0002Store = defineStore('md_prog002d0002', {
     state: () => {
-        return { 
+        return {
             gridConfig : getInitGridConfigVariable() as GridConfig,
             queryParam : {
-                orgOid : '',
-                account : '',
-                displayName : '',
-                employeeId : '',
-                email : ''
+                aggrCode : '',
+                aggrName : '',
+                aggrType : '',
+                enabled : ''
             }
         }
     },
@@ -24,13 +23,12 @@ export const useMdProg001d0002Store = defineStore('md_prog001d0002', {
         },
         setGridConfig(gJsonRes:any) {
             this.gridConfig = gJsonRes;
-        },        
+        },
         clearData() {
-            this.queryParam.orgOid = '';
-            this.queryParam.account = '';
-            this.queryParam.displayName = '';
-            this.queryParam.employeeId = '';
-            this.queryParam.email = '';
+            this.queryParam.aggrCode = '';
+            this.queryParam.aggrName = '';
+            this.queryParam.aggrType = '';
+            this.queryParam.enabled = '';
             this.gridConfig.page = 1;
             this.gridConfig.row = 10;
             this.gridConfig.total = 0;

@@ -61,6 +61,13 @@
     WHERE 1=1
 	
 	<include refid="baseConditions" />
+
+	<if test="orgCodeLike != null and orgCodeLike != ''.toString() ">
+		AND ORG_CODE like #{orgCodeLike,jdbcType=VARCHAR}
+	</if>
+	<if test="orgNameLike != null and orgNameLike != ''.toString() ">
+		AND ORG_NAME like #{orgNameLike,jdbcType=VARCHAR}
+	</if>
 		
 	<include refid="org.qifu.core.mapper.DB1Config.sql2"/>
   </select>  
@@ -70,6 +77,13 @@
     WHERE 1=1
 	
 	<include refid="baseConditions" />
+
+	<if test="orgCodeLike != null and orgCodeLike != ''.toString() ">
+		AND ORG_CODE like #{orgCodeLike,jdbcType=VARCHAR}
+	</if>
+	<if test="orgNameLike != null and orgNameLike != ''.toString() ">
+		AND ORG_NAME like #{orgNameLike,jdbcType=VARCHAR}
+	</if>
 	
   </select>  
   

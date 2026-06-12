@@ -96,8 +96,8 @@ const btnQuery = async () => {
 		const axiosInstance = getAxiosInstance();
 		const response = await axiosInstance.post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/findPage', {
 			"field": {
-				"orgCode"   : queryPageStore.queryParam.orgCode,
-				"orgName"   : queryPageStore.queryParam.orgName
+				"orgCodeLike" : queryPageStore.queryParam.orgCode,
+				"orgNameLike" : queryPageStore.queryParam.orgName
 			},
 			"pageOf": {
 				"select"  : queryPageStore.gridConfig.page,

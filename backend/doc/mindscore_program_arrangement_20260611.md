@@ -104,9 +104,9 @@ This family covers KPI scoring rule setup.
 
 Recommended backend controllers:
 
-- `MD_PROG002D0001Controller`
-- `MD_PROG002D0002Controller`
-- `MD_PROG002D0003Controller`
+- `MdPROG002D0001Controller`
+- `MdPROG002D0002Controller`
+- `MdPROG002D0003Controller`
 
 ### 3.3 MD_PROG003D - KPI Master
 
@@ -119,7 +119,7 @@ This family covers KPI definition, owner binding, formula binding, and basic KPI
 
 Recommended backend controllers:
 
-- `MD_PROG003D0001Controller`
+- `MdPROG003D0001Controller`
 
 Recommended setparam screens:
 
@@ -138,8 +138,8 @@ This family covers KPI data input and deterministic score calculation.
 
 Recommended backend controllers:
 
-- `MD_PROG004D0001Controller`
-- `MD_PROG004D0002Controller`
+- `MdPROG004D0001Controller`
+- `MdPROG004D0002Controller`
 
 This family should also host calculation APIs:
 
@@ -157,7 +157,7 @@ This family covers KPI reporting and dashboard display.
 
 Recommended backend controllers:
 
-- `MD_PROG005D0001Controller`
+- `MdPROG005D0001Controller`
 
 ### 3.6 MD_PROG006D - OKR Cycle / Objective
 
@@ -173,11 +173,11 @@ This family covers OKR cycle, objective, key result and check-in.
 
 Recommended backend controllers:
 
-- `MD_PROG006D0001Controller`
-- `MD_PROG006D0002Controller`
-- `MD_PROG006D0003Controller`
-- `MD_PROG006D0004Controller`
-- `MD_PROG006D0005Controller`
+- `MdPROG006D0001Controller`
+- `MdPROG006D0002Controller`
+- `MdPROG006D0003Controller`
+- `MdPROG006D0004Controller`
+- `MdPROG006D0005Controller`
 
 ### 3.7 MD_PROG007D - Strategy / BSC
 
@@ -193,11 +193,11 @@ This family covers strategy workspace and weighted alignment.
 
 Recommended backend controllers:
 
-- `MD_PROG007D0001Controller`
-- `MD_PROG007D0002Controller`
-- `MD_PROG007D0003Controller`
-- `MD_PROG007D0004Controller`
-- `MD_PROG007D0005Controller`
+- `MdPROG007D0001Controller`
+- `MdPROG007D0002Controller`
+- `MdPROG007D0003Controller`
+- `MdPROG007D0004Controller`
+- `MdPROG007D0005Controller`
 
 ### 3.8 MD_PROG008D - Action / PDCA
 
@@ -212,10 +212,10 @@ This family covers action plan and follow-up items.
 
 Recommended backend controllers:
 
-- `MD_PROG008D0001Controller`
-- `MD_PROG008D0002Controller`
-- `MD_PROG008D0003Controller`
-- `MD_PROG008D0004Controller`
+- `MdPROG008D0001Controller`
+- `MdPROG008D0002Controller`
+- `MdPROG008D0003Controller`
+- `MdPROG008D0004Controller`
 
 ### 3.9 MD_PROG009D - Dashboard
 
@@ -243,11 +243,11 @@ This family covers signal generation, insight, recommendation and LLM config.
 
 Recommended backend controllers:
 
-- `MD_PROG010D0001Controller`
-- `MD_PROG010D0002Controller`
-- `MD_PROG010D0003Controller`
-- `MD_PROG010D0004Controller`
-- `MD_PROG010D0005Controller`
+- `MdPROG010D0001Controller`
+- `MdPROG010D0002Controller`
+- `MdPROG010D0003Controller`
+- `MdPROG010D0004Controller`
+- `MdPROG010D0005Controller`
 
 ## 4. Backend Package Arrangement
 
@@ -457,12 +457,10 @@ SetParam: MD_PROG003D0001S01Q
 - `IS_RECOMMENDABLE`
 - `DESCRIPTION`
 - `EXAMPLE_TEXT`
-- `PARAM_SCHEMA_JSON`
 
 關鍵調整點：
 
 - `EXPRESSION` 不應只接受一種語言，需保留未來擴充空間
-- `PARAM_SCHEMA_JSON` 可用來描述公式需要哪些參數
 - 需支援公式測試 / 預覽，避免使用者盲填
 
 #### MD_PROG002D0002 - Aggregation Method
