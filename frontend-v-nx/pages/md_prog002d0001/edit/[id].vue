@@ -124,7 +124,7 @@ const loadData = async () => {
                 router.push(getUrlPrefixFromProgItem(getProgItem(PageConstants.QueryId)));
                 return;
             }
-            formParam.value = response.data.value;
+            formParam.value = { ...response.data.value, returnType: 'DECIMAL' };
         } else {
             toast.error('error, null');
             router.push(getUrlPrefixFromProgItem(getProgItem(PageConstants.QueryId)));
@@ -219,9 +219,6 @@ onMounted(() => {
         <label for="returnType" class="form-label">回傳類型</label>
         <select :class="['form-select', checkInvalid('returnType', checkFields) ? 'is-invalid' : '']" id="returnType" v-model="formParam.returnType" :disabled="isBuiltin">
           <option value="DECIMAL">DECIMAL</option>
-          <option value="INTEGER">INTEGER</option>
-          <option value="BOOLEAN">BOOLEAN</option>
-          <option value="TEXT">TEXT</option>
         </select>
         <div v-if="checkInvalid('returnType', checkFields)" class="invalid-feedback">{{ invalidFeedback('returnType', checkFields) }}</div>
       </div>

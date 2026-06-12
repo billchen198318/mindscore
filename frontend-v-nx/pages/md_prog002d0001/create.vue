@@ -179,9 +179,6 @@ const btnSave = async () => {
         <label for="returnType" class="form-label">回傳類型</label>
         <select :class="['form-select', checkInvalid('returnType', checkFields) ? 'is-invalid' : '']" id="returnType" v-model="formParam.returnType">
           <option value="DECIMAL">DECIMAL</option>
-          <option value="INTEGER">INTEGER</option>
-          <option value="BOOLEAN">BOOLEAN</option>
-          <option value="TEXT">TEXT</option>
         </select>
         <div v-if="checkInvalid('returnType', checkFields)" class="invalid-feedback">{{ invalidFeedback('returnType', checkFields) }}</div>
       </div>
