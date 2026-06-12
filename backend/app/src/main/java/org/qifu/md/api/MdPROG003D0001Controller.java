@@ -1,7 +1,10 @@
 package org.qifu.md.api;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.qifu.base.exception.ControllerException;
 import org.qifu.base.exception.ServiceException;
 import org.qifu.base.model.CheckControllerFieldHandler;
@@ -11,12 +14,17 @@ import org.qifu.base.model.DefaultResult;
 import org.qifu.base.model.PleaseSelect;
 import org.qifu.base.model.QueryResult;
 import org.qifu.base.model.SearchBody;
+import org.qifu.base.model.YesNoKeyProvide;
 import org.qifu.core.util.CoreApiSupport;
+import org.qifu.md.entity.MdFormula;
+import org.qifu.md.entity.MdFormulaRecommendRule;
 import org.qifu.md.entity.MdKpi;
 import org.qifu.md.entity.MdOrgMember;
 import org.qifu.md.entity.MdOrgUnit;
 import org.qifu.md.logic.IKpiMasterLogicService;
 import org.qifu.md.model.KpiMasterRequest;
+import org.qifu.md.service.IMdFormulaRecommendRuleService;
+import org.qifu.md.service.IMdFormulaService;
 import org.qifu.md.service.IMdKpiService;
 import org.qifu.md.service.IMdOrgMemberService;
 import org.qifu.md.service.IMdOrgUnitService;
@@ -41,16 +49,22 @@ public class MdPROG003D0001Controller extends CoreApiSupport {
     private final IMdKpiService<MdKpi, String> mdKpiService;
     private final IMdOrgUnitService<MdOrgUnit, String> mdOrgUnitService;
     private final IMdOrgMemberService<MdOrgMember, String> mdOrgMemberService;
+    private final IMdFormulaService<MdFormula, String> mdFormulaService;
+    private final IMdFormulaRecommendRuleService<MdFormulaRecommendRule, String> mdFormulaRecommendRuleService;
     private final IKpiMasterLogicService kpiMasterLogicService;
 
     public MdPROG003D0001Controller(IMdKpiService<MdKpi, String> mdKpiService,
             IMdOrgUnitService<MdOrgUnit, String> mdOrgUnitService,
             IMdOrgMemberService<MdOrgMember, String> mdOrgMemberService,
+            IMdFormulaService<MdFormula, String> mdFormulaService,
+            IMdFormulaRecommendRuleService<MdFormulaRecommendRule, String> mdFormulaRecommendRuleService,
             IKpiMasterLogicService kpiMasterLogicService) {
         super();
         this.mdKpiService = mdKpiService;
         this.mdOrgUnitService = mdOrgUnitService;
         this.mdOrgMemberService = mdOrgMemberService;
+        this.mdFormulaService = mdFormulaService;
+        this.mdFormulaRecommendRuleService = mdFormulaRecommendRuleService;
         this.kpiMasterLogicService = kpiMasterLogicService;
     }
 
@@ -116,6 +130,32 @@ public class MdPROG003D0001Controller extends CoreApiSupport {
             DefaultResult<List<MdOrgMember>> listResult = this.mdOrgMemberService.selectList("ACCOUNT", "ASC");
             this.setDefaultResponseJsonResult(listResult, result);
         } catch (ServiceException | ControllerException e) {
+            this.exceptionResult(result, e);
+        }
+        return ResponseEntity.ok().body(result);
+    }
+
+    @ControllerMethodAuthority(programId = "MD_PROG003D0001Q", check = true)
+    @Operation(summary = "MD_PROG003D0001 - recommendFormula", description = "Recommend KPI formula by KPI metadata")
+    @PostMapping(value = "/recommendFormula", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<DefaultControllerJsonResultObj<Map<String, Object>>> recommendFormula(@RequestBody MdKpi entity) {
+        DefaultControllerJsonResultObj<Map<String, Object>> result = this.initDefaultJsonResult();
+        try {
+            MdFormulaRecommendRule rule = findFormulaRecommendRule(entity);
+            MdFormula formula = null;
+            if (rule != null && StringUtils.isNotBlank(rule.getRecommendedFormulaOid())) {
+                MdFormula formulaKey = new MdFormula();
+                formulaKey.setOid(rule.getRecommendedFormulaOid());
+                formula = this.mdFormulaService.selectByEntityPrimaryKey(formulaKey).getValue();
+            }
+
+            Map<String, Object> value = new HashMap<>();
+            value.put("rule", rule);
+            value.put("formula", formula);
+            value.put("recommendedFormulaOid", formula == null ? null : formula.getOid());
+            result.setSuccess(YesNoKeyProvide.YES);
+            result.setValue(value);
+        } catch (ServiceException e) {
             this.exceptionResult(result, e);
         }
         return ResponseEntity.ok().body(result);
@@ -202,6 +242,53 @@ public class MdPROG003D0001Controller extends CoreApiSupport {
            .testField("weightValue", entity, "weightValue == null", "請輸入權重")
            .testField("quasiRange", entity, "quasiRange == null", "請輸入準目標容忍範圍")
            .testField("enabled", PleaseSelect.noSelect(entity.getEnabled()), "請選擇是否啟用")
-           .throwHtmlMessage();
+            .throwHtmlMessage();
+    }
+
+    private MdFormulaRecommendRule findFormulaRecommendRule(MdKpi entity) throws ServiceException {
+        if (entity == null || PleaseSelect.noSelect(entity.getManagementMode()) || PleaseSelect.noSelect(entity.getCompareMode())) {
+            return null;
+        }
+
+        MdFormulaRecommendRule rule = firstRecommendRule(recommendParams(entity, true, true, false));
+        if (rule != null) {
+            return rule;
+        }
+        rule = firstRecommendRule(recommendParams(entity, false, true, false));
+        if (rule != null) {
+            return rule;
+        }
+        rule = firstRecommendRule(recommendParams(entity, true, false, false));
+        if (rule != null) {
+            return rule;
+        }
+        rule = firstRecommendRule(recommendParams(entity, false, false, false));
+        if (rule != null) {
+            return rule;
+        }
+        return firstRecommendRule(recommendParams(entity, false, false, true));
+    }
+
+    private Map<String, Object> recommendParams(MdKpi entity, boolean includePeriodType, boolean includeDataType, boolean defaultOnly) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("enabled", YesNoKeyProvide.YES);
+        params.put("managementMode", entity.getManagementMode());
+        params.put("compareMode", entity.getCompareMode());
+        if (includePeriodType && !PleaseSelect.noSelect(entity.getPeriodType())) {
+            params.put("periodType", entity.getPeriodType());
+        }
+        if (includeDataType && !PleaseSelect.noSelect(entity.getDataType())) {
+            params.put("dataType", entity.getDataType());
+        }
+        if (defaultOnly) {
+            params.put("isDefault", YesNoKeyProvide.YES);
+        }
+        return params;
+    }
+
+    private MdFormulaRecommendRule firstRecommendRule(Map<String, Object> params) throws ServiceException {
+        DefaultResult<List<MdFormulaRecommendRule>> ruleResult = this.mdFormulaRecommendRuleService.selectListByParams(params, "PRIORITY_NO", "ASC");
+        List<MdFormulaRecommendRule> ruleList = ruleResult.getValue();
+        return ruleList == null || ruleList.isEmpty() ? null : ruleList.get(0);
     }
 }
