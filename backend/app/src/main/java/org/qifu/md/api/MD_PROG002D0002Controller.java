@@ -2,7 +2,7 @@ package org.qifu.md.api;
 
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.qifu.base.exception.ControllerException;
 import org.qifu.base.exception.ServiceException;
 import org.qifu.base.model.CheckControllerFieldHandler;
@@ -166,7 +166,7 @@ public class MD_PROG002D0002Controller extends CoreApiSupport {
     private void checkBuiltinReadonly(MdAggregationMethod entity) throws ServiceException, ControllerException {
         DefaultResult<MdAggregationMethod> loadResult = this.mdAggregationMethodService.selectByEntityPrimaryKey(entity);
         MdAggregationMethod dbEntity = loadResult.getValue();
-        if (dbEntity != null && StringUtils.equals("BUILTIN", dbEntity.getAggrType())) {
+        if (dbEntity != null && Strings.CS.equals("BUILTIN", dbEntity.getAggrType())) {
             throw new ControllerException("BUILTIN彙總方法為系統內建資料，不能由維護畫面修改或刪除。");
         }
     }
