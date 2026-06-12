@@ -7,6 +7,7 @@ import org.qifu.base.model.CheckControllerFieldHandler;
 import org.qifu.base.model.ControllerMethodAuthority;
 import org.qifu.base.model.DefaultControllerJsonResultObj;
 import org.qifu.base.model.DefaultResult;
+import org.qifu.base.model.PleaseSelect;
 import org.qifu.base.model.QueryResult;
 import org.qifu.base.model.SearchBody;
 import org.qifu.base.model.YesNo;
@@ -128,7 +129,7 @@ public class MdPROG001D0002Controller extends CoreApiSupport {
 
     private void handlerCheck(DefaultControllerJsonResultObj<MdOrgMember> result, MdOrgMember entity) throws ControllerException, ServiceException {
         CheckControllerFieldHandler<MdOrgMember> chk = this.getCheckControllerFieldHandler(result);
-        chk.testField("orgOid", entity, "@org.apache.commons.lang3.StringUtils@isBlank(orgOid)", "請選擇組織")
+        chk.testField("orgOid", PleaseSelect.noSelect(entity.getOrgOid()), "請選擇組織")
            .testField("account", entity, "@org.apache.commons.lang3.StringUtils@isBlank(account)", "請輸入帳號")
            .testField("displayName", entity, "@org.apache.commons.lang3.StringUtils@isBlank(displayName)", "請輸入名稱")
            .testField("employeeId", entity, "@org.apache.commons.lang3.StringUtils@isBlank(employeeId)", "請輸入員工編號")

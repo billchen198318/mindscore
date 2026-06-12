@@ -12,6 +12,7 @@ import org.qifu.base.model.CheckControllerFieldHandler;
 import org.qifu.base.model.ControllerMethodAuthority;
 import org.qifu.base.model.DefaultControllerJsonResultObj;
 import org.qifu.base.model.DefaultResult;
+import org.qifu.base.model.PleaseSelect;
 import org.qifu.base.model.QueryResult;
 import org.qifu.base.model.SearchBody;
 import org.qifu.core.util.CoreApiSupport;
@@ -146,7 +147,7 @@ public class MdPROG002D0003Controller extends CoreApiSupport {
         chk.testField("ruleCode", entity, "@org.apache.commons.lang3.StringUtils@isBlank(ruleCode)", "請輸入推薦規則代碼")
            .testField("ruleCode", entity, "!@org.qifu.util.SimpleUtils@checkBeTrueOfAZaz09Id(ruleCode)", "推薦規則代碼只允許輸入0-9,a-z,A-Z,-,_,.")
            .testField("ruleName", entity, "@org.apache.commons.lang3.StringUtils@isBlank(ruleName)", "請輸入推薦規則名稱")
-           .testField("recommendedFormulaOid", entity, "@org.apache.commons.lang3.StringUtils@isBlank(recommendedFormulaOid)", "請選擇推薦公式")
+           .testField("recommendedFormulaOid", PleaseSelect.noSelect(entity.getRecommendedFormulaOid()), "請選擇推薦公式")
            .testField("priorityNo", entity, "priorityNo == null || priorityNo < 1", "優先序需大於0")
            .testField("isDefault", entity, "@org.apache.commons.lang3.StringUtils@isBlank(isDefault)", "請選擇是否預設規則")
            .testField("enabled", entity, "@org.apache.commons.lang3.StringUtils@isBlank(enabled)", "請選擇是否啟用")
