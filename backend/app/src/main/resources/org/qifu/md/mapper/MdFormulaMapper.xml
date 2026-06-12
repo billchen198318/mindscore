@@ -15,7 +15,6 @@
     <result column="IS_RECOMMENDABLE" jdbcType="VARCHAR" property="isRecommendable" />
     <result column="DESCRIPTION" jdbcType="VARCHAR" property="description" />
     <result column="EXAMPLE_TEXT" jdbcType="VARCHAR" property="exampleText" />
-    <result column="PARAM_SCHEMA_JSON" jdbcType="LONGVARCHAR" property="paramSchemaJson" />
     <result column="ENABLED" jdbcType="VARCHAR" property="enabled" />
     <result column="CUSERID" jdbcType="VARCHAR" property="cuserid" />
     <result column="CDATE" jdbcType="TIMESTAMP" property="cdate" />
@@ -132,9 +131,6 @@
       <if test="exampleText != null">
         EXAMPLE_TEXT,
       </if>
-      <if test="paramSchemaJson != null">
-        PARAM_SCHEMA_JSON,
-      </if>
       <if test="enabled != null">
         ENABLED,
       </if>
@@ -187,9 +183,6 @@
       </if>
       <if test="exampleText != null">
         #{exampleText,jdbcType=VARCHAR},
-      </if>
-      <if test="paramSchemaJson != null">
-        #{paramSchemaJson,jdbcType=LONGVARCHAR},
       </if>
       <if test="enabled != null">
         #{enabled,jdbcType=VARCHAR},
@@ -244,9 +237,6 @@
       </if>
       <if test="exampleText != null">
         EXAMPLE_TEXT = #{exampleText,jdbcType=VARCHAR},
-      </if>
-      <if test="paramSchemaJson != null">
-        PARAM_SCHEMA_JSON = #{paramSchemaJson,jdbcType=LONGVARCHAR},
       </if>
       <if test="enabled != null">
         ENABLED = #{enabled,jdbcType=VARCHAR},

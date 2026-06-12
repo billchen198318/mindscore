@@ -148,7 +148,6 @@ CREATE TABLE `md_formula` (
   `IS_RECOMMENDABLE` VARCHAR(1) NOT NULL DEFAULT 'Y' COMMENT '是否可被系統推薦 Y/N',
   `DESCRIPTION` VARCHAR(2000) DEFAULT NULL COMMENT '公式中文說明',
   `EXAMPLE_TEXT` VARCHAR(2000) DEFAULT NULL COMMENT '公式範例說明',
-  `PARAM_SCHEMA_JSON` MEDIUMTEXT DEFAULT NULL COMMENT '公式參數 JSON schema',
   `ENABLED` VARCHAR(1) NOT NULL DEFAULT 'Y' COMMENT '是否啟用 Y/N',
   `CUSERID` VARCHAR(24) NOT NULL COMMENT '建立者',
   `CDATE` DATETIME NOT NULL COMMENT '建立時間',
@@ -166,7 +165,6 @@ CREATE TABLE `md_formula` (
 | `FORMULA_TYPE` | 內建、客製、腳本公式 |
 | `IS_RECOMMENDABLE` | 是否可由 management mode 自動推薦 |
 | `DESCRIPTION` | 顯示在 formula 下拉旁的中文說明 |
-| `PARAM_SCHEMA_JSON` | 公式需要的參數定義，例如是否需要 min / max / quasi range |
 
 ### 4.2 `md_formula_recommend_rule`
 

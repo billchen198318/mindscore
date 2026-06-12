@@ -17,7 +17,6 @@ public class MdFormula extends MdFormulaKey {
 	private String isRecommendable;
 	private String description;
 	private String exampleText;
-	private String paramSchemaJson;
 	private String enabled;
 	private String cuserid;
 	private Date cdate;
@@ -85,13 +84,6 @@ public class MdFormula extends MdFormulaKey {
 	}
 	public void setExampleText(String exampleText) {
 		this.exampleText = exampleText;
-	}
-
-	public String getParamSchemaJson() {
-		return paramSchemaJson;
-	}
-	public void setParamSchemaJson(String paramSchemaJson) {
-		this.paramSchemaJson = paramSchemaJson;
 	}
 
 	public String getEnabled() {

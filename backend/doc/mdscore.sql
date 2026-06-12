@@ -227,7 +227,6 @@ CREATE TABLE `md_formula` (
   `IS_RECOMMENDABLE` varchar(1) NOT NULL DEFAULT 'Y' COMMENT '是否可被系統推薦 Y/N',
   `DESCRIPTION` varchar(2000) DEFAULT NULL COMMENT '公式中文說明',
   `EXAMPLE_TEXT` varchar(2000) DEFAULT NULL COMMENT '公式範例說明',
-  `PARAM_SCHEMA_JSON` mediumtext DEFAULT NULL COMMENT '公式參數 JSON schema',
   `ENABLED` varchar(1) NOT NULL DEFAULT 'Y' COMMENT '是否啟用 Y/N',
   `CUSERID` varchar(24) NOT NULL COMMENT '建立者',
   `CDATE` datetime NOT NULL COMMENT '建立時間',

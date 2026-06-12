@@ -457,12 +457,10 @@ SetParam: MD_PROG003D0001S01Q
 - `IS_RECOMMENDABLE`
 - `DESCRIPTION`
 - `EXAMPLE_TEXT`
-- `PARAM_SCHEMA_JSON`
 
 關鍵調整點：
 
 - `EXPRESSION` 不應只接受一種語言，需保留未來擴充空間
-- `PARAM_SCHEMA_JSON` 可用來描述公式需要哪些參數
 - 需支援公式測試 / 預覽，避免使用者盲填
 
 #### MD_PROG002D0002 - Aggregation Method
