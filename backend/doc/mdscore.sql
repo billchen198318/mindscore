@@ -724,6 +724,8 @@ CREATE TABLE `md_org_member` (
   `ORG_OID` char(36) NOT NULL COMMENT '組織 OID',
   `ACCOUNT` varchar(24) NOT NULL COMMENT 'qifu4 帳號',
   `DISPLAY_NAME` varchar(100) DEFAULT NULL COMMENT '顯示名稱',
+  `EMPLOYEE_ID` varchar(32) DEFAULT NULL COMMENT '員工編號',
+  `EMAIL` varchar(100) DEFAULT NULL COMMENT 'Email',
   `JOB_TITLE` varchar(100) DEFAULT NULL COMMENT '職稱',
   `IS_MANAGER` varchar(1) NOT NULL DEFAULT 'N' COMMENT '是否主管 Y/N',
   `ENABLED` varchar(1) NOT NULL DEFAULT 'Y' COMMENT '是否啟用 Y/N',

@@ -12,7 +12,9 @@ export const useMdProg001d0002Store = defineStore('md_prog001d0002', {
             queryParam : {
                 orgOid : '',
                 account : '',
-                displayName : ''
+                displayName : '',
+                employeeId : '',
+                email : ''
             }
         }
     },
@@ -27,6 +29,8 @@ export const useMdProg001d0002Store = defineStore('md_prog001d0002', {
             this.queryParam.orgOid = '';
             this.queryParam.account = '';
             this.queryParam.displayName = '';
+            this.queryParam.employeeId = '';
+            this.queryParam.email = '';
             this.gridConfig.page = 1;
             this.gridConfig.row = 10;
             this.gridConfig.total = 0;

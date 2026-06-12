@@ -48,7 +48,13 @@ public class MD_PROG001D0002Controller extends CoreApiSupport {
         QueryResult<List<MdOrgMember>> result = this.initResult();
         try {
             QueryResult<List<MdOrgMember>> queryResult = this.mdOrgMemberService.findPage(
-                    this.queryParameter(searchBody).fullEquals("orgOid").fullLink("accountLike").fullLink("displayNameLike").value(),
+                    this.queryParameter(searchBody)
+                    	.fullEquals("orgOid")
+                    	.fullLink("accountLike")
+                    	.fullLink("displayNameLike")
+                    	.fullLink("employeeIdLike")
+                    	.fullLink("emailLike")
+                    	.value(),
                     searchBody.getPageOf().orderBy("ORG_OID").sortTypeAsc());
             this.setQueryResponseJsonResult(queryResult, result, searchBody.getPageOf());
         } catch (ServiceException | ControllerException e) {
@@ -125,6 +131,9 @@ public class MD_PROG001D0002Controller extends CoreApiSupport {
         chk.testField("orgOid", entity, "@org.apache.commons.lang3.StringUtils@isBlank(orgOid)", "請選擇組織")
            .testField("account", entity, "@org.apache.commons.lang3.StringUtils@isBlank(account)", "請輸入帳號")
            .testField("displayName", entity, "@org.apache.commons.lang3.StringUtils@isBlank(displayName)", "請輸入名稱")
+           .testField("employeeId", entity, "@org.apache.commons.lang3.StringUtils@isBlank(employeeId)", "請輸入員工編號")
+           .testField("email", entity, "@org.apache.commons.lang3.StringUtils@isBlank(email)", "請輸入Email")
+           .testField("email", entity, "!@org.qifu.util.SimpleUtils@isEmail(email)", "Email格式不正確")
            .throwHtmlMessage();
     }
 }

@@ -26,7 +26,10 @@ const formParam = ref({
 	orgOid : '',
 	account : '',
 	displayName : '',
+	employeeId : '',
+	email : '',
 	jobTitle : '',
+	isManager : 'N',
 	enabled : 'Y'
 });
 
@@ -37,7 +40,10 @@ const btnClear = () => {
 	formParam.value.orgOid = '';
 	formParam.value.account = '';
 	formParam.value.displayName = '';
+	formParam.value.employeeId = '';
+	formParam.value.email = '';
 	formParam.value.jobTitle = '';
+	formParam.value.isManager = 'N';
 	formParam.value.enabled = 'Y';
 };
 
@@ -136,6 +142,28 @@ onMounted(() => {
         <div v-if="checkInvalid('displayName', checkFields)" class="invalid-feedback">{{ invalidFeedback('displayName', checkFields) }}</div>
       </div>
       <div class="col-md-6">
+        <label for="employeeId" class="form-label">員工編號</label>
+        <input 
+          type="text" 
+          :class="['form-control', checkInvalid('employeeId', checkFields) ? 'is-invalid' : '']" 
+          id="employeeId" 
+          placeholder="輸入員工編號" 
+          v-model="formParam.employeeId"
+        >
+        <div v-if="checkInvalid('employeeId', checkFields)" class="invalid-feedback">{{ invalidFeedback('employeeId', checkFields) }}</div>
+      </div>
+      <div class="col-md-6">
+        <label for="email" class="form-label">Email</label>
+        <input 
+          type="text" 
+          :class="['form-control', checkInvalid('email', checkFields) ? 'is-invalid' : '']" 
+          id="email" 
+          placeholder="輸入Email" 
+          v-model="formParam.email"
+        >
+        <div v-if="checkInvalid('email', checkFields)" class="invalid-feedback">{{ invalidFeedback('email', checkFields) }}</div>
+      </div>
+      <div class="col-md-6">
         <label for="jobTitle" class="form-label">職稱</label>
         <input 
           type="text" 
@@ -144,6 +172,13 @@ onMounted(() => {
           placeholder="輸入職稱" 
           v-model="formParam.jobTitle"
         >
+      </div>
+      <div class="col-md-6">
+        <label for="isManager" class="form-label">是否主管</label>
+        <select class="form-select" id="isManager" v-model="formParam.isManager">
+            <option value="Y">是</option>
+            <option value="N">否</option>
+        </select>
       </div>
     </div>
     <div class="mt-4 d-flex gap-2">

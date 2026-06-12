@@ -105,6 +105,8 @@ CREATE TABLE `md_org_member` (
   `ORG_OID` CHAR(36) NOT NULL COMMENT '組織 OID',
   `ACCOUNT` VARCHAR(24) NOT NULL COMMENT 'qifu4 帳號',
   `DISPLAY_NAME` VARCHAR(100) DEFAULT NULL COMMENT '顯示名稱',
+  `EMPLOYEE_ID` VARCHAR(32) DEFAULT NULL COMMENT '員工編號',
+  `EMAIL` VARCHAR(100) DEFAULT NULL COMMENT 'Email',
   `JOB_TITLE` VARCHAR(100) DEFAULT NULL COMMENT '職稱',
   `IS_MANAGER` VARCHAR(1) NOT NULL DEFAULT 'N' COMMENT '是否主管 Y/N',
   `ENABLED` VARCHAR(1) NOT NULL DEFAULT 'Y' COMMENT '是否啟用 Y/N',
@@ -122,6 +124,8 @@ CREATE TABLE `md_org_member` (
 |---|---|
 | `ACCOUNT` | 對應 qifu4 `tb_account.ACCOUNT` |
 | `DISPLAY_NAME` | 報表與組織圖顯示名稱 |
+| `EMPLOYEE_ID` | 員工編號 |
+| `EMAIL` | 電子郵件 |
 | `IS_MANAGER` | 組織圖與 owner 篩選使用 |
 
 ## 4. Formula And Aggregation Tables
