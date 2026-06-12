@@ -8,8 +8,8 @@ import org.qifu.base.model.ServiceMethodType;
 import org.qifu.base.model.YesNo;
 import org.qifu.core.entity.TbAccount;
 import org.qifu.core.entity.TbUserRole;
-import org.qifu.core.mapper.TbUserRoleMapper;
 import org.qifu.core.service.IAccountService;
+import org.qifu.core.service.IUserRoleService;
 import org.qifu.md.entity.MdOrgMember;
 import org.qifu.md.logic.IMdOrgMemberLogicService;
 import org.qifu.md.service.IMdOrgMemberService;
@@ -24,14 +24,14 @@ public class MdOrgMemberLogicServiceImpl implements IMdOrgMemberLogicService {
 
     private final IMdOrgMemberService<MdOrgMember, String> mdOrgMemberService;
     private final IAccountService<TbAccount, String> accountService;
-    private final TbUserRoleMapper userRoleMapper;
+    private final IUserRoleService<TbUserRole, String> userRoleService;
 
     public MdOrgMemberLogicServiceImpl(IMdOrgMemberService<MdOrgMember, String> mdOrgMemberService,
                                        IAccountService<TbAccount, String> accountService,
-                                       TbUserRoleMapper userRoleMapper) {
+                                       IUserRoleService<TbUserRole, String> userRoleService) {
         this.mdOrgMemberService = mdOrgMemberService;
         this.accountService = accountService;
-        this.userRoleMapper = userRoleMapper;
+        this.userRoleService = userRoleService;
     }
     
 	@ServiceMethodAuthority(type = {ServiceMethodType.INSERT})
@@ -57,13 +57,10 @@ public class MdOrgMemberLogicServiceImpl implements IMdOrgMemberLogicService {
 
         // 2. 建立預設角色
         TbUserRole userRole = new TbUserRole();
-        userRole.setOid(SimpleUtils.getUUIDStr());
         userRole.setRole("COMMON01"); // 預設角色
         userRole.setAccount(acc.getAccount());
         userRole.setDescription("Auto-created for org member");
-        userRole.setCuserid(entity.getCuserid());
-        userRole.setCdate(new Date());
-        this.userRoleMapper.insert(userRole);
+        this.userRoleService.insert(userRole);
 
         // 3. 建立組織成員
         this.mdOrgMemberService.insert(entity);

@@ -133,7 +133,7 @@ public class MD_PROG001D0002Controller extends CoreApiSupport {
            .testField("displayName", entity, "@org.apache.commons.lang3.StringUtils@isBlank(displayName)", "請輸入名稱")
            .testField("employeeId", entity, "@org.apache.commons.lang3.StringUtils@isBlank(employeeId)", "請輸入員工編號")
            .testField("email", entity, "@org.apache.commons.lang3.StringUtils@isBlank(email)", "請輸入Email")
-           .testField("email", entity, "!@org.qifu.util.SimpleUtils@isEmail(email)", "Email格式不正確")
+           .testField("email", entity, "!@org.apache.commons.validator.routines.EmailValidator@getInstance().isValid(email)", "Email格式不正確")
            .throwHtmlMessage();
     }
 }
