@@ -119,5 +119,5 @@ export const popularIcons = [
   { name: 'patch-question', label: 'Patch Question' }, { name: 'layers', label: 'Layers' },
   { name: 'layers-fill', label: 'Layers Fill' }, { name: 'stack', label: 'Stack' }, { name: 'box', label: 'Box' },
   { name: 'box-seam', label: 'Box Seam' }, { name: 'cup-hot', label: 'Cup Hot' }, { name: 'puzzle', label: 'Puzzle' },
-  { name: 'calculator', label: 'Calculator' }, { name: 'diagram-3', label: 'Diagram-3' }  
+  { name: 'calculator', label: 'Calculator' }, { name: 'diagram-3', label: 'Diagram-3' }, { name: 'bullseye', label: 'Bullseye' }    
 ];

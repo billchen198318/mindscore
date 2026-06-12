@@ -1,0 +1,289 @@
+<script setup lang="ts">
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { useSwalLoading } from '@/composables/useSwalLoading';
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
+
+import Toolbar from '@/components/Toolbar.vue';
+import { PageConstants } from './config';
+import {
+    getAxiosInstance,
+    invalidFeedback,
+    checkInvalid,
+    escapeQifuHtmlMsg
+} from '../../components/BaseHelper';
+import {
+    managementModeOptions,
+    compareModeOptions,
+    periodTypeOptions,
+    dataTypeOptions,
+    scoreCapModeOptions,
+    formulaSelectionModeOptions,
+    yesNoOptions
+} from '@/types/MindScoreOptions';
+
+definePageMeta({ middleware: ['auth'] });
+
+const router = useRouter();
+const pageProgramId = ref(PageConstants.CreateId);
+const checkFields = ref<any>({});
+const formulaList = ref<any[]>([]);
+const aggrList = ref<any[]>([]);
+const { showLoading, hideLoading } = useSwalLoading();
+
+const defaultForm = () => ({
+    kpiCode : '',
+    kpiName : '',
+    description : '',
+    unitName : '',
+    dataType : 'NUMBER',
+    periodType : 'MONTH',
+    managementMode : 'BIGGER',
+    compareMode : 'TARGET',
+    minValue : null,
+    targetValue : null,
+    maxValue : null,
+    quasiRange : 0,
+    scoreCapMode : 'CAP_100',
+    scoringPolicy : '',
+    formulaOid : '',
+    recommendedFormulaOid : '',
+    formulaSelectionMode : 'AUTO',
+    aggrMethodOid : '',
+    formulaVersionNo : 1,
+    weightValue : 0,
+    enabled : 'Y'
+});
+
+const formParam = ref<any>(defaultForm());
+
+const btnBack = () => router.back();
+
+const loadFormulaList = async () => {
+    try {
+        const axiosInstance = getAxiosInstance();
+        const response = await axiosInstance.post(import.meta.env.VITE_API_URL + '/MD_PROG002D0001/findList', {});
+        if (response.data) {
+            if (import.meta.env.VITE_SUCCESS_FLAG != response.data.success) {
+                toast.warning(escapeQifuHtmlMsg(response.data.message));
+                return;
+            }
+            formulaList.value = (response.data.value || []).filter((item: any) => item.enabled === 'Y');
+        }
+    } catch (e: any) {
+        toast.warning(e?.message || e);
+    }
+};
+
+const loadAggrList = async () => {
+    try {
+        const axiosInstance = getAxiosInstance();
+        const response = await axiosInstance.post(import.meta.env.VITE_API_URL + '/MD_PROG002D0002/findList', {});
+        if (response.data) {
+            if (import.meta.env.VITE_SUCCESS_FLAG != response.data.success) {
+                toast.warning(escapeQifuHtmlMsg(response.data.message));
+                return;
+            }
+            aggrList.value = (response.data.value || []).filter((item: any) => item.enabled === 'Y');
+        }
+    } catch (e: any) {
+        toast.warning(e?.message || e);
+    }
+};
+
+const normalizePayload = () => ({
+    ...formParam.value,
+    recommendedFormulaOid : formParam.value.recommendedFormulaOid || null,
+    scoringPolicy : formParam.value.scoringPolicy || null,
+    description : formParam.value.description || null,
+    unitName : formParam.value.unitName || null
+});
+
+const btnClear = () => {
+    checkFields.value = {};
+    formParam.value = defaultForm();
+};
+
+const btnSave = async () => {
+    checkFields.value = {};
+    showLoading();
+    try {
+        const axiosInstance = getAxiosInstance();
+        const response = await axiosInstance.post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/save', normalizePayload());
+        hideLoading();
+        if (response.data) {
+            checkFields.value = response.data.checkFields || {};
+            if (import.meta.env.VITE_SUCCESS_FLAG != response.data.success) {
+                toast.warning(escapeQifuHtmlMsg(response.data.message));
+                return;
+            }
+            toast.success(response.data.message);
+            btnClear();
+        } else {
+            toast.error('error, null');
+        }
+    } catch (e: any) {
+        hideLoading();
+        alert(e);
+    }
+};
+
+onMounted(async () => {
+    await Promise.all([loadFormulaList(), loadAggrList()]);
+});
+</script>
+
+<template>
+<div class="row">
+    <div class="col-12">
+        <Toolbar
+            :progId="pageProgramId"
+            description="KPI基本資料新增"
+            refreshFlag="Y"
+            @refreshMethod="btnClear"
+            backFlag="Y"
+            @backMethod="btnBack"
+            saveFlag="Y"
+            @saveMethod="btnSave"
+        />
+    </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-md-3">
+        <label for="kpiCode" class="form-label">KPI代碼</label>
+        <input type="text" :class="['form-control', checkInvalid('kpiCode', checkFields) ? 'is-invalid' : '']" id="kpiCode" v-model="formParam.kpiCode">
+        <div v-if="checkInvalid('kpiCode', checkFields)" class="invalid-feedback">{{ invalidFeedback('kpiCode', checkFields) }}</div>
+      </div>
+      <div class="col-md-5">
+        <label for="kpiName" class="form-label">KPI名稱</label>
+        <input type="text" :class="['form-control', checkInvalid('kpiName', checkFields) ? 'is-invalid' : '']" id="kpiName" v-model="formParam.kpiName">
+        <div v-if="checkInvalid('kpiName', checkFields)" class="invalid-feedback">{{ invalidFeedback('kpiName', checkFields) }}</div>
+      </div>
+      <div class="col-md-2">
+        <label for="unitName" class="form-label">單位</label>
+        <input type="text" class="form-control" id="unitName" v-model="formParam.unitName">
+      </div>
+      <div class="col-md-2">
+        <label for="enabled" class="form-label">啟用</label>
+        <select :class="['form-select', checkInvalid('enabled', checkFields) ? 'is-invalid' : '']" id="enabled" v-model="formParam.enabled">
+          <option v-for="item in yesNoOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+        </select>
+        <div v-if="checkInvalid('enabled', checkFields)" class="invalid-feedback">{{ invalidFeedback('enabled', checkFields) }}</div>
+      </div>
+
+      <div class="col-md-3">
+        <label for="dataType" class="form-label">資料型態</label>
+        <select :class="['form-select', checkInvalid('dataType', checkFields) ? 'is-invalid' : '']" id="dataType" v-model="formParam.dataType">
+          <option v-for="item in dataTypeOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+        </select>
+        <div v-if="checkInvalid('dataType', checkFields)" class="invalid-feedback">{{ invalidFeedback('dataType', checkFields) }}</div>
+      </div>
+      <div class="col-md-3">
+        <label for="periodType" class="form-label">週期</label>
+        <select :class="['form-select', checkInvalid('periodType', checkFields) ? 'is-invalid' : '']" id="periodType" v-model="formParam.periodType">
+          <option v-for="item in periodTypeOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+        </select>
+        <div v-if="checkInvalid('periodType', checkFields)" class="invalid-feedback">{{ invalidFeedback('periodType', checkFields) }}</div>
+      </div>
+      <div class="col-md-3">
+        <label for="managementMode" class="form-label">管理模式</label>
+        <select :class="['form-select', checkInvalid('managementMode', checkFields) ? 'is-invalid' : '']" id="managementMode" v-model="formParam.managementMode">
+          <option v-for="item in managementModeOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+        </select>
+        <div v-if="checkInvalid('managementMode', checkFields)" class="invalid-feedback">{{ invalidFeedback('managementMode', checkFields) }}</div>
+      </div>
+      <div class="col-md-3">
+        <label for="compareMode" class="form-label">比較模式</label>
+        <select :class="['form-select', checkInvalid('compareMode', checkFields) ? 'is-invalid' : '']" id="compareMode" v-model="formParam.compareMode">
+          <option v-for="item in compareModeOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+        </select>
+        <div v-if="checkInvalid('compareMode', checkFields)" class="invalid-feedback">{{ invalidFeedback('compareMode', checkFields) }}</div>
+      </div>
+
+      <div class="col-md-3">
+        <label for="minValue" class="form-label">最小值</label>
+        <input type="number" step="0.0001" class="form-control" id="minValue" v-model.number="formParam.minValue">
+      </div>
+      <div class="col-md-3">
+        <label for="targetValue" class="form-label">目標值</label>
+        <input type="number" step="0.0001" class="form-control" id="targetValue" v-model.number="formParam.targetValue">
+      </div>
+      <div class="col-md-3">
+        <label for="maxValue" class="form-label">最大值</label>
+        <input type="number" step="0.0001" class="form-control" id="maxValue" v-model.number="formParam.maxValue">
+      </div>
+      <div class="col-md-3">
+        <label for="quasiRange" class="form-label">接近範圍</label>
+        <input type="number" min="0" step="0.0001" :class="['form-control', checkInvalid('quasiRange', checkFields) ? 'is-invalid' : '']" id="quasiRange" v-model.number="formParam.quasiRange">
+        <div v-if="checkInvalid('quasiRange', checkFields)" class="invalid-feedback">{{ invalidFeedback('quasiRange', checkFields) }}</div>
+      </div>
+
+      <div class="col-md-3">
+        <label for="scoreCapMode" class="form-label">分數上限模式</label>
+        <select :class="['form-select', checkInvalid('scoreCapMode', checkFields) ? 'is-invalid' : '']" id="scoreCapMode" v-model="formParam.scoreCapMode">
+          <option v-for="item in scoreCapModeOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+        </select>
+        <div v-if="checkInvalid('scoreCapMode', checkFields)" class="invalid-feedback">{{ invalidFeedback('scoreCapMode', checkFields) }}</div>
+      </div>
+      <div class="col-md-3">
+        <label for="formulaSelectionMode" class="form-label">公式選擇</label>
+        <select :class="['form-select', checkInvalid('formulaSelectionMode', checkFields) ? 'is-invalid' : '']" id="formulaSelectionMode" v-model="formParam.formulaSelectionMode">
+          <option v-for="item in formulaSelectionModeOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+        </select>
+        <div v-if="checkInvalid('formulaSelectionMode', checkFields)" class="invalid-feedback">{{ invalidFeedback('formulaSelectionMode', checkFields) }}</div>
+      </div>
+      <div class="col-md-3">
+        <label for="formulaVersionNo" class="form-label">公式版本</label>
+        <input type="number" min="1" :class="['form-control', checkInvalid('formulaVersionNo', checkFields) ? 'is-invalid' : '']" id="formulaVersionNo" v-model.number="formParam.formulaVersionNo">
+        <div v-if="checkInvalid('formulaVersionNo', checkFields)" class="invalid-feedback">{{ invalidFeedback('formulaVersionNo', checkFields) }}</div>
+      </div>
+      <div class="col-md-3">
+        <label for="weightValue" class="form-label">權重</label>
+        <input type="number" step="0.0001" :class="['form-control', checkInvalid('weightValue', checkFields) ? 'is-invalid' : '']" id="weightValue" v-model.number="formParam.weightValue">
+        <div v-if="checkInvalid('weightValue', checkFields)" class="invalid-feedback">{{ invalidFeedback('weightValue', checkFields) }}</div>
+      </div>
+
+      <div class="col-md-6">
+        <label for="formulaOid" class="form-label">計算公式</label>
+        <select :class="['form-select', checkInvalid('formulaOid', checkFields) ? 'is-invalid' : '']" id="formulaOid" v-model="formParam.formulaOid">
+          <option value="">請選擇</option>
+          <option v-for="item in formulaList" :key="item.oid" :value="item.oid">{{ item.formulaCode }} - {{ item.formulaName }}</option>
+        </select>
+        <div v-if="checkInvalid('formulaOid', checkFields)" class="invalid-feedback">{{ invalidFeedback('formulaOid', checkFields) }}</div>
+      </div>
+      <div class="col-md-6">
+        <label for="recommendedFormulaOid" class="form-label">推薦公式</label>
+        <select class="form-select" id="recommendedFormulaOid" v-model="formParam.recommendedFormulaOid">
+          <option value="">不指定</option>
+          <option v-for="item in formulaList" :key="item.oid" :value="item.oid">{{ item.formulaCode }} - {{ item.formulaName }}</option>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label for="aggrMethodOid" class="form-label">彙總方法</label>
+        <select :class="['form-select', checkInvalid('aggrMethodOid', checkFields) ? 'is-invalid' : '']" id="aggrMethodOid" v-model="formParam.aggrMethodOid">
+          <option value="">請選擇</option>
+          <option v-for="item in aggrList" :key="item.oid" :value="item.oid">{{ item.aggrCode }} - {{ item.aggrName }}</option>
+        </select>
+        <div v-if="checkInvalid('aggrMethodOid', checkFields)" class="invalid-feedback">{{ invalidFeedback('aggrMethodOid', checkFields) }}</div>
+      </div>
+      <div class="col-md-6">
+        <label for="scoringPolicy" class="form-label">計分政策</label>
+        <input type="text" class="form-control" id="scoringPolicy" v-model="formParam.scoringPolicy">
+      </div>
+
+      <div class="col-md-12">
+        <label for="description" class="form-label">說明</label>
+        <textarea class="form-control" id="description" rows="3" v-model="formParam.description"></textarea>
+      </div>
+    </div>
+    <div class="mt-4 d-flex gap-2">
+      <button type="button" class="btn btn-primary" @click="btnSave"><i class="bi bi-save"></i> 儲存</button>
+      <button type="button" class="btn btn-outline-secondary" @click="btnClear"><i class="bi bi-eraser"></i> 清除</button>
+    </div>
+  </div>
+</div>
+</template>

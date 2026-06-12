@@ -44,8 +44,35 @@
     <if test="kpiCode != null and kpiCode != ''.toString() ">
         AND KPI_CODE = #{kpiCode,jdbcType=VARCHAR}
     </if>
+    <if test="kpiCodeLike != null and kpiCodeLike != ''.toString() ">
+        AND KPI_CODE LIKE #{kpiCodeLike,jdbcType=VARCHAR}
+    </if>
     <if test="kpiName != null and kpiName != ''.toString() ">
-        AND KPI_NAME LIKE #{kpiName,jdbcType=VARCHAR}
+        AND KPI_NAME = #{kpiName,jdbcType=VARCHAR}
+    </if>
+    <if test="kpiNameLike != null and kpiNameLike != ''.toString() ">
+        AND KPI_NAME LIKE #{kpiNameLike,jdbcType=VARCHAR}
+    </if>
+    <if test="dataType != null and dataType != ''.toString() ">
+        AND DATA_TYPE = #{dataType,jdbcType=VARCHAR}
+    </if>
+    <if test="periodType != null and periodType != ''.toString() ">
+        AND PERIOD_TYPE = #{periodType,jdbcType=VARCHAR}
+    </if>
+    <if test="managementMode != null and managementMode != ''.toString() ">
+        AND MANAGEMENT_MODE = #{managementMode,jdbcType=VARCHAR}
+    </if>
+    <if test="compareMode != null and compareMode != ''.toString() ">
+        AND COMPARE_MODE = #{compareMode,jdbcType=VARCHAR}
+    </if>
+    <if test="formulaOid != null and formulaOid != ''.toString() ">
+        AND FORMULA_OID = #{formulaOid,jdbcType=CHAR}
+    </if>
+    <if test="aggrMethodOid != null and aggrMethodOid != ''.toString() ">
+        AND AGGR_METHOD_OID = #{aggrMethodOid,jdbcType=CHAR}
+    </if>
+    <if test="formulaSelectionMode != null and formulaSelectionMode != ''.toString() ">
+        AND FORMULA_SELECTION_MODE = #{formulaSelectionMode,jdbcType=VARCHAR}
     </if>
     <if test="enabled != null and enabled != ''.toString() ">
         AND ENABLED = #{enabled,jdbcType=VARCHAR}

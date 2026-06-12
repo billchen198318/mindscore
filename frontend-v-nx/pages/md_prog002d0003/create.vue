@@ -13,6 +13,13 @@ import {
     checkInvalid,
     escapeQifuHtmlMsg
 } from '../../components/BaseHelper';
+import {
+    managementModeOptions,
+    compareModeOptions,
+    periodTypeOptions,
+    dataTypeOptions,
+    withAnyOption
+} from '@/types/MindScoreOptions';
 
 definePageMeta({ middleware: ['auth'] });
 
@@ -21,39 +28,10 @@ const pageProgramId = ref(PageConstants.CreateId);
 const checkFields = ref<any>({});
 const formulaList = ref<any[]>([]);
 const { showLoading, hideLoading } = useSwalLoading();
-
-const managementModeOptions = [
-    { value: '', label: '不限' },
-    { value: 'HIGHER_BETTER', label: '越高越好' },
-    { value: 'LOWER_BETTER', label: '越低越好' },
-    { value: 'TARGET_RANGE', label: '目標區間' }
-];
-
-const compareModeOptions = [
-    { value: '', label: '不限' },
-    { value: 'GTE', label: '大於等於目標' },
-    { value: 'LTE', label: '小於等於目標' },
-    { value: 'BETWEEN', label: '介於上下限' },
-    { value: 'EQ', label: '等於目標' }
-];
-
-const periodTypeOptions = [
-    { value: '', label: '不限' },
-    { value: 'DAY', label: '日' },
-    { value: 'WEEK', label: '週' },
-    { value: 'MONTH', label: '月' },
-    { value: 'QUARTER', label: '季' },
-    { value: 'HALFYEAR', label: '半年' },
-    { value: 'YEAR', label: '年' }
-];
-
-const dataTypeOptions = [
-    { value: '', label: '不限' },
-    { value: 'DECIMAL', label: '數值' },
-    { value: 'PERCENT', label: '百分比' },
-    { value: 'COUNT', label: '筆數' },
-    { value: 'BOOLEAN', label: '是/否' }
-];
+const managementModeRuleOptions = withAnyOption(managementModeOptions);
+const compareModeRuleOptions = withAnyOption(compareModeOptions);
+const periodTypeRuleOptions = withAnyOption(periodTypeOptions);
+const dataTypeRuleOptions = withAnyOption(dataTypeOptions);
 
 const formParam = ref({
     ruleCode : '',
@@ -169,25 +147,25 @@ onMounted(() => {
       <div class="col-md-3">
         <label for="managementMode" class="form-label">管理模式</label>
         <select class="form-select" id="managementMode" v-model="formParam.managementMode">
-          <option v-for="item in managementModeOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+          <option v-for="item in managementModeRuleOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
         </select>
       </div>
       <div class="col-md-3">
         <label for="compareMode" class="form-label">比較模式</label>
         <select class="form-select" id="compareMode" v-model="formParam.compareMode">
-          <option v-for="item in compareModeOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+          <option v-for="item in compareModeRuleOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
         </select>
       </div>
       <div class="col-md-3">
         <label for="periodType" class="form-label">期間</label>
         <select class="form-select" id="periodType" v-model="formParam.periodType">
-          <option v-for="item in periodTypeOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+          <option v-for="item in periodTypeRuleOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
         </select>
       </div>
       <div class="col-md-3">
         <label for="dataType" class="form-label">資料型態</label>
         <select class="form-select" id="dataType" v-model="formParam.dataType">
-          <option v-for="item in dataTypeOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+          <option v-for="item in dataTypeRuleOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
         </select>
       </div>
 

@@ -1640,6 +1640,8 @@ INSERT INTO `tb_sys_menu` VALUES
 ('7aa1208a-5fc2-11f1-afe9-33fb6c1b9ce7','CORE_PROG005D','00000000-0000-0000-0000-000000000000','Y','admin','2026-06-04 11:07:11',NULL,NULL),
 ('7aa2590b-5fc2-11f1-afe9-73b1551d818b','CORE_PROG005D0001Q','7aa1208a-5fc2-11f1-afe9-33fb6c1b9ce7','Y','admin','2026-06-04 11:07:11',NULL,NULL),
 ('7ea68636-c93a-4669-ac42-dafc3770d20d','CORE_PROG001D','00000000-0000-0000-0000-000000000000','Y','admin','2017-04-20 11:24:53',NULL,NULL),
+('8f83e222-6639-11f1-bf8d-b59eb088d935','MD_PROG003D','00000000-0000-0000-0000-000000000000','Y','admin','2026-06-12 16:34:43',NULL,NULL),
+('8f84cc83-6639-11f1-bf8d-53e7a80e8b49','MD_PROG003D0001Q','8f83e222-6639-11f1-bf8d-b59eb088d935','Y','admin','2026-06-12 16:34:43',NULL,NULL),
 ('91f90746-6558-11f1-8ea0-31612e6b0ce2','MD_PROG001D','00000000-0000-0000-0000-000000000000','Y','admin','2026-06-11 13:44:10',NULL,NULL),
 ('947ccbfe-6558-11f1-8ea0-db03aa0e50b5','MD_PROG001D0001Q','91f90746-6558-11f1-8ea0-31612e6b0ce2','Y','admin','2026-06-11 13:44:14',NULL,NULL),
 ('947d412f-6558-11f1-8ea0-5d8cbc8c4b4c','MD_PROG001D0002Q','91f90746-6558-11f1-8ea0-31612e6b0ce2','Y','admin','2026-06-11 13:44:14',NULL,NULL),
@@ -1752,6 +1754,7 @@ INSERT INTO `tb_sys_prog` VALUES
 ('67190e7a-6605-11f1-a6b2-244bfee7c856','MD_PROG002D0001E','AB01 - Formula (編輯)','#/md_prog002d0001/edit','Y','N',0,0,'CORE','ITEM','SYSTEM','calculator','admin','2026-06-12 10:20:08',NULL,NULL),
 ('6a442973-0e0c-4a7a-d546-464f4ff5f7a9','CORE_PROG001D0003Q','ZA03 - Menu settings','#/prog001d0003','N','N',0,0,'CORE','ITEM','FOLDER','menu-down','admin','2014-10-02 00:00:00','admin','2023-08-15 19:21:23'),
 ('6b210525-8975-4fb5-954c-fe349f66d3fe','CORE_PROG002D0001S01Q','ZB01 - Role (permission)','#/prog002d0001/setparam','Y','N',0,0,'CORE','ITEM','IMPORTANT','globe2','admin','2017-05-09 14:32:47','admin','2021-01-20 08:48:52'),
+('6e6a8223-6639-11f1-a6b2-244bfee7c856','MD_PROG003D','AC. KPI','#','N','N',0,0,'CORE','FOLDER','SYSTEM','bullseye','admin','2026-06-12 16:32:33','admin','2026-06-12 16:34:25'),
 ('72e6e0d1-1818-47d3-99f9-5134fb211b79','CORE_PROG002D','ZB. Role authority','/','N','N',0,0,'CORE','FOLDER','SHARED','person-square','admin','2017-05-08 21:27:52','admin','2023-08-27 16:47:03'),
 ('7746f746-961f-44c2-9b66-fa43c0f49838','CORE_PROG001D0004S01Q','ZA04 - Freemarker樣板 (Parameter)','#/prog001d0004/setparam','Y','N',0,0,'CORE','ITEM','TEMPLATE','file-text','admin','2017-05-12 10:42:04','admin','2023-08-16 21:49:12'),
 ('7d9ddc45-3eab-4f61-8c0a-d5505c0cc748','CORE_PROG001D0004A','ZA04 - Freemarker樣板 (Create)','#/prog001d0004/create','N','N',0,0,'CORE','ITEM','TEMPLATE','file-text','admin','2017-05-12 10:39:20','admin','2023-08-16 21:48:49'),
@@ -1767,6 +1770,9 @@ INSERT INTO `tb_sys_prog` VALUES
 ('da69253b-6557-11f1-8ea0-3792e4bd3499','MD_PROG001D','AA. 基本資料','#','N','N',0,0,'CORE','FOLDER','SYSTEM','folder','admin','2026-06-11 13:39:02',NULL,NULL),
 ('da7d969a-5efb-4e84-9eab-4fdae236f28c','CORE_PROG002D0002Q','ZB02 - User role','#/prog002d0002','N','N',0,0,'CORE','ITEM','PERSON','person-check','admin','2017-05-08 21:34:39','admin','2023-08-28 19:54:25'),
 ('dda67b1d-e3a2-4534-835a-c62d9e8421f3','CORE_PROG001D0005S01Q','ZA05 - JasperReport (Parameter)','#/prog001d0005/setparam','Y','N',0,0,'CORE','ITEM','APPLICATION_PDF','file-pdf','admin','2017-05-18 09:57:26','admin','2023-08-24 20:21:02'),
+('dffe7fc8-6638-11f1-a6b2-244bfee7c856','MD_PROG003D0001Q','AC01 - KPI 基本資料','#/md_prog003d0001','N','N',0,0,'CORE','ITEM','SYSTEM','bullseye','admin','2026-06-12 16:28:34',NULL,NULL),
+('dffe854b-6638-11f1-a6b2-244bfee7c856','MD_PROG003D0001A','AC01 - KPI 基本資料 (新增)','#/md_prog003d0001/create','N','N',0,0,'CORE','ITEM','SYSTEM','bullseye','admin','2026-06-12 16:28:34',NULL,NULL),
+('dffe85df-6638-11f1-a6b2-244bfee7c856','MD_PROG003D0001E','AC01 - KPI 基本資料 (編輯)','#/md_prog003d0001/edit','Y','N',0,0,'CORE','ITEM','SYSTEM','bullseye','admin','2026-06-12 16:28:34',NULL,NULL),
 ('e32b9329-bb38-46d7-8552-2307bac77724','CORE_PROG001D0002A','ZA02 - Program (Create)','#/prog001d0002/create','N','N',0,0,'CORE','ITEM','G_APP_INSTALL','filetype-html','admin','2014-10-02 00:00:00','admin','2023-08-15 19:19:42'),
 ('e5faf3e8-3c61-43cf-b748-d60dd6f34b6d','MD_PROG002D0002Q','AB02 - 彙總方法','#/md_prog002d0002','N','N',0,0,'CORE','ITEM','SYSTEM','calculator-fill','admin','2026-06-12 14:24:38',NULL,NULL),
 ('e86dbb1b-6870-4827-8039-72f5e15fa4f2','CORE_PROG004D','ZD. Log','/','N','N',0,0,'CORE','FOLDER','PROPERTIES','clipboard-check-fill','admin','2017-06-03 14:21:03','admin','2023-08-29 10:14:04'),
@@ -2036,4 +2042,4 @@ SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2026-06-12 16:01:12
+-- Dump completed on 2026-06-12 16:36:39

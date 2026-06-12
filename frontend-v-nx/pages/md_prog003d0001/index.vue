@@ -10,11 +10,12 @@ import GridPagination from '@/components/GridPagination.vue';
 import HiddenQueryFieldAlertInfo from '@/components/HiddenQueryFieldAlertInfo.vue';
 import { PageConstants } from './config';
 import { getGridConfig, setConfigRow, setConfigPage, setConfigTotal, resetConfigByOld } from '../../components/GridHelper';
-import { useMdProg002d0003Store } from './QueryPageStore';
+import { useMdProg003d0001Store } from './QueryPageStore';
 import {
     getAxiosInstance,
     getProgItem,
-    getUrlPrefixFromProgItem
+    getUrlPrefixFromProgItem,
+    escapeQifuHtmlMsg
 } from '../../components/BaseHelper';
 import { useSwalLoading } from '@/composables/useSwalLoading';
 import {
@@ -22,6 +23,7 @@ import {
     compareModeOptions,
     periodTypeOptions,
     dataTypeOptions,
+    formulaSelectionModeOptions,
     withAllOption,
     optionName,
     yesNoName
@@ -30,18 +32,23 @@ import {
 definePageMeta({ middleware: ['auth'] });
 
 const router = useRouter();
-const queryPageStore = useMdProg002d0003Store();
+const queryPageStore = useMdProg003d0001Store();
 const { showLoading, hideLoading, confirmFire } = useSwalLoading();
 
 const pageProgramId = ref(PageConstants.QueryId);
 const dsList = ref<any[]>([]);
 const qFieldShow = ref(true);
 const formulaMap = ref<Record<string, string>>({});
+const aggrMap = ref<Record<string, string>>({});
+
+const dataTypeQueryOptions = withAllOption(dataTypeOptions);
+const periodTypeQueryOptions = withAllOption(periodTypeOptions);
 const managementModeQueryOptions = withAllOption(managementModeOptions);
 const compareModeQueryOptions = withAllOption(compareModeOptions);
-const periodTypeQueryOptions = withAllOption(periodTypeOptions);
-const dataTypeQueryOptions = withAllOption(dataTypeOptions);
+const formulaSelectionModeQueryOptions = withAllOption(formulaSelectionModeOptions);
+
 const formulaName = (oid: string) => formulaMap.value[oid] || oid;
+const aggrName = (oid: string) => aggrMap.value[oid] || oid;
 
 const tbRefresh = () => btnClear();
 const tbCreate = () => router.push(PageConstants.frontendNamespace + '/create');
@@ -85,9 +92,7 @@ const initQueryGridConfig = () => {
                 'class'   : 'btn btn-info btn-sm'
             },
             {
-                'method'  : (val: any) => {
-                    confirmFire('刪除?', delItem, val);
-                },
+                'method'  : (val: any) => confirmFire('確定刪除?', delItem, val),
                 'icon'    : 'trash',
                 'type'    : 'delete',
                 'memo'    : 'Delete current item.',
@@ -96,31 +101,47 @@ const initQueryGridConfig = () => {
         ],
         [
             { label: '<i class="bi bi-hand-index-thumb"></i>', field: 'oid', labHtml: true },
-            { label: '規則代碼', field: 'ruleCode' },
-            { label: '規則名稱', field: 'ruleName' },
+            { label: 'KPI代碼', field: 'kpiCode' },
+            { label: 'KPI名稱', field: 'kpiName' },
+            { label: '資料型態', field: 'dataTypeName' },
+            { label: '週期', field: 'periodTypeName' },
             { label: '管理模式', field: 'managementModeName' },
             { label: '比較模式', field: 'compareModeName' },
-            { label: '期間', field: 'periodTypeName' },
-            { label: '資料型態', field: 'dataTypeName' },
-            { label: '推薦公式', field: 'recommendedFormulaName' },
-            { label: '優先序', field: 'priorityNo' },
-            { label: '預設', field: 'isDefaultName' },
+            { label: '公式', field: 'formulaName' },
+            { label: '彙總方法', field: 'aggrMethodName' },
+            { label: '公式選擇', field: 'formulaSelectionModeName' },
             { label: '啟用', field: 'enabledName' }
         ]
     );
 };
 
 const loadFormulaList = async () => {
+    const axiosInstance = getAxiosInstance();
+    const response = await axiosInstance.post(import.meta.env.VITE_API_URL + '/MD_PROG002D0001/findList', {});
+    if (response.data && import.meta.env.VITE_SUCCESS_FLAG == response.data.success) {
+        const map: Record<string, string> = {};
+        (response.data.value || []).forEach((item: any) => {
+            map[item.oid] = item.formulaCode + ' - ' + item.formulaName;
+        });
+        formulaMap.value = map;
+    }
+};
+
+const loadAggrList = async () => {
+    const axiosInstance = getAxiosInstance();
+    const response = await axiosInstance.post(import.meta.env.VITE_API_URL + '/MD_PROG002D0002/findList', {});
+    if (response.data && import.meta.env.VITE_SUCCESS_FLAG == response.data.success) {
+        const map: Record<string, string> = {};
+        (response.data.value || []).forEach((item: any) => {
+            map[item.oid] = item.aggrCode + ' - ' + item.aggrName;
+        });
+        aggrMap.value = map;
+    }
+};
+
+const loadOptionMaps = async () => {
     try {
-        const axiosInstance = getAxiosInstance();
-        const response = await axiosInstance.post(import.meta.env.VITE_API_URL + '/MD_PROG002D0001/findList', {});
-        if (response.data && import.meta.env.VITE_SUCCESS_FLAG == response.data.success) {
-            const map: Record<string, string> = {};
-            (response.data.value || []).forEach((item: any) => {
-                map[item.oid] = item.formulaCode + ' - ' + item.formulaName;
-            });
-            formulaMap.value = map;
-        }
+        await Promise.all([loadFormulaList(), loadAggrList()]);
     } catch (e: any) {
         toast.warning(e?.message || e);
     }
@@ -132,36 +153,37 @@ const btnQuery = async () => {
     try {
         const axiosInstance = getAxiosInstance();
         const response = await axiosInstance.post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/findPage', {
-            "field": {
-                "ruleCodeLike"   : queryPageStore.queryParam.ruleCode,
-                "ruleNameLike"   : queryPageStore.queryParam.ruleName,
-                "managementMode" : queryPageStore.queryParam.managementMode,
-                "compareMode"    : queryPageStore.queryParam.compareMode,
-                "periodType"     : queryPageStore.queryParam.periodType,
-                "dataType"       : queryPageStore.queryParam.dataType,
-                "isDefault"      : queryPageStore.queryParam.isDefault,
-                "enabled"        : queryPageStore.queryParam.enabled
+            field: {
+                kpiCodeLike          : queryPageStore.queryParam.kpiCode,
+                kpiNameLike          : queryPageStore.queryParam.kpiName,
+                dataType             : queryPageStore.queryParam.dataType,
+                periodType           : queryPageStore.queryParam.periodType,
+                managementMode       : queryPageStore.queryParam.managementMode,
+                compareMode          : queryPageStore.queryParam.compareMode,
+                formulaSelectionMode : queryPageStore.queryParam.formulaSelectionMode,
+                enabled              : queryPageStore.queryParam.enabled
             },
-            "pageOf": {
-                "select"  : queryPageStore.gridConfig.page,
-                "showRow" : queryPageStore.gridConfig.row
+            pageOf: {
+                select  : queryPageStore.gridConfig.page,
+                showRow : queryPageStore.gridConfig.row
             }
         });
         hideLoading();
         if (response.data) {
             if (import.meta.env.VITE_SUCCESS_FLAG != response.data.success) {
                 clearGridConfig();
-                toast.warning(response.data.message);
+                toast.warning(escapeQifuHtmlMsg(response.data.message));
                 return;
             }
             dsList.value = response.data.value.map((item: any) => ({
                 ...item,
+                dataTypeName : optionName(dataTypeOptions, item.dataType),
+                periodTypeName : optionName(periodTypeOptions, item.periodType),
                 managementModeName : optionName(managementModeOptions, item.managementMode),
                 compareModeName : optionName(compareModeOptions, item.compareMode),
-                periodTypeName : optionName(periodTypeOptions, item.periodType),
-                dataTypeName : optionName(dataTypeOptions, item.dataType),
-                recommendedFormulaName : formulaName(item.recommendedFormulaOid),
-                isDefaultName : yesNoName(item.isDefault),
+                formulaSelectionModeName : optionName(formulaSelectionModeOptions, item.formulaSelectionMode),
+                formulaName : formulaName(item.formulaOid),
+                aggrMethodName : aggrName(item.aggrMethodOid),
                 enabledName : yesNoName(item.enabled)
             }));
             setConfigTotal(queryPageStore.gridConfig, response.data.pageOf.countSize);
@@ -180,13 +202,13 @@ const delItem = async (oid: string) => {
     showLoading();
     try {
         const axiosInstance = getAxiosInstance();
-        const response = await axiosInstance.post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/delete', { "oid": oid });
+        const response = await axiosInstance.post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/delete', { oid });
         hideLoading();
         if (response.data) {
             if (import.meta.env.VITE_SUCCESS_FLAG == response.data.success) {
                 toast.success(response.data.message);
             } else {
-                toast.warning(response.data.message);
+                toast.warning(escapeQifuHtmlMsg(response.data.message));
             }
             btnQuery();
         } else {
@@ -201,7 +223,7 @@ const delItem = async (oid: string) => {
 };
 
 onMounted(async () => {
-    await loadFormulaList();
+    await loadOptionMaps();
     const newGridConfig = initQueryGridConfig();
     if (queryPageStore.gridConfig.column) {
         resetConfigByOld(newGridConfig, queryPageStore.gridConfig);
@@ -219,7 +241,7 @@ onMounted(async () => {
   <div class="col-12">
     <Toolbar
         :progId="pageProgramId"
-        description="公式推薦規則查詢"
+        description="KPI基本資料查詢"
         refreshFlag="Y"
         @refreshMethod="tbRefresh"
         createFlag="Y"
@@ -237,14 +259,30 @@ onMounted(async () => {
     <div class="row g-3">
       <div class="col-md-3">
         <div class="form-group form-floating">
-          <input type="text" class="form-control" id="ruleCode" placeholder="規則代碼" v-model="queryPageStore.queryParam.ruleCode">
-          <label for="ruleCode">規則代碼</label>
+          <input type="text" class="form-control" id="kpiCode" placeholder="KPI代碼" v-model="queryPageStore.queryParam.kpiCode">
+          <label for="kpiCode">KPI代碼</label>
         </div>
       </div>
       <div class="col-md-3">
         <div class="form-group form-floating">
-          <input type="text" class="form-control" id="ruleName" placeholder="規則名稱" v-model="queryPageStore.queryParam.ruleName">
-          <label for="ruleName">規則名稱</label>
+          <input type="text" class="form-control" id="kpiName" placeholder="KPI名稱" v-model="queryPageStore.queryParam.kpiName">
+          <label for="kpiName">KPI名稱</label>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="form-group form-floating">
+          <select class="form-select" id="dataType" v-model="queryPageStore.queryParam.dataType">
+            <option v-for="item in dataTypeQueryOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+          </select>
+          <label for="dataType">資料型態</label>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="form-group form-floating">
+          <select class="form-select" id="periodType" v-model="queryPageStore.queryParam.periodType">
+            <option v-for="item in periodTypeQueryOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+          </select>
+          <label for="periodType">週期</label>
         </div>
       </div>
       <div class="col-md-3">
@@ -265,28 +303,10 @@ onMounted(async () => {
       </div>
       <div class="col-md-3">
         <div class="form-group form-floating">
-          <select class="form-select" id="periodType" v-model="queryPageStore.queryParam.periodType">
-            <option v-for="item in periodTypeQueryOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+          <select class="form-select" id="formulaSelectionMode" v-model="queryPageStore.queryParam.formulaSelectionMode">
+            <option v-for="item in formulaSelectionModeQueryOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
           </select>
-          <label for="periodType">期間</label>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="form-group form-floating">
-          <select class="form-select" id="dataType" v-model="queryPageStore.queryParam.dataType">
-            <option v-for="item in dataTypeQueryOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
-          </select>
-          <label for="dataType">資料型態</label>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="form-group form-floating">
-          <select class="form-select" id="isDefault" v-model="queryPageStore.queryParam.isDefault">
-            <option value="">全部</option>
-            <option value="Y">是</option>
-            <option value="N">否</option>
-          </select>
-          <label for="isDefault">預設規則</label>
+          <label for="formulaSelectionMode">公式選擇</label>
         </div>
       </div>
       <div class="col-md-3">
