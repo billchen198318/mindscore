@@ -39,6 +39,9 @@
 	<if test="formulaName != null and formulaName != ''.toString() ">
 		AND FORMULA_NAME = #{formulaName,jdbcType=VARCHAR}
 	</if>
+	<if test="formulaType != null and formulaType != ''.toString() ">
+		AND FORMULA_TYPE = #{formulaType,jdbcType=VARCHAR}
+	</if>
 	<if test="enabled != null and enabled != ''.toString() ">
 		AND ENABLED = #{enabled,jdbcType=VARCHAR}
 	</if>
@@ -64,6 +67,13 @@
     WHERE 1=1
 	
 	<include refid="baseConditions" />
+
+	<if test="formulaCodeLike != null and formulaCodeLike != ''.toString() ">
+		AND FORMULA_CODE like #{formulaCodeLike,jdbcType=VARCHAR}
+	</if>
+	<if test="formulaNameLike != null and formulaNameLike != ''.toString() ">
+		AND FORMULA_NAME like #{formulaNameLike,jdbcType=VARCHAR}
+	</if>
 		
 	<include refid="org.qifu.core.mapper.DB1Config.sql2"/>
   </select>  
@@ -73,6 +83,13 @@
     WHERE 1=1
 	
 	<include refid="baseConditions" />
+
+	<if test="formulaCodeLike != null and formulaCodeLike != ''.toString() ">
+		AND FORMULA_CODE like #{formulaCodeLike,jdbcType=VARCHAR}
+	</if>
+	<if test="formulaNameLike != null and formulaNameLike != ''.toString() ">
+		AND FORMULA_NAME like #{formulaNameLike,jdbcType=VARCHAR}
+	</if>
 	
   </select>  
   
