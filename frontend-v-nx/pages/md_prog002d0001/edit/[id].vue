@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, nextTick, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useSwalLoading } from '@/composables/useSwalLoading';
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
 
 import Toolbar from '@/components/Toolbar.vue';
+import FormulaInputPad from '../FormulaInputPad.vue';
 import { PageConstants } from '../config';
 import {
     getAxiosInstance,
@@ -22,6 +23,7 @@ const router = useRouter();
 const route = useRoute();
 const pageProgramId = ref(PageConstants.EditId);
 const checkFields = ref<any>({});
+const expressionTextarea = ref<HTMLTextAreaElement | null>(null);
 const { showLoading, hideLoading } = useSwalLoading();
 const isBuiltin = computed(() => formParam.value.formulaType === 'BUILTIN');
 const formulaTypeDisplay = computed(() => formParam.value.formulaType === 'BUILTIN' ? '系統提供' : '使用者自訂');
@@ -44,6 +46,30 @@ const formParam = ref({
 });
 
 const btnBack = () => router.back();
+
+const insertExpressionValue = async (value: string) => {
+    if (isBuiltin.value) {
+        return;
+    }
+    const textarea = expressionTextarea.value;
+    if (!textarea) {
+        formParam.value.expression = formParam.value.expression + value;
+        return;
+    }
+    const start = textarea.selectionStart ?? formParam.value.expression.length;
+    const end = textarea.selectionEnd ?? formParam.value.expression.length;
+    formParam.value.expression = formParam.value.expression.substring(0, start) + value + formParam.value.expression.substring(end);
+    await nextTick();
+    textarea.focus();
+    textarea.setSelectionRange(start + value.length, start + value.length);
+};
+
+const clearExpressionValue = () => {
+    if (isBuiltin.value) {
+        return;
+    }
+    formParam.value.expression = '';
+};
 
 const btnClear = () => {
     if (isBuiltin.value) {
@@ -198,7 +224,10 @@ onMounted(() => {
 
       <div class="col-md-12">
         <label for="expression" class="form-label">Expression</label>
-        <textarea class="form-control" id="expression" rows="5" v-model="formParam.expression" :readonly="isBuiltin"></textarea>
+        <textarea ref="expressionTextarea" class="form-control" id="expression" rows="5" v-model="formParam.expression" :readonly="isBuiltin"></textarea>
+      </div>
+      <div class="col-md-12">
+        <FormulaInputPad :disabled="isBuiltin" @insert="insertExpressionValue" @clear="clearExpressionValue" />
       </div>
       <div class="col-md-12">
         <label for="paramSchemaJson" class="form-label">參數規格 JSON</label>
