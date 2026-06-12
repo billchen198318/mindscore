@@ -46,6 +46,8 @@ Date: 2026-06-11
 
 KPI 是整個系統的第一個核心業務模組。
 
+Implementation note: KPI owner binding can be implemented inside the KPI master create/edit flow. A separate owner-binding page is optional and should be added only when owner maintenance needs independent permissions or a separate operational workflow.
+
 1. KPI master CRUD
 2. KPI owner 綁定
 3. KPI 與 organization / account 綁定

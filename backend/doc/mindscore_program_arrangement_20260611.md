@@ -112,18 +112,20 @@ Recommended backend controllers:
 
 This family covers KPI definition, owner binding, formula binding, and basic KPI maintenance.
 
+Implementation decision: KPI owner binding is maintained inside `MD_PROG003D0001` create/edit by submitting `ownerList` with organization (`OWNER_TYPE=ORG`) and account (`OWNER_TYPE=ACCOUNT`) owners. The `setparam` page is optional, not required for owner binding to be considered complete.
+
 | Program ID | Page Folder | Main Entity | Purpose | Priority |
 |---|---|---|---|---|
-| `MD_PROG003D0001` | `md_prog003d0001` | `MdKpi` | KPI master maintenance | High |
-| `MD_PROG003D0001S01` | `md_prog003d0001/setparam` | `MdKpiOwner` | KPI owner binding | High |
+| `MD_PROG003D0001` | `md_prog003d0001` | `MdKpi` | KPI master maintenance, including embedded KPI owner binding | High |
+| `MD_PROG003D0001S01` | `md_prog003d0001/setparam` | `MdKpiOwner` | Optional split page for owner-only or advanced parameter maintenance | Medium |
 
 Recommended backend controllers:
 
 - `MdPROG003D0001Controller`
 
-Recommended setparam screens:
+Optional setparam screens:
 
-- KPI owner
+- KPI owner, only if owner maintenance must be separated from KPI create/edit
 - formula preview / recommendation
 - formula selection mode
 
