@@ -22,9 +22,6 @@ public class AggregationMethodUtils {
         if (request == null) {
             throw new IllegalArgumentException("Aggregation test request cannot be null.");
         }
-        if (Strings.CS.equals("BUILTIN", request.getAggrType())) {
-            return executeBuiltin(request.getExpression(), request.getScores());
-        }
         return executeScript(request.getExpression(), request.getScores());
     }
 
