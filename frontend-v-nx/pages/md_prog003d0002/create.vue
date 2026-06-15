@@ -43,7 +43,7 @@ const defaultForm = () => ({
     scoreMin: 80,
     scoreMax: 100,
     scoreStatus: 'GOOD',
-    fontColor: '#ffffff',
+    fontColor: '#212529',
     bgColor: '#198754',
     sortNo: 100,
     enabled: 'Y',

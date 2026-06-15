@@ -45,7 +45,7 @@ const formParam = ref<any>({
     scoreMin: 80,
     scoreMax: 100,
     scoreStatus: 'GOOD',
-    fontColor: '#ffffff',
+    fontColor: '#212529',
     bgColor: '#198754',
     sortNo: 100,
     enabled: 'Y',
@@ -85,7 +85,7 @@ const loadData = async () => {
             formParam.value = {
                 ...response.data.value,
                 kpiOid: response.data.value.kpiOid || pleaseSelectId,
-                fontColor: response.data.value.fontColor || '#ffffff',
+                fontColor: response.data.value.fontColor || '#212529',
                 bgColor: response.data.value.bgColor || '#198754'
             };
         } else {
