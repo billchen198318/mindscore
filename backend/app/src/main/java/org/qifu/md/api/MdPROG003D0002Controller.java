@@ -1,6 +1,8 @@
 package org.qifu.md.api;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.qifu.base.exception.ControllerException;
@@ -210,9 +212,39 @@ public class MdPROG003D0002Controller extends CoreApiSupport {
                 result.getCheckFields().put("scoreMin", "Score min cannot be greater than score max.");
                 throw new ControllerException("Score min cannot be greater than score max.");
             }
+            validateScoreRangeOverlap(result, entity);
         }
         validateHexColor(result, "fontColor", entity.getFontColor(), "Please enter valid font color, for example #FFFFFF.");
         validateHexColor(result, "bgColor", entity.getBgColor(), "Please enter valid background color, for example #198754.");
+    }
+
+    private void validateScoreRangeOverlap(DefaultControllerJsonResultObj<MdKpiScoreColor> result, MdKpiScoreColor entity) throws ControllerException, ServiceException {
+        Map<String, Object> params = new HashMap<>();
+        params.put("scopeType", entity.getScopeType());
+        params.put("scopeKey", entity.getScopeKey());
+        params.put("colorType", COLOR_CUSTOM);
+        DefaultResult<List<MdKpiScoreColor>> listResult = this.mdKpiScoreColorService.selectListByParams(params);
+        List<MdKpiScoreColor> rules = listResult.getValue();
+        if (rules == null) {
+            return;
+        }
+        for (MdKpiScoreColor rule : rules) {
+            if (StringUtils.equals(entity.getOid(), rule.getOid())) {
+                continue;
+            }
+            if (rule.getScoreMin() == null || rule.getScoreMax() == null) {
+                continue;
+            }
+            boolean overlapped = rule.getScoreMin().compareTo(entity.getScoreMax()) <= 0
+                    && rule.getScoreMax().compareTo(entity.getScoreMin()) >= 0;
+            if (overlapped) {
+                String message = "Score range overlaps with existing rule: " + rule.getColorCode()
+                        + " (" + rule.getScoreMin() + " - " + rule.getScoreMax() + ").";
+                result.getCheckFields().put("scoreMin", message);
+                result.getCheckFields().put("scoreMax", message);
+                throw new ControllerException(message);
+            }
+        }
     }
 
     private boolean isScoreStatus(String scoreStatus) {
