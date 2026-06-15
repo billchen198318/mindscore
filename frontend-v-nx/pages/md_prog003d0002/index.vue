@@ -110,7 +110,7 @@ const initQueryGridConfig = () => getGridConfig(
         { label: 'Name', field: 'colorName' },
         { label: 'Range', field: 'rangeText' },
         { label: 'Status', field: 'scoreStatusName' },
-        { label: 'Preview', field: 'previewHtml', labHtml: true },
+        { label: 'Preview', field: 'previewHtml', colHtml: true, colMethod: (val: any) => val },
         { label: 'Sort', field: 'sortNo' },
         { label: 'Enabled', field: 'enabledName' }
     ]
