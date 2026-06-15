@@ -403,6 +403,51 @@ LOCK TABLES `md_kpi_owner` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `md_kpi_score_color`
+--
+
+DROP TABLE IF EXISTS `md_kpi_score_color`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `md_kpi_score_color` (
+  `OID` char(36) NOT NULL COMMENT 'Color rule OID',
+  `SCOPE_TYPE` varchar(32) NOT NULL DEFAULT 'GLOBAL' COMMENT 'Color scope GLOBAL/KPI',
+  `SCOPE_KEY` varchar(64) NOT NULL DEFAULT 'GLOBAL' COMMENT 'GLOBAL or KPI OID, used for unique rule key',
+  `KPI_OID` char(36) DEFAULT NULL COMMENT 'KPI OID, required when SCOPE_TYPE=KPI',
+  `COLOR_TYPE` varchar(32) NOT NULL DEFAULT 'CUSTOM' COMMENT 'Color type CUSTOM/DEFAULT',
+  `COLOR_CODE` varchar(64) NOT NULL COMMENT 'Color rule code',
+  `COLOR_NAME` varchar(100) NOT NULL COMMENT 'Color rule name',
+  `SCORE_MIN` decimal(10,4) DEFAULT NULL COMMENT 'Score range start, used for CUSTOM color',
+  `SCORE_MAX` decimal(10,4) DEFAULT NULL COMMENT 'Score range end, used for CUSTOM color',
+  `SCORE_STATUS` varchar(32) NOT NULL DEFAULT 'UNKNOWN' COMMENT 'Score status GOOD/WARNING/BAD/UNKNOWN',
+  `FONT_COLOR` varchar(32) NOT NULL COMMENT 'Font color, for example #FFFFFF',
+  `BG_COLOR` varchar(32) NOT NULL COMMENT 'Background color, for example #198754',
+  `SORT_NO` int(11) NOT NULL DEFAULT 0 COMMENT 'Sort number',
+  `ENABLED` varchar(1) NOT NULL DEFAULT 'Y' COMMENT 'Enabled Y/N',
+  `DESCRIPTION` varchar(1000) DEFAULT NULL COMMENT 'Description',
+  `CUSERID` varchar(24) NOT NULL COMMENT 'Create user',
+  `CDATE` datetime NOT NULL COMMENT 'Create date',
+  `UUSERID` varchar(24) DEFAULT NULL COMMENT 'Update user',
+  `UDATE` datetime DEFAULT NULL COMMENT 'Update date',
+  PRIMARY KEY (`OID`),
+  KEY `IDX_MD_KPI_SCORE_COLOR_SCOPE` (`SCOPE_TYPE`,`SCOPE_KEY`),
+  KEY `IDX_MD_KPI_SCORE_COLOR_KPI` (`KPI_OID`),
+  KEY `IDX_MD_KPI_SCORE_COLOR_STATUS` (`SCORE_STATUS`),
+  KEY `IDX_MD_KPI_SCORE_COLOR_RANGE` (`SCORE_MIN`,`SCORE_MAX`),
+  UNIQUE KEY `UK_MD_KPI_SCORE_COLOR_CODE` (`SCOPE_TYPE`,`SCOPE_KEY`,`COLOR_CODE`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore KPI score color rule';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `md_kpi_score_color`
+--
+
+LOCK TABLES `md_kpi_score_color` WRITE;
+/*!40000 ALTER TABLE `md_kpi_score_color` DISABLE KEYS */;
+/*!40000 ALTER TABLE `md_kpi_score_color` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `md_kpi_score_snapshot`
 --
 

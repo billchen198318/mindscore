@@ -29,6 +29,7 @@ Naming rules:
 | `md_kpi` | KPI 主檔 |
 | `md_kpi_owner` | KPI owner，支援 account / org owner |
 | `md_kpi_measure_data` | KPI 週期目標與實績資料 |
+| `md_kpi_score_color` | KPI 分數顏色規則，支援全域共用與單一 KPI 覆寫 |
 | `md_kpi_score_snapshot` | KPI 計算結果快照 |
 | `md_okr_cycle` | OKR 週期 |
 | `md_okr_objective` | OKR Objective |
@@ -334,7 +335,52 @@ CREATE TABLE `md_kpi_measure_data` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore KPI 量測資料';
 ```
 
-### 5.4 `md_kpi_score_snapshot`
+### 5.4 `md_kpi_score_color`
+
+用途：KPI 分數顏色規則。此表用於 KPI snapshot、KPI report 與 dashboard 顯示時，依最終分數解析文字顏色與背景顏色。
+
+設計原則：
+
+- 顏色規則可為全域共用，也可針對單一 KPI 覆寫。
+- `SCOPE_TYPE = GLOBAL` 表示全域共用規則，`SCOPE_KEY = GLOBAL`，`KPI_OID` 應為 NULL。
+- `SCOPE_TYPE = KPI` 表示 KPI 專屬規則，`SCOPE_KEY` 應等於 KPI OID，`KPI_OID` 必填。
+- 解析顏色時應先找 KPI 專屬規則；找不到時 fallback 到 GLOBAL 規則。
+- `COLOR_TYPE = CUSTOM` 使用 `SCORE_MIN` / `SCORE_MAX` 作為分數區間。
+- `COLOR_TYPE = DEFAULT` 作為未命中任何分數區間時的預設顏色。
+- `SCORE_STATUS` 使用 `GOOD`、`WARNING`、`BAD`、`UNKNOWN`。
+- `md_kpi_score_snapshot` 儲存官方 `SCORE_STATUS`；報表與 UI 可用此表解析 `FONT_COLOR` / `BG_COLOR`。
+
+```sql
+CREATE TABLE `md_kpi_score_color` (
+  `OID` CHAR(36) NOT NULL COMMENT 'Color rule OID',
+  `SCOPE_TYPE` VARCHAR(32) NOT NULL DEFAULT 'GLOBAL' COMMENT 'Color scope GLOBAL/KPI',
+  `SCOPE_KEY` VARCHAR(64) NOT NULL DEFAULT 'GLOBAL' COMMENT 'GLOBAL or KPI OID, used for unique rule key',
+  `KPI_OID` CHAR(36) DEFAULT NULL COMMENT 'KPI OID, required when SCOPE_TYPE=KPI',
+  `COLOR_TYPE` VARCHAR(32) NOT NULL DEFAULT 'CUSTOM' COMMENT 'Color type CUSTOM/DEFAULT',
+  `COLOR_CODE` VARCHAR(64) NOT NULL COMMENT 'Color rule code',
+  `COLOR_NAME` VARCHAR(100) NOT NULL COMMENT 'Color rule name',
+  `SCORE_MIN` DECIMAL(10,4) DEFAULT NULL COMMENT 'Score range start, used for CUSTOM color',
+  `SCORE_MAX` DECIMAL(10,4) DEFAULT NULL COMMENT 'Score range end, used for CUSTOM color',
+  `SCORE_STATUS` VARCHAR(32) NOT NULL DEFAULT 'UNKNOWN' COMMENT 'Score status GOOD/WARNING/BAD/UNKNOWN',
+  `FONT_COLOR` VARCHAR(32) NOT NULL COMMENT 'Font color, for example #FFFFFF',
+  `BG_COLOR` VARCHAR(32) NOT NULL COMMENT 'Background color, for example #198754',
+  `SORT_NO` INT NOT NULL DEFAULT 0 COMMENT 'Sort number',
+  `ENABLED` VARCHAR(1) NOT NULL DEFAULT 'Y' COMMENT 'Enabled Y/N',
+  `DESCRIPTION` VARCHAR(1000) DEFAULT NULL COMMENT 'Description',
+  `CUSERID` VARCHAR(24) NOT NULL COMMENT 'Create user',
+  `CDATE` DATETIME NOT NULL COMMENT 'Create date',
+  `UUSERID` VARCHAR(24) DEFAULT NULL COMMENT 'Update user',
+  `UDATE` DATETIME DEFAULT NULL COMMENT 'Update date',
+  PRIMARY KEY (`OID`),
+  KEY `IDX_MD_KPI_SCORE_COLOR_SCOPE` (`SCOPE_TYPE`, `SCOPE_KEY`),
+  KEY `IDX_MD_KPI_SCORE_COLOR_KPI` (`KPI_OID`),
+  KEY `IDX_MD_KPI_SCORE_COLOR_STATUS` (`SCORE_STATUS`),
+  KEY `IDX_MD_KPI_SCORE_COLOR_RANGE` (`SCORE_MIN`, `SCORE_MAX`),
+  UNIQUE KEY `UK_MD_KPI_SCORE_COLOR_CODE` (`SCOPE_TYPE`, `SCOPE_KEY`, `COLOR_CODE`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore KPI score color rule';
+```
+
+### 5.5 `md_kpi_score_snapshot`
 
 用途：KPI 官方計算結果快照。保存公式版本、計算 trace，避免公式修改後歷史分數消失。
 
