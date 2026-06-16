@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
 import { use } from 'echarts/core';
@@ -90,6 +90,9 @@ const statusClass = (value: string) => {
     return 'text-bg-secondary';
 };
 const firstScore = computed(() => dsList.value.length > 0 ? dsList.value[0] : null);
+const showOrgFilter = computed(() => queryPageStore.queryParam.dataForType === 'ORG');
+const showAccountFilter = computed(() => queryPageStore.queryParam.dataForType === 'ACCOUNT');
+const hasPeriodRange = computed(() => !!queryPageStore.queryParam.periodKeyFrom && !!queryPageStore.queryParam.periodKeyTo);
 
 const trendOption = reactive<any>({
     tooltip: { trigger: 'axis' },
@@ -124,15 +127,20 @@ const gaugeOption = reactive<any>({
     }]
 });
 
+const normalizedQuery = () => {
+    return {
+        kpiOid : queryPageStore.queryParam.kpiOid,
+        periodType : queryPageStore.queryParam.periodType,
+        periodKey : hasPeriodRange.value ? '' : queryPageStore.queryParam.periodKey,
+        periodKeyFrom : queryPageStore.queryParam.periodKeyFrom,
+        periodKeyTo : queryPageStore.queryParam.periodKeyTo,
+        dataForType : queryPageStore.queryParam.dataForType,
+        account : queryPageStore.queryParam.dataForType === 'ACCOUNT' ? queryPageStore.queryParam.account : '',
+        orgOid : queryPageStore.queryParam.dataForType === 'ORG' ? queryPageStore.queryParam.orgOid : ''
+    };
+};
 const chartPayload = () => ({
-    kpiOid : queryPageStore.queryParam.kpiOid,
-    periodType : queryPageStore.queryParam.periodType,
-    periodKey : queryPageStore.queryParam.periodKey,
-    periodKeyFrom : queryPageStore.queryParam.periodKeyFrom,
-    periodKeyTo : queryPageStore.queryParam.periodKeyTo,
-    dataForType : queryPageStore.queryParam.dataForType,
-    account : queryPageStore.queryParam.account,
-    orgOid : queryPageStore.queryParam.orgOid,
+    ...normalizedQuery(),
     limit : 24
 });
 
@@ -227,19 +235,16 @@ const btnClear = () => {
 };
 
 const btnQuery = async () => {
+    if (!!queryPageStore.queryParam.periodKeyFrom !== !!queryPageStore.queryParam.periodKeyTo) {
+        toast.warning('Trend From and Trend To must be entered together.');
+        return;
+    }
     showLoading();
     dsList.value = [];
     try {
         const axiosInstance = getAxiosInstance();
         const response = await axiosInstance.post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/reportQuery', {
-            field: {
-                kpiOid : queryPageStore.queryParam.kpiOid,
-                periodType : queryPageStore.queryParam.periodType,
-                periodKey : queryPageStore.queryParam.periodKey,
-                dataForType : queryPageStore.queryParam.dataForType,
-                account : queryPageStore.queryParam.account,
-                orgOid : queryPageStore.queryParam.orgOid
-            },
+            field: normalizedQuery(),
             pageOf: {
                 select : queryPageStore.gridConfig.page,
                 showRow : queryPageStore.gridConfig.row
@@ -267,9 +272,11 @@ const btnQuery = async () => {
 const loadSummary = async () => {
     const axiosInstance = getAxiosInstance();
     const response = await axiosInstance.post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/summary', chartPayload());
-    if (response.data && import.meta.env.VITE_SUCCESS_FLAG == response.data.success) {
-        summary.value = response.data.value || summary.value;
-    }
+        if (response.data && import.meta.env.VITE_SUCCESS_FLAG == response.data.success) {
+            summary.value = response.data.value || summary.value;
+        } else if (response.data && response.data.message) {
+            toast.warning(escapeQifuHtmlMsg(response.data.message));
+        }
 };
 const loadTrend = async () => {
     const axiosInstance = getAxiosInstance();
@@ -278,6 +285,8 @@ const loadTrend = async () => {
         const rows = response.data.value || [];
         trendOption.xAxis.data = rows.map((item: any) => item.periodKey);
         trendOption.series[0].data = rows.map((item: any) => Number(item.scoreValue || 0));
+    } else if (response.data && response.data.message) {
+        toast.warning(escapeQifuHtmlMsg(response.data.message));
     }
 };
 const loadTargetActual = async () => {
@@ -288,6 +297,8 @@ const loadTargetActual = async () => {
         targetActualOption.xAxis.data = rows.map((item: any) => item.periodKey);
         targetActualOption.series[0].data = rows.map((item: any) => Number(item.rawTarget || 0));
         targetActualOption.series[1].data = rows.map((item: any) => Number(item.rawActual || 0));
+    } else if (response.data && response.data.message) {
+        toast.warning(escapeQifuHtmlMsg(response.data.message));
     }
 };
 const updateGauge = () => {
@@ -306,6 +317,21 @@ onMounted(async () => {
     }
     queryPageStore.gridConfig = newGridConfig;
     btnQuery();
+});
+
+watch(() => queryPageStore.queryParam.dataForType, (value) => {
+    if (value !== 'ACCOUNT') {
+        queryPageStore.queryParam.account = '';
+    }
+    if (value !== 'ORG') {
+        queryPageStore.queryParam.orgOid = '';
+    }
+});
+
+watch(hasPeriodRange, (value) => {
+    if (value) {
+        queryPageStore.queryParam.periodKey = '';
+    }
 });
 </script>
 
@@ -371,7 +397,7 @@ onMounted(async () => {
           <label for="queryDataForType">Data For</label>
         </div>
       </div>
-      <div class="col-md-3">
+      <div v-if="showAccountFilter" class="col-md-3">
         <div class="form-group form-floating">
           <select class="form-select" id="queryAccount" v-model="queryPageStore.queryParam.account">
             <option value="">All</option>
@@ -380,7 +406,7 @@ onMounted(async () => {
           <label for="queryAccount">Account</label>
         </div>
       </div>
-      <div class="col-md-3">
+      <div v-if="showOrgFilter" class="col-md-3">
         <div class="form-group form-floating">
           <select class="form-select" id="queryOrgOid" v-model="queryPageStore.queryParam.orgOid">
             <option value="">All</option>

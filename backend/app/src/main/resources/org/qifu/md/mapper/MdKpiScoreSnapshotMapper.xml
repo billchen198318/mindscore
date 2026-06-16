@@ -44,6 +44,12 @@
     <if test="periodKey != null and periodKey != ''.toString() ">
         AND PERIOD_KEY = #{periodKey,jdbcType=VARCHAR}
     </if>
+    <if test="periodKeyFrom != null and periodKeyFrom != ''.toString() ">
+        AND PERIOD_KEY &gt;= #{periodKeyFrom,jdbcType=VARCHAR}
+    </if>
+    <if test="periodKeyTo != null and periodKeyTo != ''.toString() ">
+        AND PERIOD_KEY &lt;= #{periodKeyTo,jdbcType=VARCHAR}
+    </if>
     <if test="dataForType != null and dataForType != ''.toString() ">
         AND DATA_FOR_TYPE = #{dataForType,jdbcType=VARCHAR}
     </if>

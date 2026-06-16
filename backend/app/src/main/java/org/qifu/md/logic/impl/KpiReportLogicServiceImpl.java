@@ -143,10 +143,18 @@ public class KpiReportLogicServiceImpl implements IKpiReportLogicService {
         }
         putIfNotBlank(params, "kpiOid", request.getKpiOid());
         putIfNotBlank(params, "periodType", request.getPeriodType());
-        putIfNotBlank(params, "periodKey", request.getPeriodKey());
+        if (StringUtils.isNotBlank(request.getPeriodKeyFrom()) && StringUtils.isNotBlank(request.getPeriodKeyTo())) {
+            putIfNotBlank(params, "periodKeyFrom", request.getPeriodKeyFrom());
+            putIfNotBlank(params, "periodKeyTo", request.getPeriodKeyTo());
+        } else {
+            putIfNotBlank(params, "periodKey", request.getPeriodKey());
+        }
         putIfNotBlank(params, "dataForType", request.getDataForType());
-        putIfNotBlank(params, "account", request.getAccount());
-        putIfNotBlank(params, "orgOid", request.getOrgOid());
+        if ("ACCOUNT".equals(request.getDataForType())) {
+            putIfNotBlank(params, "account", request.getAccount());
+        } else if ("ORG".equals(request.getDataForType())) {
+            putIfNotBlank(params, "orgOid", request.getOrgOid());
+        }
         return params;
     }
 

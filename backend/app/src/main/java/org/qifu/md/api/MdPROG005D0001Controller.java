@@ -77,15 +77,17 @@ public class MdPROG005D0001Controller extends CoreApiSupport {
         QueryResult<List<KpiReportScoreView>> result = this.initResult();
         try {
             recalculateBeforeReport(toRequest(searchBody));
+            Map<String, Object> params = this.queryParameter(searchBody)
+                    .fullEquals("kpiOid")
+                    .fullEquals("periodType")
+                    .fullEquals("periodKey")
+                    .fullEquals("dataForType")
+                    .fullEquals("account")
+                    .fullEquals("orgOid")
+                    .value();
+            applyReportRangeParams(params, searchBody);
             QueryResult<List<MdKpiScoreSnapshot>> snapshotResult = this.mdKpiScoreSnapshotService.findPage(
-                    this.queryParameter(searchBody)
-                        .fullEquals("kpiOid")
-                        .fullEquals("periodType")
-                        .fullEquals("periodKey")
-                        .fullEquals("dataForType")
-                        .fullEquals("account")
-                        .fullEquals("orgOid")
-                        .value(),
+                    params,
                     searchBody.getPageOf().orderBy("PERIOD_TYPE, PERIOD_KEY, KPI_OID").sortTypeDesc());
             DefaultResult<List<KpiReportScoreView>> viewResult = this.kpiReportLogicService.enrich(snapshotResult.getValue());
             this.setQueryResponseJsonResult(viewResult, result, searchBody.getPageOf());
@@ -101,7 +103,6 @@ public class MdPROG005D0001Controller extends CoreApiSupport {
     public ResponseEntity<DefaultControllerJsonResultObj<List<KpiReportScoreView>>> trend(@RequestBody KpiReportQueryRequest request) {
         DefaultControllerJsonResultObj<List<KpiReportScoreView>> result = this.initDefaultJsonResult();
         try {
-            recalculateBeforeReport(request);
             DefaultResult<List<KpiReportScoreView>> trendResult = this.kpiReportLogicService.trend(request);
             this.setDefaultResponseJsonResult(trendResult, result);
         } catch (ServiceException | ControllerException e) {
@@ -116,7 +117,6 @@ public class MdPROG005D0001Controller extends CoreApiSupport {
     public ResponseEntity<DefaultControllerJsonResultObj<List<KpiReportScoreView>>> targetActual(@RequestBody KpiReportQueryRequest request) {
         DefaultControllerJsonResultObj<List<KpiReportScoreView>> result = this.initDefaultJsonResult();
         try {
-            recalculateBeforeReport(request);
             DefaultResult<List<KpiReportScoreView>> targetActualResult = this.kpiReportLogicService.targetActual(request);
             this.setDefaultResponseJsonResult(targetActualResult, result);
         } catch (ServiceException | ControllerException e) {
@@ -131,7 +131,6 @@ public class MdPROG005D0001Controller extends CoreApiSupport {
     public ResponseEntity<DefaultControllerJsonResultObj<KpiReportSummary>> summary(@RequestBody KpiReportQueryRequest request) {
         DefaultControllerJsonResultObj<KpiReportSummary> result = this.initDefaultJsonResult();
         try {
-            recalculateBeforeReport(request);
             DefaultResult<KpiReportSummary> summaryResult = this.kpiReportLogicService.summary(request);
             this.setDefaultResponseJsonResult(summaryResult, result);
         } catch (ServiceException | ControllerException e) {
@@ -191,10 +190,25 @@ public class MdPROG005D0001Controller extends CoreApiSupport {
         request.setKpiOid(field.get("kpiOid"));
         request.setPeriodType(field.get("periodType"));
         request.setPeriodKey(field.get("periodKey"));
+        request.setPeriodKeyFrom(field.get("periodKeyFrom"));
+        request.setPeriodKeyTo(field.get("periodKeyTo"));
         request.setDataForType(field.get("dataForType"));
         request.setAccount(field.get("account"));
         request.setOrgOid(field.get("orgOid"));
         return request;
+    }
+
+    private void applyReportRangeParams(Map<String, Object> params, SearchBody searchBody) {
+        if (params == null || searchBody == null || searchBody.getField() == null) {
+            return;
+        }
+        String periodKeyFrom = searchBody.getField().get("periodKeyFrom");
+        String periodKeyTo = searchBody.getField().get("periodKeyTo");
+        if (StringUtils.isNotBlank(periodKeyFrom) && StringUtils.isNotBlank(periodKeyTo)) {
+            params.remove("periodKey");
+            params.put("periodKeyFrom", StringUtils.trim(periodKeyFrom));
+            params.put("periodKeyTo", StringUtils.trim(periodKeyTo));
+        }
     }
 
     private void recalculateBeforeReport(KpiReportQueryRequest request) throws ServiceException {
@@ -207,10 +221,20 @@ public class MdPROG005D0001Controller extends CoreApiSupport {
             criteria.setKpiOid(StringUtils.trimToNull(request.getKpiOid()));
             criteria.setPeriodType(StringUtils.trimToNull(request.getPeriodType()));
             criteria.setPeriodKey(periodKey);
-            criteria.setDataForType(StringUtils.trimToNull(request.getDataForType()));
-            criteria.setAccount(StringUtils.trimToNull(request.getAccount()));
-            criteria.setOrgOid(StringUtils.trimToNull(request.getOrgOid()));
+            applyDataForCriteria(criteria, request);
             this.kpiScoreCalculationLogicService.recalculateByPeriod(criteria);
+        }
+    }
+
+    private void applyDataForCriteria(MdKpiMeasureData criteria, KpiReportQueryRequest request) {
+        String dataForType = StringUtils.trimToNull(request.getDataForType());
+        criteria.setDataForType(dataForType);
+        if ("ACCOUNT".equals(dataForType)) {
+            criteria.setAccount(StringUtils.trimToNull(request.getAccount()));
+            return;
+        }
+        if ("ORG".equals(dataForType)) {
+            criteria.setOrgOid(StringUtils.trimToNull(request.getOrgOid()));
         }
     }
 
