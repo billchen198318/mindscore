@@ -29,6 +29,12 @@
     <if test="krOid != null and krOid != ''.toString() ">
         AND KR_OID = #{krOid,jdbcType=CHAR}
     </if>
+    <if test="checkinDateStart != null">
+        AND CHECKIN_DATE &gt;= #{checkinDateStart,jdbcType=DATE}
+    </if>
+    <if test="checkinDateEnd != null">
+        AND CHECKIN_DATE &lt;= #{checkinDateEnd,jdbcType=DATE}
+    </if>
   </sql>
   
   <select id="selectListByParams" parameterType="java.util.HashMap" resultMap="BaseResultMap">
