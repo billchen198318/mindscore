@@ -69,6 +69,14 @@ const scoreStatusOptions = [
 ];
 const dataForTypeQueryOptions = withAllOption(dataForTypeOptions);
 
+const periodRangeLimits: Record<string, { max: number; unit: string }> = {
+    DAY : { max: 365, unit: 'days' },
+    WEEK : { max: 104, unit: 'weeks' },
+    MONTH : { max: 32, unit: 'months' },
+    QUARTER : { max: 12, unit: 'quarters' },
+    HALFYEAR : { max: 12, unit: 'half-years' },
+    YEAR : { max: 6, unit: 'years' }
+};
 const pad2 = (value: number) => String(value).padStart(2, '0');
 const currentDateValue = () => new Date().toISOString().slice(0, 10);
 const currentMonthValue = () => new Date().toISOString().slice(0, 7);
@@ -130,6 +138,77 @@ const defaultPeriodKey = () => {
         return String(now.getFullYear());
     }
     return '';
+};
+const parsePeriodStart = (periodType: string, periodKey: string) => {
+    if (periodType === 'DAY' && /^\d{4}-\d{2}-\d{2}$/.test(periodKey)) {
+        return new Date(periodKey + 'T00:00:00');
+    }
+    if (periodType === 'WEEK') {
+        const match = /^(\d{4})-W(\d{2})$/.exec(periodKey || '');
+        if (match) {
+            const date = new Date(Date.UTC(Number(match[1]), 0, 4));
+            const day = date.getUTCDay() || 7;
+            date.setUTCDate(date.getUTCDate() - day + 1 + (Number(match[2]) - 1) * 7);
+            return new Date(date.toISOString().slice(0, 10) + 'T00:00:00');
+        }
+    }
+    if (periodType === 'MONTH' && /^\d{4}-\d{2}$/.test(periodKey)) {
+        const [year, month] = periodKey.split('-').map(Number);
+        return new Date(year, month - 1, 1);
+    }
+    if (periodType === 'QUARTER') {
+        const match = /^(\d{4})-Q([1-4])$/.exec(periodKey || '');
+        if (match) {
+            return new Date(Number(match[1]), (Number(match[2]) - 1) * 3, 1);
+        }
+    }
+    if (periodType === 'HALFYEAR') {
+        const match = /^(\d{4})-H([1-2])$/.exec(periodKey || '');
+        if (match) {
+            return new Date(Number(match[1]), (Number(match[2]) - 1) * 6, 1);
+        }
+    }
+    if (periodType === 'YEAR' && /^\d{4}$/.test(periodKey)) {
+        return new Date(Number(periodKey), 0, 1);
+    }
+    return null;
+};
+const nextPeriodDate = (periodType: string, date: Date) => {
+    const next = new Date(date.getTime());
+    if (periodType === 'DAY') {
+        next.setDate(next.getDate() + 1);
+    } else if (periodType === 'WEEK') {
+        next.setDate(next.getDate() + 7);
+    } else if (periodType === 'MONTH') {
+        next.setMonth(next.getMonth() + 1);
+    } else if (periodType === 'QUARTER') {
+        next.setMonth(next.getMonth() + 3);
+    } else if (periodType === 'HALFYEAR') {
+        next.setMonth(next.getMonth() + 6);
+    } else {
+        next.setFullYear(next.getFullYear() + 1);
+    }
+    return next;
+};
+const periodRangeCount = (periodType: string, from: string, to: string) => {
+    const limit = periodRangeLimits[periodType];
+    if (!limit) {
+        return null;
+    }
+    let current = parsePeriodStart(periodType, from);
+    const end = parsePeriodStart(periodType, to);
+    if (!current || !end) {
+        return null;
+    }
+    if (current.getTime() > end.getTime()) {
+        return 0;
+    }
+    let count = 0;
+    while (current.getTime() <= end.getTime() && count <= limit.max) {
+        count++;
+        current = nextPeriodDate(periodType, current);
+    }
+    return count;
 };
 
 const trendOption = reactive<any>({
@@ -280,6 +359,22 @@ const btnQuery = async () => {
     if (isPeriodRangeMode.value && (!queryPageStore.queryParam.periodKeyFrom || !queryPageStore.queryParam.periodKeyTo)) {
         toast.warning('Period From and Period To must be entered together.');
         return;
+    }
+    if (isPeriodRangeMode.value) {
+        const count = periodRangeCount(queryPageStore.queryParam.periodType, queryPageStore.queryParam.periodKeyFrom, queryPageStore.queryParam.periodKeyTo);
+        if (count === null) {
+            toast.warning('Invalid period range.');
+            return;
+        }
+        if (count === 0) {
+            toast.warning('Period From must be earlier than or equal to Period To.');
+            return;
+        }
+        const limit = periodRangeLimits[queryPageStore.queryParam.periodType];
+        if (limit && count > limit.max) {
+            toast.warning('Period range cannot exceed ' + limit.max + ' ' + limit.unit + '.');
+            return;
+        }
     }
     showLoading();
     dsList.value = [];

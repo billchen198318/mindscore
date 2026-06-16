@@ -47,6 +47,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequestMapping("/api/MD_PROG005D0001")
 public class MdPROG005D0001Controller extends CoreApiSupport {
     private static final long serialVersionUID = 1L;
+    private static final Map<String, PeriodRangeLimit> PERIOD_RANGE_LIMITS = Map.of(
+            "DAY", new PeriodRangeLimit(365, "days"),
+            "WEEK", new PeriodRangeLimit(104, "weeks"),
+            "MONTH", new PeriodRangeLimit(32, "months"),
+            "QUARTER", new PeriodRangeLimit(12, "quarters"),
+            "HALFYEAR", new PeriodRangeLimit(12, "half-years"),
+            "YEAR", new PeriodRangeLimit(6, "years"));
 
     private final IMdKpiScoreSnapshotService<MdKpiScoreSnapshot, String> mdKpiScoreSnapshotService;
     private final IMdKpiService<MdKpi, String> mdKpiService;
@@ -76,7 +83,9 @@ public class MdPROG005D0001Controller extends CoreApiSupport {
     public ResponseEntity<QueryResult<List<KpiReportScoreView>>> reportQuery(@RequestBody SearchBody searchBody) {
         QueryResult<List<KpiReportScoreView>> result = this.initResult();
         try {
-            recalculateBeforeReport(toRequest(searchBody));
+            KpiReportQueryRequest request = toRequest(searchBody);
+            validateReportRequest(request);
+            recalculateBeforeReport(request);
             Map<String, Object> params = this.queryParameter(searchBody)
                     .fullEquals("kpiOid")
                     .fullEquals("periodType")
@@ -103,6 +112,7 @@ public class MdPROG005D0001Controller extends CoreApiSupport {
     public ResponseEntity<DefaultControllerJsonResultObj<List<KpiReportScoreView>>> trend(@RequestBody KpiReportQueryRequest request) {
         DefaultControllerJsonResultObj<List<KpiReportScoreView>> result = this.initDefaultJsonResult();
         try {
+            validateReportRequest(request);
             DefaultResult<List<KpiReportScoreView>> trendResult = this.kpiReportLogicService.trend(request);
             this.setDefaultResponseJsonResult(trendResult, result);
         } catch (ServiceException | ControllerException e) {
@@ -117,6 +127,7 @@ public class MdPROG005D0001Controller extends CoreApiSupport {
     public ResponseEntity<DefaultControllerJsonResultObj<List<KpiReportScoreView>>> targetActual(@RequestBody KpiReportQueryRequest request) {
         DefaultControllerJsonResultObj<List<KpiReportScoreView>> result = this.initDefaultJsonResult();
         try {
+            validateReportRequest(request);
             DefaultResult<List<KpiReportScoreView>> targetActualResult = this.kpiReportLogicService.targetActual(request);
             this.setDefaultResponseJsonResult(targetActualResult, result);
         } catch (ServiceException | ControllerException e) {
@@ -131,6 +142,7 @@ public class MdPROG005D0001Controller extends CoreApiSupport {
     public ResponseEntity<DefaultControllerJsonResultObj<KpiReportSummary>> summary(@RequestBody KpiReportQueryRequest request) {
         DefaultControllerJsonResultObj<KpiReportSummary> result = this.initDefaultJsonResult();
         try {
+            validateReportRequest(request);
             DefaultResult<KpiReportSummary> summaryResult = this.kpiReportLogicService.summary(request);
             this.setDefaultResponseJsonResult(summaryResult, result);
         } catch (ServiceException | ControllerException e) {
@@ -211,6 +223,26 @@ public class MdPROG005D0001Controller extends CoreApiSupport {
         }
     }
 
+    private void validateReportRequest(KpiReportQueryRequest request) throws ServiceException {
+        if (request == null || StringUtils.isBlank(request.getPeriodType())) {
+            throw new ServiceException("Please select period type.");
+        }
+        boolean hasFrom = StringUtils.isNotBlank(request.getPeriodKeyFrom());
+        boolean hasTo = StringUtils.isNotBlank(request.getPeriodKeyTo());
+        if (hasFrom != hasTo) {
+            throw new ServiceException("Period From and Period To must be entered together.");
+        }
+        if (hasFrom) {
+            expandPeriodKeys(request.getPeriodType(), request.getPeriodKeyFrom(), request.getPeriodKeyTo());
+            return;
+        }
+        if (StringUtils.isNotBlank(request.getPeriodKey())) {
+            parsePeriodStart(request.getPeriodType(), request.getPeriodKey());
+            return;
+        }
+        throw new ServiceException("Please select period.");
+    }
+
     private void recalculateBeforeReport(KpiReportQueryRequest request) throws ServiceException {
         if (request == null || StringUtils.isBlank(request.getPeriodType())) {
             return;
@@ -252,13 +284,21 @@ public class MdPROG005D0001Controller extends CoreApiSupport {
 
     private List<String> expandPeriodKeys(String periodType, String from, String to) throws ServiceException {
         List<String> keys = new ArrayList<>();
+        PeriodRangeLimit limit = PERIOD_RANGE_LIMITS.get(periodType);
+        if (limit == null) {
+            throw new ServiceException("Unsupported period type: " + periodType);
+        }
         LocalDate current = parsePeriodStart(periodType, from);
         LocalDate end = parsePeriodStart(periodType, to);
-        int guard = 0;
-        while (!current.isAfter(end) && guard < 120) {
+        if (current.isAfter(end)) {
+            throw new ServiceException("Period From must be earlier than or equal to Period To.");
+        }
+        while (!current.isAfter(end)) {
+            if (keys.size() >= limit.max()) {
+                throw new ServiceException("Period range cannot exceed " + limit.max() + " " + limit.unit() + ".");
+            }
             keys.add(formatPeriodKey(periodType, current));
             current = nextPeriod(periodType, current);
-            guard++;
         }
         return keys;
     }
@@ -338,5 +378,8 @@ public class MdPROG005D0001Controller extends CoreApiSupport {
             return String.valueOf(date.getYear());
         }
         throw new ServiceException("Unsupported period type: " + periodType);
+    }
+
+    private record PeriodRangeLimit(int max, String unit) {
     }
 }
