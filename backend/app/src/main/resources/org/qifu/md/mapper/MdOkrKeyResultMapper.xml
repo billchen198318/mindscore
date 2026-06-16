@@ -38,6 +38,18 @@
     <if test="krCode != null and krCode != ''.toString() ">
         AND KR_CODE = #{krCode,jdbcType=VARCHAR}
     </if>
+    <if test="krCodeLike != null and krCodeLike != ''.toString() ">
+        AND KR_CODE like #{krCodeLike,jdbcType=VARCHAR}
+    </if>
+    <if test="krNameLike != null and krNameLike != ''.toString() ">
+        AND KR_NAME like #{krNameLike,jdbcType=VARCHAR}
+    </if>
+    <if test="krType != null and krType != ''.toString() ">
+        AND KR_TYPE = #{krType,jdbcType=VARCHAR}
+    </if>
+    <if test="status != null and status != ''.toString() ">
+        AND STATUS = #{status,jdbcType=VARCHAR}
+    </if>
   </sql>
   
   <select id="selectListByParams" parameterType="java.util.HashMap" resultMap="BaseResultMap">
@@ -114,12 +126,12 @@
       <if test="krCode != null">KR_CODE = #{krCode,jdbcType=VARCHAR},</if>
       <if test="krName != null">KR_NAME = #{krName,jdbcType=VARCHAR},</if>
       <if test="krType != null">KR_TYPE = #{krType,jdbcType=VARCHAR},</if>
-      <if test="startValue != null">START_VALUE = #{startValue,jdbcType=DECIMAL},</if>
-      <if test="targetValue != null">TARGET_VALUE = #{targetValue,jdbcType=DECIMAL},</if>
-      <if test="currentValue != null">CURRENT_VALUE = #{currentValue,jdbcType=DECIMAL},</if>
+      START_VALUE = #{startValue,jdbcType=DECIMAL},
+      TARGET_VALUE = #{targetValue,jdbcType=DECIMAL},
+      CURRENT_VALUE = #{currentValue,jdbcType=DECIMAL},
       <if test="progressValue != null">PROGRESS_VALUE = #{progressValue,jdbcType=DECIMAL},</if>
       <if test="weightValue != null">WEIGHT_VALUE = #{weightValue,jdbcType=DECIMAL},</if>
-      <if test="unitName != null">UNIT_NAME = #{unitName,jdbcType=VARCHAR},</if>
+      UNIT_NAME = #{unitName,jdbcType=VARCHAR},
       <if test="sortNo != null">SORT_NO = #{sortNo,jdbcType=INTEGER},</if>
       <if test="status != null">STATUS = #{status,jdbcType=VARCHAR},</if>
       <if test="uuserid != null">UUSERID = #{uuserid,jdbcType=VARCHAR},</if>
