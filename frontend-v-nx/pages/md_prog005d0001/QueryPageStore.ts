@@ -9,6 +9,7 @@ export const useMdProg005d0001Store = defineStore('md_prog005d0001', {
             gridConfig : getInitGridConfigVariable() as GridConfig,
             queryParam : {
                 kpiOid : '',
+                periodMode : 'SINGLE',
                 periodType : 'MONTH',
                 periodKey : currentMonthKey(),
                 periodKeyFrom : '',
@@ -22,6 +23,7 @@ export const useMdProg005d0001Store = defineStore('md_prog005d0001', {
     actions: {
         clearData() {
             this.queryParam.kpiOid = '';
+            this.queryParam.periodMode = 'SINGLE';
             this.queryParam.periodType = 'MONTH';
             this.queryParam.periodKey = currentMonthKey();
             this.queryParam.periodKeyFrom = '';
