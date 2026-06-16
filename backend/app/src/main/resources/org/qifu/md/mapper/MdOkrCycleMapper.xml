@@ -32,6 +32,18 @@
     <if test="cycleName != null and cycleName != ''.toString() ">
         AND CYCLE_NAME = #{cycleName,jdbcType=VARCHAR}
     </if>
+    <if test="cycleCodeLike != null and cycleCodeLike != ''.toString() ">
+        AND CYCLE_CODE like #{cycleCodeLike,jdbcType=VARCHAR}
+    </if>
+    <if test="cycleNameLike != null and cycleNameLike != ''.toString() ">
+        AND CYCLE_NAME like #{cycleNameLike,jdbcType=VARCHAR}
+    </if>
+    <if test="periodType != null and periodType != ''.toString() ">
+        AND PERIOD_TYPE = #{periodType,jdbcType=VARCHAR}
+    </if>
+    <if test="status != null and status != ''.toString() ">
+        AND STATUS = #{status,jdbcType=VARCHAR}
+    </if>
   </sql>
   
   <select id="selectListByParams" parameterType="java.util.HashMap" resultMap="BaseResultMap">

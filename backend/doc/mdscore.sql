@@ -1585,9 +1585,14 @@ CREATE TABLE `tb_sys_menu` (
 LOCK TABLES `tb_sys_menu` WRITE;
 /*!40000 ALTER TABLE `tb_sys_menu` DISABLE KEYS */;
 INSERT INTO `tb_sys_menu` VALUES
+('13716639-698d-11f1-90bd-5d78ae194a30','MD_PROG006D0001Q','57b2fa07-6985-11f1-9ff0-6fc50c28457a','Y','admin','2026-06-16 22:10:06',NULL,NULL),
+('137277aa-698d-11f1-90bd-49969aecfab3','MD_PROG006D0002Q','57b2fa07-6985-11f1-9ff0-6fc50c28457a','Y','admin','2026-06-16 22:10:06',NULL,NULL),
+('1373891b-698d-11f1-90bd-cf3d5cf086cd','MD_PROG006D0003Q','57b2fa07-6985-11f1-9ff0-6fc50c28457a','Y','admin','2026-06-16 22:10:06',NULL,NULL),
+('1374e8ac-698d-11f1-90bd-4b6ab75c1543','MD_PROG006D0004Q','57b2fa07-6985-11f1-9ff0-6fc50c28457a','Y','admin','2026-06-16 22:10:06',NULL,NULL),
 ('37fa0e49-6674-11f1-9dca-0d721c5c0f0c','MD_PROG004D','00000000-0000-0000-0000-000000000000','Y','admin','2026-06-12 23:34:36',NULL,NULL),
 ('37fb94ea-6674-11f1-9dca-0d6665973f3b','MD_PROG004D0001Q','37fa0e49-6674-11f1-9dca-0d721c5c0f0c','Y','admin','2026-06-12 23:34:36',NULL,NULL),
 ('4bd4d202-5feb-495b-8c8c-ec6b7f5b8041','CORE_PROG002D0002Q','79e1cf24-2522-4cdf-abcc-6455b47d545b','Y','admin','2017-05-10 14:20:12',NULL,NULL),
+('57b2fa07-6985-11f1-9ff0-6fc50c28457a','MD_PROG006D','00000000-0000-0000-0000-000000000000','Y','admin','2026-06-16 21:14:44',NULL,NULL),
 ('5e055f61-bfc5-402c-93b4-f241dc17b00b','CORE_PROG004D','00000000-0000-0000-0000-000000000000','Y','admin','2017-06-03 14:23:17',NULL,NULL),
 ('6383c095-6633-11f1-aa10-b7dc47bd3176','MD_PROG002D0001Q','bef9d6cc-6605-11f1-81b4-6babbff1c7f5','Y','admin','2026-06-12 15:50:32',NULL,NULL),
 ('63845cd6-6633-11f1-aa10-2bc96535409b','MD_PROG002D0002Q','bef9d6cc-6605-11f1-81b4-6babbff1c7f5','Y','admin','2026-06-12 15:50:32',NULL,NULL),
@@ -1685,6 +1690,9 @@ LOCK TABLES `tb_sys_prog` WRITE;
 /*!40000 ALTER TABLE `tb_sys_prog` DISABLE KEYS */;
 INSERT INTO `tb_sys_prog` VALUES
 ('078a5671-6558-11f1-8ea0-91de96b88a3d','MD_PROG001D0001E','AA01 - 組織單位 (編輯)','#/md_prog001d0001/edit','Y','N',0,0,'CORE','ITEM','SYSTEM','house','admin','2026-06-11 13:40:18','admin','2026-06-11 13:42:11'),
+('0f496e9f-698a-11f1-a592-005056c00001','MD_PROG006D0003Q','AF03 - OKR Key Result','#/md_prog006d0003','N','N',0,0,'CORE','ITEM','SYSTEM','list-check','admin','2026-06-16 21:48:17',NULL,NULL),
+('0f497316-698a-11f1-a592-005056c00001','MD_PROG006D0003A','AF03 - OKR Key Result (新增)','#/md_prog006d0003/create','N','N',0,0,'CORE','ITEM','SYSTEM','list-check','admin','2026-06-16 21:48:17',NULL,NULL),
+('0f4973cb-698a-11f1-a592-005056c00001','MD_PROG006D0003E','AF03 - OKR Key Result (編輯)','#/md_prog006d0003/edit','Y','N',0,0,'CORE','ITEM','SYSTEM','list-check','admin','2026-06-16 21:48:17',NULL,NULL),
 ('132d76b3-6558-11f1-8ea0-ad52a9ef6410','MD_PROG001D0002Q','AA02 - 成員維護','#/md_prog001d0002','N','N',0,0,'CORE','ITEM','SYSTEM','person','admin','2026-06-11 13:40:37',NULL,NULL),
 ('186b1fb1-749f-4b6f-97d1-6b7fb8115345','CORE_PROG001D0004E','ZA04 - Freemarker樣板 (Edit)','#/prog001d0004/edit','Y','N',0,0,'CORE','ITEM','TEMPLATE','file-text','admin','2017-05-12 10:40:10','admin','2023-08-16 21:48:56'),
 ('1b11c7eb-6133-48fb-87f0-dfbd098ce914','CORE_PROG001D0001E','ZA01 - System site (Edit)','#/prog001d0001/edit','Y','N',0,0,'CORE','ITEM','COMPUTER','globe2','admin','2014-10-02 00:00:00','admin','2021-01-20 08:20:58'),
@@ -1720,11 +1728,18 @@ INSERT INTO `tb_sys_prog` VALUES
 ('8499957e-6da9-4160-c2ec-dfb7dbc202fe','CORE_PROG001D0002E','ZA02 - Program (Edit)','#/prog001d0002/edit','Y','N',0,0,'CORE','ITEM','G_APP_INSTALL','filetype-html','admin','2014-10-02 00:00:00','admin','2023-08-15 19:19:17'),
 ('87f9ae6a-1dd2-4585-b31d-9533bdda8fd5','CORE_PROG005D0001Q','ZE01 - MQTT Dashboard','#/prog005d0001','N','N',0,0,'CORE','ITEM','PROPERTIES','speedometer2','admin','2026-06-04 11:00:54',NULL,NULL),
 ('ac5bcfd0-4abd-11e4-916c-0800200c9a66','CORE_PROG001D0001A','ZA01 - System site (Create)','#/prog001d0001/create','N','N',0,0,'CORE','ITEM','COMPUTER','globe2','admin','2014-10-02 00:00:00','admin','2021-01-20 08:20:45'),
+('aee910f9-6987-11f1-a592-005056c00001','MD_PROG006D0002Q','AF02 - OKR Objective','#/md_prog006d0002','N','N',0,0,'CORE','ITEM','SYSTEM','diagram-3','admin','2026-06-16 21:31:16',NULL,NULL),
+('aee91485-6987-11f1-a592-005056c00001','MD_PROG006D0002A','AF02 - OKR Objective (新增)','#/md_prog006d0002/create','N','N',0,0,'CORE','ITEM','SYSTEM','diagram-3','admin','2026-06-16 21:31:16',NULL,NULL),
+('aee914e3-6987-11f1-a592-005056c00001','MD_PROG006D0002E','AF02 - OKR Objective (編輯)','#/md_prog006d0002/edit','Y','N',0,0,'CORE','ITEM','SYSTEM','diagram-3','admin','2026-06-16 21:31:16',NULL,NULL),
 ('b39159ad-0707-4515-b78d-e3fc72c53974','CORE_PROG002D0001E','ZB01 - Role (Edit)','#/prog002d0001/edit','Y','N',0,0,'CORE','ITEM','PEOPLE','person-square','admin','2017-05-09 12:11:53','admin','2023-08-27 16:46:35'),
 ('b6b89559-6864-46ab-9ca9-0992dcf238f1','CORE_PROG001D0001Q','ZA01 - System site','#/prog001d0001','N','N',0,0,'CORE','ITEM','COMPUTER','globe2','admin','2014-10-02 00:00:00','admin','2021-01-20 08:20:29'),
 ('b978f706-4c5f-40f8-83b1-395492f141d4','CORE_PROG002D0001Q','ZB01 - Role','#/prog002d0001','N','N',0,0,'CORE','ITEM','PEOPLE','person-square','admin','2017-05-08 21:32:50','admin','2023-08-27 16:46:27'),
 ('bfeb7935-334f-4a94-9666-f77433793a8a','CORE_PROG005D','ZE. MQTT','/','N','N',0,0,'CORE','FOLDER','PROPERTIES','gear-fill','admin','2026-06-04 11:00:54',NULL,NULL),
 ('c96ebde8-7044-4b05-a155-68a0c2605619','CORE_PROG002D0003Q','ZB03 - Role for menu','#/prog002d0003','N','N',0,0,'CORE','ITEM','FOLDER','menu-app-fill','admin','2017-05-08 21:37:01','admin','2023-08-28 19:54:34'),
+('c9d50c9d-6984-11f1-a592-005056c00001','MD_PROG006D','AF. OKR','#','N','N',0,0,'CORE','FOLDER','SYSTEM','diagram-3','admin','2026-06-16 21:10:33',NULL,NULL),
+('c9d51115-6984-11f1-a592-005056c00001','MD_PROG006D0001Q','AF01 - OKR Cycle','#/md_prog006d0001','N','N',0,0,'CORE','ITEM','SYSTEM','calendar3','admin','2026-06-16 21:10:33',NULL,NULL),
+('c9d511cc-6984-11f1-a592-005056c00001','MD_PROG006D0001A','AF01 - OKR Cycle (新增)','#/md_prog006d0001/create','N','N',0,0,'CORE','ITEM','SYSTEM','calendar3','admin','2026-06-16 21:10:33',NULL,NULL),
+('c9d51275-6984-11f1-a592-005056c00001','MD_PROG006D0001E','AF01 - OKR Cycle (編輯)','#/md_prog006d0001/edit','Y','N',0,0,'CORE','ITEM','SYSTEM','calendar3','admin','2026-06-16 21:10:33',NULL,NULL),
 ('da69253b-6557-11f1-8ea0-3792e4bd3499','MD_PROG001D','AA. 基本資料','#','N','N',0,0,'CORE','FOLDER','SYSTEM','folder','admin','2026-06-11 13:39:02',NULL,NULL),
 ('da7d969a-5efb-4e84-9eab-4fdae236f28c','CORE_PROG002D0002Q','ZB02 - User role','#/prog002d0002','N','N',0,0,'CORE','ITEM','PERSON','person-check','admin','2017-05-08 21:34:39','admin','2023-08-28 19:54:25'),
 ('dda67b1d-e3a2-4534-835a-c62d9e8421f3','CORE_PROG001D0005S01Q','ZA05 - JasperReport (Parameter)','#/prog001d0005/setparam','Y','N',0,0,'CORE','ITEM','APPLICATION_PDF','file-pdf','admin','2017-05-18 09:57:26','admin','2023-08-24 20:21:02'),
@@ -1740,6 +1755,8 @@ INSERT INTO `tb_sys_prog` VALUES
 ('eb786ffd-c7d1-4631-aed2-4d9d7368eb13','CORE_PROG001D0005Q','ZA05 - JasperReport','#/prog001d0005','N','N',0,0,'CORE','ITEM','APPLICATION_PDF','file-pdf','admin','2017-05-18 09:54:35','admin','2023-08-24 20:20:16'),
 ('eb8ecb3d-6557-11f1-8ea0-a313029ec7da','MD_PROG001D0001Q','AA01 - 組織單位','#/md_prog001d0001','N','N',0,0,'CORE','ITEM','SYSTEM','house','admin','2026-06-11 13:39:31',NULL,NULL),
 ('f2f984fa-963c-42ed-b281-2047b863399d','MD_PROG002D0002E','AB02 - 彙總方法 (編輯)','#/md_prog002d0002/edit','Y','N',0,0,'CORE','ITEM','SYSTEM','calculator-fill','admin','2026-06-12 14:24:38',NULL,NULL),
+('f50f2063-698c-11f1-a592-005056c00001','MD_PROG006D0004Q','AF04 - OKR Check-in','#/md_prog006d0004','N','N',0,0,'CORE','ITEM','SYSTEM','clipboard-check','admin','2026-06-16 22:09:01',NULL,NULL),
+('f50f2490-698c-11f1-a592-005056c00001','MD_PROG006D0004A','AF04 - OKR Check-in (新增)','#/md_prog006d0004','N','N',0,0,'CORE','ITEM','SYSTEM','clipboard-check','admin','2026-06-16 22:09:01',NULL,NULL),
 ('f9ed13df-6557-11f1-8ea0-ebb67d5fab5b','MD_PROG001D0001A','AA01 - 組織單位 (建立)','#/md_prog001d0001/create','N','N',0,0,'CORE','ITEM','SYSTEM','house','admin','2026-06-11 13:39:55',NULL,NULL);
 /*!40000 ALTER TABLE `tb_sys_prog` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -1979,4 +1996,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2026-06-16 20:36:54
+-- Dump completed on 2026-06-16 22:13:41

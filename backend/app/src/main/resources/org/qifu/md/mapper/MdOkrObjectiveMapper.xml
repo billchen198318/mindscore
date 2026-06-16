@@ -34,6 +34,18 @@
     <if test="objectiveCode != null and objectiveCode != ''.toString() ">
         AND OBJECTIVE_CODE = #{objectiveCode,jdbcType=VARCHAR}
     </if>
+    <if test="objectiveCodeLike != null and objectiveCodeLike != ''.toString() ">
+        AND OBJECTIVE_CODE like #{objectiveCodeLike,jdbcType=VARCHAR}
+    </if>
+    <if test="objectiveNameLike != null and objectiveNameLike != ''.toString() ">
+        AND OBJECTIVE_NAME like #{objectiveNameLike,jdbcType=VARCHAR}
+    </if>
+    <if test="parentOid != null and parentOid != ''.toString() ">
+        AND PARENT_OID = #{parentOid,jdbcType=CHAR}
+    </if>
+    <if test="status != null and status != ''.toString() ">
+        AND STATUS = #{status,jdbcType=VARCHAR}
+    </if>
   </sql>
   
   <select id="selectListByParams" parameterType="java.util.HashMap" resultMap="BaseResultMap">
@@ -101,9 +113,9 @@
       <if test="cycleOid != null">CYCLE_OID = #{cycleOid,jdbcType=CHAR},</if>
       <if test="objectiveCode != null">OBJECTIVE_CODE = #{objectiveCode,jdbcType=VARCHAR},</if>
       <if test="objectiveName != null">OBJECTIVE_NAME = #{objectiveName,jdbcType=VARCHAR},</if>
-      <if test="description != null">DESCRIPTION = #{description,jdbcType=VARCHAR},</if>
-      <if test="parentOid != null">PARENT_OID = #{parentOid,jdbcType=CHAR},</if>
-      <if test="confidenceScore != null">CONFIDENCE_SCORE = #{confidenceScore,jdbcType=DECIMAL},</if>
+      DESCRIPTION = #{description,jdbcType=VARCHAR},
+      PARENT_OID = #{parentOid,jdbcType=CHAR},
+      CONFIDENCE_SCORE = #{confidenceScore,jdbcType=DECIMAL},
       <if test="progressValue != null">PROGRESS_VALUE = #{progressValue,jdbcType=DECIMAL},</if>
       <if test="status != null">STATUS = #{status,jdbcType=VARCHAR},</if>
       <if test="uuserid != null">UUSERID = #{uuserid,jdbcType=VARCHAR},</if>
