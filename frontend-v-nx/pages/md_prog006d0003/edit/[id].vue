@@ -241,6 +241,13 @@ watch(
         </select>
         <div v-if="checkInvalid('krType', checkFields)" class="invalid-feedback">{{ invalidFeedback('krType', checkFields) }}</div>
       </div>
+      <div class="col-md-12">
+        <div class="alert alert-info py-2 mb-0">
+          <strong>Value fields are optional.</strong>
+          Use Start / Target / Current for numeric KR types such as Increase, Decrease, and Percent.
+          For Milestone, Binary, or Manual KR, Progress can be maintained directly.
+        </div>
+      </div>
       <div class="col-md-4">
         <label for="unitName" class="form-label">Unit</label>
         <input type="text" class="form-control" id="unitName" v-model="formParam.unitName">
@@ -258,19 +265,23 @@ watch(
       <div class="col-md-4">
         <label for="startValue" class="form-label">Start Value</label>
         <input type="number" step="0.000001" class="form-control" id="startValue" v-model.number="formParam.startValue">
+        <div class="form-text">Optional baseline value for numeric KR calculation.</div>
       </div>
       <div class="col-md-4">
         <label for="targetValue" class="form-label">Target Value</label>
         <input type="number" step="0.000001" class="form-control" id="targetValue" v-model.number="formParam.targetValue">
+        <div class="form-text">Optional goal value for numeric KR calculation.</div>
       </div>
       <div class="col-md-4">
         <label for="currentValue" class="form-label">Current Value</label>
         <input type="number" step="0.000001" class="form-control" id="currentValue" v-model.number="formParam.currentValue">
+        <div class="form-text">Optional latest measured value. Check-in can update this later.</div>
       </div>
       <div class="col-md-4">
         <label for="progressValue" class="form-label">Progress</label>
         <input type="number" min="0" max="100" step="0.0001" :class="['form-control', checkInvalid('progressValue', checkFields) ? 'is-invalid' : '']" id="progressValue" v-model.number="formParam.progressValue">
         <div v-if="checkInvalid('progressValue', checkFields)" class="invalid-feedback">{{ invalidFeedback('progressValue', checkFields) }}</div>
+        <div class="form-text">Required official progress percentage for this KR.</div>
       </div>
       <div class="col-md-4">
         <label for="weightValue" class="form-label">Weight</label>
