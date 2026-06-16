@@ -69,6 +69,34 @@ const scoreStatusOptions = [
 const periodTypeQueryOptions = withAllOption(periodTypeOptions);
 const dataForTypeQueryOptions = withAllOption(dataForTypeOptions);
 
+type PeriodField = 'periodKey' | 'periodKeyFrom' | 'periodKeyTo';
+
+const periodFieldLabels: Record<PeriodField, string> = {
+    periodKey : 'Period',
+    periodKeyFrom : 'Period From',
+    periodKeyTo : 'Period To'
+};
+const quarterOptions = [
+    { value: '1', label: 'Q1' },
+    { value: '2', label: 'Q2' },
+    { value: '3', label: 'Q3' },
+    { value: '4', label: 'Q4' }
+];
+const halfYearOptions = [
+    { value: '1', label: 'H1' },
+    { value: '2', label: 'H2' }
+];
+const pad2 = (value: number) => String(value).padStart(2, '0');
+const currentDateValue = () => new Date().toISOString().slice(0, 10);
+const currentMonthValue = () => new Date().toISOString().slice(0, 7);
+const yearOptions = computed(() => {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    for (let year = currentYear + 5; year >= currentYear - 10; year--) {
+        years.push(String(year));
+    }
+    return years;
+});
 const numberText = (value: any) => value === null || value === undefined || value === '' ? '' : Number(value).toLocaleString(undefined, { maximumFractionDigits: 4 });
 const kpiName = (oid: string) => {
     const item = kpiList.value.find((kpi: any) => kpi.oid === oid);
@@ -93,6 +121,104 @@ const firstScore = computed(() => dsList.value.length > 0 ? dsList.value[0] : nu
 const showOrgFilter = computed(() => queryPageStore.queryParam.dataForType === 'ORG');
 const showAccountFilter = computed(() => queryPageStore.queryParam.dataForType === 'ACCOUNT');
 const hasPeriodRange = computed(() => !!queryPageStore.queryParam.periodKeyFrom && !!queryPageStore.queryParam.periodKeyTo);
+const periodPickerType = computed(() => queryPageStore.queryParam.periodType);
+
+const weekOfYear = (date: Date) => {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    return {
+        year : d.getUTCFullYear(),
+        week : Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7)
+    };
+};
+const dateFromIsoWeek = (periodKey: string) => {
+    const match = /^(\d{4})-W(\d{2})$/.exec(periodKey || '');
+    if (!match) {
+        return currentDateValue();
+    }
+    const year = Number(match[1]);
+    const week = Number(match[2]);
+    const simple = new Date(Date.UTC(year, 0, 4));
+    const day = simple.getUTCDay() || 7;
+    simple.setUTCDate(simple.getUTCDate() - day + 1 + (week - 1) * 7);
+    return simple.toISOString().slice(0, 10);
+};
+const periodInputValue = (field: PeriodField) => {
+    const key = queryPageStore.queryParam[field] || '';
+    if (periodPickerType.value === 'DAY') {
+        return /^\d{4}-\d{2}-\d{2}$/.test(key) ? key : '';
+    }
+    if (periodPickerType.value === 'WEEK') {
+        return key ? dateFromIsoWeek(key) : '';
+    }
+    if (periodPickerType.value === 'MONTH') {
+        return /^\d{4}-\d{2}$/.test(key) ? key : '';
+    }
+    if (periodPickerType.value === 'YEAR') {
+        return /^\d{4}$/.test(key) ? key : '';
+    }
+    return key;
+};
+const periodYearValue = (field: PeriodField) => {
+    const key = queryPageStore.queryParam[field] || '';
+    const match = /^(\d{4})-[QH]([1-4])$/.exec(key);
+    return match ? match[1] : '';
+};
+const periodPartValue = (field: PeriodField) => {
+    const key = queryPageStore.queryParam[field] || '';
+    const match = /^(\d{4})-[QH]([1-4])$/.exec(key);
+    return match ? match[2] : '';
+};
+const setPeriodKey = (field: PeriodField, value: string) => {
+    queryPageStore.queryParam[field] = value;
+};
+const eventValue = (event: Event) => (event.target as HTMLInputElement | HTMLSelectElement).value;
+const updatePeriodFromInput = (field: PeriodField, value: string) => {
+    if (!value) {
+        setPeriodKey(field, '');
+        return;
+    }
+    if (periodPickerType.value === 'WEEK') {
+        const info = weekOfYear(new Date(value + 'T00:00:00'));
+        setPeriodKey(field, info.year + '-W' + pad2(info.week));
+        return;
+    }
+    setPeriodKey(field, value);
+};
+const updateStructuredPeriod = (field: PeriodField, part: 'year' | 'period', value: string) => {
+    const year = part === 'year' ? value : (periodYearValue(field) || String(new Date().getFullYear()));
+    const period = part === 'period' ? value : periodPartValue(field);
+    if (!year || !period) {
+        setPeriodKey(field, '');
+        return;
+    }
+    setPeriodKey(field, year + (periodPickerType.value === 'QUARTER' ? '-Q' : '-H') + period);
+};
+const defaultPeriodKey = () => {
+    const now = new Date();
+    const dateValue = currentDateValue();
+    if (periodPickerType.value === 'DAY') {
+        return dateValue;
+    }
+    if (periodPickerType.value === 'WEEK') {
+        const info = weekOfYear(now);
+        return info.year + '-W' + pad2(info.week);
+    }
+    if (periodPickerType.value === 'MONTH') {
+        return currentMonthValue();
+    }
+    if (periodPickerType.value === 'QUARTER') {
+        return now.getFullYear() + '-Q' + Math.floor(now.getMonth() / 3 + 1);
+    }
+    if (periodPickerType.value === 'HALFYEAR') {
+        return now.getFullYear() + '-H' + (now.getMonth() < 6 ? '1' : '2');
+    }
+    if (periodPickerType.value === 'YEAR') {
+        return String(now.getFullYear());
+    }
+    return '';
+};
 
 const trendOption = reactive<any>({
     tooltip: { trigger: 'axis' },
@@ -333,6 +459,12 @@ watch(hasPeriodRange, (value) => {
         queryPageStore.queryParam.periodKey = '';
     }
 });
+
+watch(periodPickerType, (value) => {
+    queryPageStore.queryParam.periodKeyFrom = '';
+    queryPageStore.queryParam.periodKeyTo = '';
+    queryPageStore.queryParam.periodKey = value ? defaultPeriodKey() : '';
+});
 </script>
 
 <template>
@@ -372,21 +504,117 @@ watch(hasPeriodRange, (value) => {
         </div>
       </div>
       <div class="col-md-2">
-        <div class="form-group form-floating">
-          <input type="text" class="form-control" id="queryPeriodKey" placeholder="Period Key" v-model="queryPageStore.queryParam.periodKey">
-          <label for="queryPeriodKey">Period Key</label>
+        <div v-if="periodPickerType === 'DAY'" class="form-group form-floating">
+          <input type="date" class="form-control" id="queryPeriodKey" :value="periodInputValue('periodKey')" @input="updatePeriodFromInput('periodKey', eventValue($event))">
+          <label for="queryPeriodKey">{{ periodFieldLabels.periodKey }}</label>
+        </div>
+        <div v-else-if="periodPickerType === 'WEEK'" class="form-group form-floating">
+          <input type="date" class="form-control" id="queryPeriodKey" :value="periodInputValue('periodKey')" @input="updatePeriodFromInput('periodKey', eventValue($event))">
+          <label for="queryPeriodKey">{{ periodFieldLabels.periodKey }}</label>
+        </div>
+        <div v-else-if="periodPickerType === 'MONTH'" class="form-group form-floating">
+          <input type="month" class="form-control" id="queryPeriodKey" :value="periodInputValue('periodKey')" @input="updatePeriodFromInput('periodKey', eventValue($event))">
+          <label for="queryPeriodKey">{{ periodFieldLabels.periodKey }}</label>
+        </div>
+        <div v-else-if="periodPickerType === 'QUARTER' || periodPickerType === 'HALFYEAR'" class="form-group">
+          <label class="form-label" for="queryPeriodKeyYear">{{ periodFieldLabels.periodKey }}</label>
+          <div class="input-group">
+            <select class="form-select" id="queryPeriodKeyYear" :value="periodYearValue('periodKey')" @change="updateStructuredPeriod('periodKey', 'year', eventValue($event))">
+              <option value=""></option>
+              <option v-for="year in yearOptions" :key="year" :value="year">{{ year }}</option>
+            </select>
+            <select class="form-select" :value="periodPartValue('periodKey')" @change="updateStructuredPeriod('periodKey', 'period', eventValue($event))">
+              <option value=""></option>
+              <option v-for="item in periodPickerType === 'QUARTER' ? quarterOptions : halfYearOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+            </select>
+          </div>
+        </div>
+        <div v-else-if="periodPickerType === 'YEAR'" class="form-group form-floating">
+          <select class="form-select" id="queryPeriodKey" :value="periodInputValue('periodKey')" @change="updatePeriodFromInput('periodKey', eventValue($event))">
+            <option value=""></option>
+            <option v-for="year in yearOptions" :key="year" :value="year">{{ year }}</option>
+          </select>
+          <label for="queryPeriodKey">{{ periodFieldLabels.periodKey }}</label>
+        </div>
+        <div v-else class="form-group form-floating">
+          <input type="text" class="form-control" id="queryPeriodKey" disabled>
+          <label for="queryPeriodKey">{{ periodFieldLabels.periodKey }}</label>
         </div>
       </div>
       <div class="col-md-2">
-        <div class="form-group form-floating">
-          <input type="text" class="form-control" id="periodKeyFrom" placeholder="From" v-model="queryPageStore.queryParam.periodKeyFrom">
-          <label for="periodKeyFrom">Trend From</label>
+        <div v-if="periodPickerType === 'DAY'" class="form-group form-floating">
+          <input type="date" class="form-control" id="periodKeyFrom" :value="periodInputValue('periodKeyFrom')" @input="updatePeriodFromInput('periodKeyFrom', eventValue($event))">
+          <label for="periodKeyFrom">{{ periodFieldLabels.periodKeyFrom }}</label>
+        </div>
+        <div v-else-if="periodPickerType === 'WEEK'" class="form-group form-floating">
+          <input type="date" class="form-control" id="periodKeyFrom" :value="periodInputValue('periodKeyFrom')" @input="updatePeriodFromInput('periodKeyFrom', eventValue($event))">
+          <label for="periodKeyFrom">{{ periodFieldLabels.periodKeyFrom }}</label>
+        </div>
+        <div v-else-if="periodPickerType === 'MONTH'" class="form-group form-floating">
+          <input type="month" class="form-control" id="periodKeyFrom" :value="periodInputValue('periodKeyFrom')" @input="updatePeriodFromInput('periodKeyFrom', eventValue($event))">
+          <label for="periodKeyFrom">{{ periodFieldLabels.periodKeyFrom }}</label>
+        </div>
+        <div v-else-if="periodPickerType === 'QUARTER' || periodPickerType === 'HALFYEAR'" class="form-group">
+          <label class="form-label" for="periodKeyFromYear">{{ periodFieldLabels.periodKeyFrom }}</label>
+          <div class="input-group">
+            <select class="form-select" id="periodKeyFromYear" :value="periodYearValue('periodKeyFrom')" @change="updateStructuredPeriod('periodKeyFrom', 'year', eventValue($event))">
+              <option value=""></option>
+              <option v-for="year in yearOptions" :key="year" :value="year">{{ year }}</option>
+            </select>
+            <select class="form-select" :value="periodPartValue('periodKeyFrom')" @change="updateStructuredPeriod('periodKeyFrom', 'period', eventValue($event))">
+              <option value=""></option>
+              <option v-for="item in periodPickerType === 'QUARTER' ? quarterOptions : halfYearOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+            </select>
+          </div>
+        </div>
+        <div v-else-if="periodPickerType === 'YEAR'" class="form-group form-floating">
+          <select class="form-select" id="periodKeyFrom" :value="periodInputValue('periodKeyFrom')" @change="updatePeriodFromInput('periodKeyFrom', eventValue($event))">
+            <option value=""></option>
+            <option v-for="year in yearOptions" :key="year" :value="year">{{ year }}</option>
+          </select>
+          <label for="periodKeyFrom">{{ periodFieldLabels.periodKeyFrom }}</label>
+        </div>
+        <div v-else class="form-group form-floating">
+          <input type="text" class="form-control" id="periodKeyFrom" disabled>
+          <label for="periodKeyFrom">{{ periodFieldLabels.periodKeyFrom }}</label>
         </div>
       </div>
       <div class="col-md-2">
-        <div class="form-group form-floating">
-          <input type="text" class="form-control" id="periodKeyTo" placeholder="To" v-model="queryPageStore.queryParam.periodKeyTo">
-          <label for="periodKeyTo">Trend To</label>
+        <div v-if="periodPickerType === 'DAY'" class="form-group form-floating">
+          <input type="date" class="form-control" id="periodKeyTo" :value="periodInputValue('periodKeyTo')" @input="updatePeriodFromInput('periodKeyTo', eventValue($event))">
+          <label for="periodKeyTo">{{ periodFieldLabels.periodKeyTo }}</label>
+        </div>
+        <div v-else-if="periodPickerType === 'WEEK'" class="form-group form-floating">
+          <input type="date" class="form-control" id="periodKeyTo" :value="periodInputValue('periodKeyTo')" @input="updatePeriodFromInput('periodKeyTo', eventValue($event))">
+          <label for="periodKeyTo">{{ periodFieldLabels.periodKeyTo }}</label>
+        </div>
+        <div v-else-if="periodPickerType === 'MONTH'" class="form-group form-floating">
+          <input type="month" class="form-control" id="periodKeyTo" :value="periodInputValue('periodKeyTo')" @input="updatePeriodFromInput('periodKeyTo', eventValue($event))">
+          <label for="periodKeyTo">{{ periodFieldLabels.periodKeyTo }}</label>
+        </div>
+        <div v-else-if="periodPickerType === 'QUARTER' || periodPickerType === 'HALFYEAR'" class="form-group">
+          <label class="form-label" for="periodKeyToYear">{{ periodFieldLabels.periodKeyTo }}</label>
+          <div class="input-group">
+            <select class="form-select" id="periodKeyToYear" :value="periodYearValue('periodKeyTo')" @change="updateStructuredPeriod('periodKeyTo', 'year', eventValue($event))">
+              <option value=""></option>
+              <option v-for="year in yearOptions" :key="year" :value="year">{{ year }}</option>
+            </select>
+            <select class="form-select" :value="periodPartValue('periodKeyTo')" @change="updateStructuredPeriod('periodKeyTo', 'period', eventValue($event))">
+              <option value=""></option>
+              <option v-for="item in periodPickerType === 'QUARTER' ? quarterOptions : halfYearOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+            </select>
+          </div>
+        </div>
+        <div v-else-if="periodPickerType === 'YEAR'" class="form-group form-floating">
+          <select class="form-select" id="periodKeyTo" :value="periodInputValue('periodKeyTo')" @change="updatePeriodFromInput('periodKeyTo', eventValue($event))">
+            <option value=""></option>
+            <option v-for="year in yearOptions" :key="year" :value="year">{{ year }}</option>
+          </select>
+          <label for="periodKeyTo">{{ periodFieldLabels.periodKeyTo }}</label>
+        </div>
+        <div v-else class="form-group form-floating">
+          <input type="text" class="form-control" id="periodKeyTo" disabled>
+          <label for="periodKeyTo">{{ periodFieldLabels.periodKeyTo }}</label>
         </div>
       </div>
       <div class="col-md-3">
