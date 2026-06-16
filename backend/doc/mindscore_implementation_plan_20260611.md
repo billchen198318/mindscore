@@ -68,21 +68,33 @@ Implementation note: KPI owner binding can be implemented inside the KPI master 
 
 把 KPI 的 deterministic score engine 做出來。
 
+KPI score is calculated by the backend deterministic engine. The engine uses KPI formula and aggregation method configuration, writes the official result to score snapshot, and keeps calculation trace for audit.
+
+Calculation can be triggered by KPI report query, manual recalculation, or future scheduled job. KPI report may trigger real-time recalculation before reading score snapshot, but frontend must not calculate the official KPI score directly.
+
 1. Score calculation service
-2. Calculation trace
-3. Score snapshot
-4. Score color
-5. Recalculate by period
+2. Formula-based score calculation
+3. Aggregation method calculation
+4. Calculation trace
+5. Score snapshot
+6. Score color
+7. Recalculate by period
+8. Real-time recalculation entry for KPI report
 
 ### Phase 6. KPI 報表
 
 KPI 報表應該建立在已存在的 score snapshot 上。
 
-1. KPI report query
-2. Trend chart
+KPI report is a real-time score entry point. Report APIs call the backend deterministic score engine first, persist or update score snapshot, then query snapshot for report rendering.
+
+Report display should expose the score result together with its calculation source, including formula, aggregation method, score color, and calculation trace.
+
+1. Real-time KPI report query
+2. Trend chart from recalculated score snapshot
 3. Gauge / score display
 4. Target vs actual chart
 5. Personal / org KPI view
+6. Formula / aggregation / trace display
 
 ### Phase 7. OKR 週期建立
 

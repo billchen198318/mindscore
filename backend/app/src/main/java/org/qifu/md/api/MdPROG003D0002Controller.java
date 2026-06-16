@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.qifu.base.exception.ControllerException;
 import org.qifu.base.exception.ServiceException;
 import org.qifu.base.model.CheckControllerFieldHandler;
@@ -229,7 +230,7 @@ public class MdPROG003D0002Controller extends CoreApiSupport {
             return;
         }
         for (MdKpiScoreColor rule : rules) {
-            if (StringUtils.equals(entity.getOid(), rule.getOid())) {
+            if (Strings.CS.equals(entity.getOid(), rule.getOid())) {
                 continue;
             }
             if (rule.getScoreMin() == null || rule.getScoreMax() == null) {

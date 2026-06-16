@@ -120,5 +120,5 @@ export const popularIcons = [
   { name: 'layers-fill', label: 'Layers Fill' }, { name: 'stack', label: 'Stack' }, { name: 'box', label: 'Box' },
   { name: 'box-seam', label: 'Box Seam' }, { name: 'cup-hot', label: 'Cup Hot' }, { name: 'puzzle', label: 'Puzzle' },
   { name: 'calculator', label: 'Calculator' }, { name: 'diagram-3', label: 'Diagram-3' }, { name: 'bullseye', label: 'Bullseye' },
-  { name: 'palette', label: 'Palette' }  
+  { name: 'palette', label: 'Palette' }, { name: 'graph-up', label: 'Graph up' }, { name: 'speedometer2', label: 'Speed ometer 2' }
 ];

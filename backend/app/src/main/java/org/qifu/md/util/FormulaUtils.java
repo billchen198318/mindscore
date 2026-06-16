@@ -85,11 +85,11 @@ public class FormulaUtils {
         Map<String, Object> parameters = new HashMap<>();
         if (measureData != null) {
             putIfNotNull(parameters, VAR_ACTUAL, measureData.getActualValue());
-            putIfNotNull(parameters, VAR_TARGET, measureData.getTargetValue());
         }
+        putIfNotNull(parameters, VAR_TARGET, resolveTarget(kpi, measureData));
         if (kpi != null) {
-            putIfNotNull(parameters, VAR_KPI_MAX, kpi.getMaxValue());
-            putIfNotNull(parameters, VAR_KPI_MIN, kpi.getMinValue());
+            putIfNotNull(parameters, VAR_KPI_MAX, resolveMax(kpi, measureData));
+            putIfNotNull(parameters, VAR_KPI_MIN, resolveMin(kpi, measureData));
             putIfNotNull(parameters, VAR_KPI_TARGET, kpi.getTargetValue());
             putIfNotNull(parameters, VAR_KPI_WEIGHT, kpi.getWeightValue());
         }
@@ -137,5 +137,26 @@ public class FormulaUtils {
         if (value != null) {
             parameters.put(key, value);
         }
+    }
+
+    private static BigDecimal resolveTarget(MdKpi kpi, MdKpiMeasureData measureData) {
+        if (measureData != null && measureData.getTargetValue() != null) {
+            return measureData.getTargetValue();
+        }
+        return kpi == null ? null : kpi.getTargetValue();
+    }
+
+    private static BigDecimal resolveMin(MdKpi kpi, MdKpiMeasureData measureData) {
+        if (measureData != null && measureData.getMinValue() != null) {
+            return measureData.getMinValue();
+        }
+        return kpi == null ? null : kpi.getMinValue();
+    }
+
+    private static BigDecimal resolveMax(MdKpi kpi, MdKpiMeasureData measureData) {
+        if (measureData != null && measureData.getMaxValue() != null) {
+            return measureData.getMaxValue();
+        }
+        return kpi == null ? null : kpi.getMaxValue();
     }
 }

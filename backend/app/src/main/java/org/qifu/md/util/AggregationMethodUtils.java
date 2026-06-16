@@ -83,29 +83,30 @@ public class AggregationMethodUtils {
         if (StringUtils.isBlank(aggrCode)) {
             return BigDecimal.ZERO;
         }
+        aggrCode = StringUtils.trimToEmpty(aggrCode).toUpperCase();
         List<BigDecimal> scores = context == null ? null : context.getScores();
         if (CollectionUtils.isEmpty(scores)) {
             scores = java.util.Collections.emptyList();
         }
-        if (Strings.CS.contains(aggrCode, METHOD_LATEST_ACTUAL)) {
+        if (METHOD_LATEST_ACTUAL.equals(aggrCode)) {
             return latestActual(context);
         }
-        if (Strings.CS.contains(aggrCode, METHOD_FIRST_ACTUAL)) {
+        if (METHOD_FIRST_ACTUAL.equals(aggrCode)) {
             return firstActual(context);
         }
-        if (Strings.CS.contains(aggrCode, METHOD_NON_NULL_CNT)) {
+        if (METHOD_NON_NULL_CNT.equals(aggrCode)) {
             return nonNullCount(context);
         }
-        if (Strings.CS.contains(aggrCode, METHOD_VALID_RATE)) {
+        if (METHOD_VALID_RATE.equals(aggrCode)) {
             return validRate(context);
         }
-        if (Strings.CS.contains(aggrCode, METHOD_ACHIEVEMENT_RATE)) {
+        if (METHOD_ACHIEVEMENT_RATE.equals(aggrCode)) {
             return achievementRate(context);
         }
-        if (Strings.CS.contains(aggrCode, METHOD_PASS_RATE)) {
+        if (METHOD_PASS_RATE.equals(aggrCode)) {
             return passRate(context);
         }
-        if (Strings.CS.contains(aggrCode, "AVG")) {
+        if (METHOD_AVG.equals(aggrCode)) {
             if (CollectionUtils.isEmpty(scores)) {
                 return BigDecimal.ZERO;
             }
@@ -115,7 +116,7 @@ public class AggregationMethodUtils {
             }
             return sum.divide(BigDecimal.valueOf(scores.size()), 4, RoundingMode.HALF_UP);
         }
-        if (Strings.CS.contains(aggrCode, "SUM")) {
+        if (METHOD_SUM.equals(aggrCode)) {
             if (CollectionUtils.isEmpty(scores)) {
                 return BigDecimal.ZERO;
             }
@@ -125,7 +126,7 @@ public class AggregationMethodUtils {
             }
             return sum;
         }
-        if (Strings.CS.contains(aggrCode, "MAX")) {
+        if (METHOD_MAX.equals(aggrCode)) {
             if (CollectionUtils.isEmpty(scores)) {
                 return BigDecimal.ZERO;
             }
@@ -135,7 +136,7 @@ public class AggregationMethodUtils {
             }
             return max;
         }
-        if (Strings.CS.contains(aggrCode, "MIN")) {
+        if (METHOD_MIN.equals(aggrCode)) {
             if (CollectionUtils.isEmpty(scores)) {
                 return BigDecimal.ZERO;
             }
@@ -145,10 +146,10 @@ public class AggregationMethodUtils {
             }
             return min;
         }
-        if (Strings.CS.contains(aggrCode, "CNT")) {
+        if (METHOD_CNT.equals(aggrCode)) {
             return BigDecimal.valueOf(scores.size());
         }
-        if (Strings.CS.contains(aggrCode, "DISTINCT")) {
+        if (METHOD_DISTINCT.equals(aggrCode)) {
             long distinctCount = scores.stream()
                     .map(BigDecimal::stripTrailingZeros)
                     .distinct()
@@ -297,10 +298,16 @@ public class AggregationMethodUtils {
         if (actual == null) {
             return false;
         }
-        if (Strings.CS.contains(compareMode, "BETWEEN") || Strings.CS.contains(compareMode, "RANGE")) {
+        if ("RANGE".equals(compareMode) || Strings.CS.contains(compareMode, "BETWEEN")) {
             boolean minPassed = min == null || actual.compareTo(min) >= 0;
             boolean maxPassed = max == null || actual.compareTo(max) <= 0;
             return minPassed && maxPassed;
+        }
+        if ("MINIMUM".equals(compareMode)) {
+            return min != null ? actual.compareTo(min) >= 0 : target != null && actual.compareTo(target) >= 0;
+        }
+        if ("MAXIMUM".equals(compareMode)) {
+            return max != null ? actual.compareTo(max) <= 0 : target != null && actual.compareTo(target) <= 0;
         }
         if (target == null) {
             return false;
