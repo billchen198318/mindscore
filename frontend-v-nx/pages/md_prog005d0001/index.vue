@@ -43,6 +43,8 @@ const { showLoading, hideLoading } = useSwalLoading();
 const pageProgramId = ref(PageConstants.QueryId);
 const dsList = ref<any[]>([]);
 const kpiList = ref<any[]>([]);
+const orgList = ref<any[]>([]);
+const memberList = ref<any[]>([]);
 const qFieldShow = ref(true);
 const summary = ref<any>({
     kpiCount : 0,
@@ -71,6 +73,14 @@ const numberText = (value: any) => value === null || value === undefined || valu
 const kpiName = (oid: string) => {
     const item = kpiList.value.find((kpi: any) => kpi.oid === oid);
     return item ? item.kpiCode + ' - ' + item.kpiName : oid;
+};
+const orgName = (oid: string) => {
+    const item = orgList.value.find((org: any) => org.oid === oid);
+    return item ? item.orgCode + ' - ' + item.orgName : oid;
+};
+const accountName = (account: string) => {
+    const item = memberList.value.find((member: any) => member.account === account);
+    return item ? item.account + (item.displayName ? ' - ' + item.displayName : '') : account;
 };
 const statusName = (value: string) => optionName(scoreStatusOptions, value || 'UNKNOWN');
 const statusClass = (value: string) => {
@@ -163,6 +173,27 @@ const loadKpiList = async () => {
     const response = await axiosInstance.post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/findKpiList', {});
     if (response.data && import.meta.env.VITE_SUCCESS_FLAG == response.data.success) {
         kpiList.value = (response.data.value || []).filter((item: any) => item.enabled === 'Y');
+    }
+};
+const loadOrgList = async () => {
+    const axiosInstance = getAxiosInstance();
+    const response = await axiosInstance.post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/findOrgList', {});
+    if (response.data && import.meta.env.VITE_SUCCESS_FLAG == response.data.success) {
+        orgList.value = (response.data.value || []).filter((item: any) => item.enabled === 'Y');
+    }
+};
+const loadMemberList = async () => {
+    const axiosInstance = getAxiosInstance();
+    const response = await axiosInstance.post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/findMemberList', {});
+    if (response.data && import.meta.env.VITE_SUCCESS_FLAG == response.data.success) {
+        const seen: Record<string, boolean> = {};
+        memberList.value = (response.data.value || []).filter((item: any) => {
+            if (!item.account || seen[item.account]) {
+                return false;
+            }
+            seen[item.account] = true;
+            return true;
+        });
     }
 };
 
@@ -265,7 +296,7 @@ const updateGauge = () => {
 
 onMounted(async () => {
     try {
-        await loadKpiList();
+        await Promise.all([loadKpiList(), loadOrgList(), loadMemberList()]);
     } catch (e: any) {
         toast.warning(e?.message || e);
     }
@@ -342,14 +373,20 @@ onMounted(async () => {
       </div>
       <div class="col-md-3">
         <div class="form-group form-floating">
-          <input type="text" class="form-control" id="queryAccount" placeholder="Account" v-model="queryPageStore.queryParam.account">
+          <select class="form-select" id="queryAccount" v-model="queryPageStore.queryParam.account">
+            <option value="">All</option>
+            <option v-for="item in memberList" :key="item.account" :value="item.account">{{ accountName(item.account) }}</option>
+          </select>
           <label for="queryAccount">Account</label>
         </div>
       </div>
       <div class="col-md-3">
         <div class="form-group form-floating">
-          <input type="text" class="form-control" id="queryOrgOid" placeholder="Org OID" v-model="queryPageStore.queryParam.orgOid">
-          <label for="queryOrgOid">Org OID</label>
+          <select class="form-select" id="queryOrgOid" v-model="queryPageStore.queryParam.orgOid">
+            <option value="">All</option>
+            <option v-for="item in orgList" :key="item.oid" :value="item.oid">{{ orgName(item.oid) }}</option>
+          </select>
+          <label for="queryOrgOid">Organization</label>
         </div>
       </div>
       <div class="col-md-3 d-flex gap-2 align-items-end">
