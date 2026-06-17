@@ -142,7 +142,11 @@ OKR 一定要先有 cycle，後面 objective / KR 才有歸屬。
 2. Strategy theme CRUD
 3. Strategy objective CRUD
 4. Strategy objective link to KPI / OKR
-5. Strategy snapshot
+5. Strategy report / BSC report generates or reuses strategy snapshot automatically
+
+Strategy snapshot is not a normal user-maintained CRUD function.
+It should be created or reused by report generation, publish/freeze, or scheduled period-close behavior.
+For ordinary users, strategy snapshot should be exposed as report evidence/history, not as a daily maintenance screen.
 
 ### Phase 12. PDCA / Action 功能
 

@@ -191,7 +191,11 @@ This family covers strategy workspace and weighted alignment.
 | `MD_PROG007D0002` | `md_prog007d0002` | `MdStrategyTheme` | Strategy theme / pillar maintenance | Medium |
 | `MD_PROG007D0003` | `md_prog007d0003` | `MdStrategyObjective` | Strategy objective maintenance | Medium |
 | `MD_PROG007D0004` | `md_prog007d0004` | `MdStrategyObjectiveLink` | KPI / OKR alignment maintenance | Medium |
-| `MD_PROG007D0005` | `md_prog007d0005` | `MdStrategySnapshot` | Strategy snapshot query | Medium |
+| `MD_PROG007D0005` | `md_prog007d0005` | `MdStrategySnapshot` | Strategy snapshot report / evidence history, read-only | Medium |
+
+`MdStrategySnapshot` is not a user-maintained master-data program.
+It should be created or reused automatically when a Strategy / BSC report is generated, published, frozen, or closed by schedule.
+The UI, if implemented, should be read-only report evidence/history, not create/edit maintenance.
 
 Recommended backend controllers:
 
@@ -199,7 +203,9 @@ Recommended backend controllers:
 - `MdPROG007D0002Controller`
 - `MdPROG007D0003Controller`
 - `MdPROG007D0004Controller`
-- `MdPROG007D0005Controller`
+
+`MdStrategySnapshot` should be created or reused by Strategy / BSC report logic or an internal snapshot service.
+`MD_PROG007D0005` may exist as a read-only report/history controller, but must not provide create/edit/delete maintenance functions.
 
 ### 3.8 MD_PROG008D - Action / PDCA
 
@@ -832,10 +838,24 @@ SetParam: MD_PROG003D0001S01Q
 
 #### MD_PROG007D0005 - Strategy Snapshot
 
+調整後範圍：
+
+- 不做一般使用者 CRUD
+- 可做 read-only report / snapshot history 頁面
+- Strategy / BSC 報表產生時自動建立或引用 snapshot
+- Publish / freeze / period-close 排程也可以建立 snapshot
+- 若日後需要 UI，僅做 read-only snapshot evidence/history，不做 create/edit maintenance
+
+設計理由：
+
+- 一般 user 不應該手動維護 snapshot
+- 正式報表需要歷史一致性，報表結果必須指向固定的策略結構
+- Preview / current-state 報表可以直接讀 master data；formal / freeze 報表才使用 snapshot
+
 核心用途：
 
 - 記錄策略快照
-- 供年度 / 季度檢視
+- 供年度 / 季度檢視與正式報表追溯
 
 關鍵調整點：
 
