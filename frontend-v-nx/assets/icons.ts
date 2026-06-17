@@ -121,5 +121,6 @@ export const popularIcons = [
   { name: 'box-seam', label: 'Box Seam' }, { name: 'cup-hot', label: 'Cup Hot' }, { name: 'puzzle', label: 'Puzzle' },
   { name: 'calculator', label: 'Calculator' }, { name: 'diagram-3', label: 'Diagram-3' }, { name: 'bullseye', label: 'Bullseye' },
   { name: 'palette', label: 'Palette' }, { name: 'graph-up', label: 'Graph up' }, { name: 'speedometer2', label: 'Speed ometer 2' },
-  { name: 'calendar3', label: 'Calendar 3' }, { name: 'list-check', label: 'List check' }, { name: 'bar-chart-line', label: 'Bar chart line' }  
+  { name: 'calendar3', label: 'Calendar 3' }, { name: 'list-check', label: 'List check' }, { name: 'bar-chart-line', label: 'Bar chart line' },
+  { name: 'diagram-2', label: 'Diagram 2' } 
 ];
