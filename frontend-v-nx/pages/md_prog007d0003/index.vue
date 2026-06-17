@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
@@ -10,7 +10,7 @@ import GridPagination from '@/components/GridPagination.vue';
 import HiddenQueryFieldAlertInfo from '@/components/HiddenQueryFieldAlertInfo.vue';
 import { PageConstants } from './config';
 import { getGridConfig, setConfigRow, setConfigPage, setConfigTotal, resetConfigByOld } from '../../components/GridHelper';
-import { useMdProg007d0002Store } from './QueryPageStore';
+import { useMdProg007d0003Store } from './QueryPageStore';
 import {
     getAxiosInstance,
     getProgItem,
@@ -21,17 +21,18 @@ import { useSwalLoading } from '@/composables/useSwalLoading';
 definePageMeta({ middleware: ['auth'] });
 
 const router = useRouter();
-const queryPageStore = useMdProg007d0002Store();
+const queryPageStore = useMdProg007d0003Store();
 const { showLoading, hideLoading } = useSwalLoading();
 
 const pageProgramId = ref(PageConstants.QueryId);
 const dsList = ref<any[]>([]);
 const workspaceList = ref<any[]>([]);
+const themeList = ref<any[]>([]);
 const qFieldShow = ref(true);
 
-const workspaceName = (workspaceOid: string) => {
-    const workspace = workspaceList.value.find((item: any) => item.oid === workspaceOid);
-    return workspace ? `${workspace.workspaceCode} - ${workspace.workspaceName}` : workspaceOid;
+const themeName = (themeOid: string) => {
+    const theme = themeList.value.find((item: any) => item.oid === themeOid);
+    return theme ? `${theme.themeCode} - ${theme.themeName}` : themeOid;
 };
 
 const tbRefresh = () => btnClear();
@@ -42,6 +43,7 @@ const btnClear = () => {
     queryPageStore.clearData();
     dsList.value = [];
     clearGridConfig();
+    loadThemeList();
 };
 
 const changeQueryGridRow = (row: number) => {
@@ -78,9 +80,9 @@ const initQueryGridConfig = () => {
         ],
         [
             { label: '<i class="bi bi-hand-index-thumb"></i>', field: 'oid', labHtml: true },
-            { label: 'Workspace', field: 'workspaceName' },
-            { label: 'Theme Code', field: 'themeCode' },
-            { label: 'Theme Name', field: 'themeName' },
+            { label: 'Theme', field: 'themeName' },
+            { label: 'Objective Code', field: 'objectiveCode' },
+            { label: 'Objective Name', field: 'objectiveName' },
             { label: 'Weight', field: 'weightValue' },
             { label: 'Sort No', field: 'sortNo' },
             { label: 'Description', field: 'description' }
@@ -100,6 +102,20 @@ const loadWorkspaceList = async () => {
     }
 };
 
+const loadThemeList = async () => {
+    try {
+        const axiosInstance = getAxiosInstance();
+        const response = await axiosInstance.post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/findThemeList', {
+            workspaceOid: queryPageStore.queryParam.workspaceOid
+        });
+        if (response.data && import.meta.env.VITE_SUCCESS_FLAG == response.data.success) {
+            themeList.value = response.data.value || [];
+        }
+    } catch (e: any) {
+        alert(e);
+    }
+};
+
 const btnQuery = async () => {
     showLoading();
     dsList.value = [];
@@ -107,9 +123,9 @@ const btnQuery = async () => {
         const axiosInstance = getAxiosInstance();
         const response = await axiosInstance.post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/findPage', {
             "field": {
-                "workspaceOid"   : queryPageStore.queryParam.workspaceOid,
-                "themeCodeLike"  : queryPageStore.queryParam.themeCode,
-                "themeName"      : queryPageStore.queryParam.themeName
+                "themeOid"       : queryPageStore.queryParam.themeOid,
+                "objectiveCodeLike"  : queryPageStore.queryParam.objectiveCode,
+                "objectiveName"  : queryPageStore.queryParam.objectiveName
             },
             "pageOf": {
                 "select"  : queryPageStore.gridConfig.page,
@@ -125,7 +141,7 @@ const btnQuery = async () => {
             }
             dsList.value = response.data.value.map((item: any) => ({
                 ...item,
-                workspaceName: workspaceName(item.workspaceOid),
+                themeName: themeName(item.themeOid),
                 description: item.description || ''
             }));
             setConfigTotal(queryPageStore.gridConfig, response.data.pageOf.countSize);
@@ -147,11 +163,20 @@ onMounted(async () => {
     }
     queryPageStore.gridConfig = newGridConfig;
     await loadWorkspaceList();
+    await loadThemeList();
 
     if (queryPageStore.gridConfig.total > 0) {
         btnQuery();
     }
 });
+
+watch(
+    () => queryPageStore.queryParam.workspaceOid,
+    async () => {
+        queryPageStore.queryParam.themeOid = '';
+        await loadThemeList();
+    }
+);
 </script>
 
 <template>
@@ -159,7 +184,7 @@ onMounted(async () => {
   <div class="col-12">
     <Toolbar
         :progId="pageProgramId"
-        description="Strategy Theme Query"
+        description="Strategy Objective Query"
         refreshFlag="Y"
         @refreshMethod="tbRefresh"
         createFlag="Y"
@@ -175,7 +200,7 @@ onMounted(async () => {
 <div v-show="qFieldShow" class="card mb-4">
   <div class="card-body">
     <div class="row g-3">
-      <div class="col-md-4">
+      <div class="col-md-3">
         <div class="form-group form-floating">
           <select class="form-select" id="workspaceOid" v-model="queryPageStore.queryParam.workspaceOid">
             <option value="">All</option>
@@ -186,16 +211,27 @@ onMounted(async () => {
           <label for="workspaceOid">Workspace</label>
         </div>
       </div>
-      <div class="col-md-4">
+      <div class="col-md-3">
         <div class="form-group form-floating">
-          <input type="text" class="form-control" id="themeCode" placeholder="Theme Code" v-model="queryPageStore.queryParam.themeCode">
-          <label for="themeCode">Theme Code</label>
+          <select class="form-select" id="themeOid" v-model="queryPageStore.queryParam.themeOid">
+            <option value="">All</option>
+            <option v-for="theme in themeList" :key="theme.oid" :value="theme.oid">
+              {{ theme.themeCode }} - {{ theme.themeName }}
+            </option>
+          </select>
+          <label for="themeOid">Theme</label>
         </div>
       </div>
-      <div class="col-md-4">
+      <div class="col-md-3">
         <div class="form-group form-floating">
-          <input type="text" class="form-control" id="themeName" placeholder="Theme Name" v-model="queryPageStore.queryParam.themeName">
-          <label for="themeName">Theme Name</label>
+          <input type="text" class="form-control" id="objectiveCode" placeholder="Objective Code" v-model="queryPageStore.queryParam.objectiveCode">
+          <label for="objectiveCode">Objective Code</label>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="form-group form-floating">
+          <input type="text" class="form-control" id="objectiveName" placeholder="Objective Name" v-model="queryPageStore.queryParam.objectiveName">
+          <label for="objectiveName">Objective Name</label>
         </div>
       </div>
     </div>

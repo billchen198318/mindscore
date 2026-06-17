@@ -57,7 +57,7 @@ public class MdPROG007D0002Controller extends CoreApiSupport {
                     this.queryParameter(searchBody)
                         .fullEquals("workspaceOid")
                         .fullLink("themeCodeLike")
-                        .fullLink("themeNameLike")
+                        .fullLink("themeName")
                         .value(),
                     searchBody.getPageOf().orderBy("SORT_NO").sortTypeAsc().orderBy("THEME_CODE").sortTypeAsc());
             this.setQueryResponseJsonResult(queryResult, result, searchBody.getPageOf());

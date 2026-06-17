@@ -57,7 +57,7 @@ public class MdPROG007D0001Controller extends CoreApiSupport {
             QueryResult<List<MdStrategyWorkspace>> queryResult = this.mdStrategyWorkspaceService.findPage(
                     this.queryParameter(searchBody)
                         .fullLink("workspaceCodeLike")
-                        .fullLink("workspaceNameLike")
+                        .fullLink("workspaceName")
                         .fullEquals("status")
                         .value(),
                     searchBody.getPageOf().orderBy("WORKSPACE_CODE").sortTypeAsc());
