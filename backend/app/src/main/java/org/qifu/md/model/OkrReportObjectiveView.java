@@ -3,6 +3,7 @@ package org.qifu.md.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.qifu.md.entity.MdOkrInitiative;
 import org.qifu.md.entity.MdOkrObjective;
 import org.qifu.md.entity.MdOkrObjectiveOwner;
 import org.qifu.md.entity.MdOkrSnapshot;
@@ -13,6 +14,7 @@ public class OkrReportObjectiveView implements java.io.Serializable {
     private MdOkrObjective objective;
     private MdOkrSnapshot snapshot;
     private List<MdOkrObjectiveOwner> ownerList = new ArrayList<>();
+    private List<MdOkrInitiative> initiativeList = new ArrayList<>();
     private List<OkrSnapshotKeyResultDetail> keyResultDetailList = new ArrayList<>();
     private List<OkrReportObjectiveView> children = new ArrayList<>();
 
@@ -38,6 +40,14 @@ public class OkrReportObjectiveView implements java.io.Serializable {
 
     public void setOwnerList(List<MdOkrObjectiveOwner> ownerList) {
         this.ownerList = ownerList;
+    }
+
+    public List<MdOkrInitiative> getInitiativeList() {
+        return initiativeList;
+    }
+
+    public void setInitiativeList(List<MdOkrInitiative> initiativeList) {
+        this.initiativeList = initiativeList;
     }
 
     public List<OkrSnapshotKeyResultDetail> getKeyResultDetailList() {

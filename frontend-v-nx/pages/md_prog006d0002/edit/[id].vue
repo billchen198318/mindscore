@@ -28,6 +28,7 @@ const orgList = ref<any[]>([]);
 const memberList = ref<any[]>([]);
 const orgOwnerList = ref<any[]>([]);
 const accountOwnerList = ref<any[]>([]);
+const initiativeList = ref<any[]>([]);
 const pleaseSelectId = import.meta.env.VITE_PLEASE_SELECT_ID;
 const pleaseSelectLabel = import.meta.env.VITE_PLEASE_SELECT_LABEL;
 const selectedOrgOid = ref(pleaseSelectId);
@@ -64,6 +65,15 @@ const accountName = (account: string) => {
 const splitOwnerList = (ownerList: any[]) => {
     orgOwnerList.value = (ownerList || []).filter((item: any) => item.ownerType === 'ORG');
     accountOwnerList.value = (ownerList || []).filter((item: any) => item.ownerType === 'ACCOUNT');
+};
+
+const setInitiativeList = (items: any[]) => {
+    initiativeList.value = (items || []).map((item: any) => ({
+        ...item,
+        content: item.content || '',
+        status: item.status || 'ACTIVE',
+        sortNo: item.sortNo ?? 0
+    }));
 };
 
 const loadCycleList = async () => {
@@ -163,6 +173,7 @@ const loadData = async () => {
                 confidenceScore: value.objective?.confidenceScore ?? null
             };
             splitOwnerList(value.ownerList || []);
+            setInitiativeList(value.initiativeList || []);
             await loadObjectiveList();
         } else {
             toast.error('error, null');
@@ -201,6 +212,20 @@ const removeAccountOwner = (idx: number) => {
     accountOwnerList.value.splice(idx, 1);
 };
 
+const addInitiative = () => {
+    initiativeList.value.push({
+        initiativeCode: '',
+        initiativeName: '',
+        content: '',
+        sortNo: initiativeList.value.length + 1,
+        status: 'ACTIVE'
+    });
+};
+
+const removeInitiative = (idx: number) => {
+    initiativeList.value.splice(idx, 1);
+};
+
 const normalizePayload = () => ({
     objective: {
         ...formParam.value,
@@ -211,7 +236,15 @@ const normalizePayload = () => ({
     ownerList: [
         ...orgOwnerList.value,
         ...accountOwnerList.value
-    ]
+    ],
+    initiativeList: initiativeList.value
+        .filter((item: any) => item.initiativeCode || item.initiativeName)
+        .map((item: any) => ({
+            ...item,
+            content: item.content || null,
+            sortNo: item.sortNo ?? 0,
+            status: item.status || 'ACTIVE'
+        }))
 });
 
 const btnUpdate = async () => {
@@ -366,6 +399,46 @@ watch(
       <div class="col-md-12">
         <label for="description" class="form-label">Description</label>
         <textarea class="form-control" id="description" rows="3" v-model="formParam.description"></textarea>
+      </div>
+
+      <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="fw-semibold">Initiatives</div>
+          <button type="button" class="btn btn-sm btn-outline-primary" @click="addInitiative"><i class="bi bi-plus"></i> Add</button>
+        </div>
+        <div v-if="initiativeList.length === 0" class="text-muted border rounded p-3">No initiative data.</div>
+        <div v-for="(item, idx) in initiativeList" :key="item.oid || idx" class="border rounded p-3 mb-2">
+          <div class="row g-2">
+            <div class="col-md-3">
+              <label class="form-label">Code</label>
+              <input type="text" class="form-control" v-model="item.initiativeCode">
+            </div>
+            <div class="col-md-5">
+              <label class="form-label">Name</label>
+              <input type="text" class="form-control" v-model="item.initiativeName">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Sort</label>
+              <input type="number" min="0" class="form-control" v-model.number="item.sortNo">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Status</label>
+              <select class="form-select" v-model="item.status">
+                <option value="DRAFT">Draft</option>
+                <option value="ACTIVE">Active</option>
+                <option value="CLOSED">Closed</option>
+                <option value="ARCHIVED">Archived</option>
+              </select>
+            </div>
+            <div class="col-md-11">
+              <label class="form-label">Content</label>
+              <textarea class="form-control" rows="2" v-model="item.content"></textarea>
+            </div>
+            <div class="col-md-1 d-flex align-items-end">
+              <button type="button" class="btn btn-outline-danger w-100" @click="removeInitiative(idx)"><i class="bi bi-trash"></i></button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="mt-4 d-flex gap-2">

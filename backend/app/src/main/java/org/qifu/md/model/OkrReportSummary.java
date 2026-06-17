@@ -7,6 +7,7 @@ public class OkrReportSummary implements java.io.Serializable {
 
     private int objectiveCount;
     private int keyResultCount;
+    private int initiativeCount;
     private BigDecimal avgProgress = BigDecimal.ZERO;
     private int goodCount;
     private int warningCount;
@@ -27,6 +28,14 @@ public class OkrReportSummary implements java.io.Serializable {
 
     public void setKeyResultCount(int keyResultCount) {
         this.keyResultCount = keyResultCount;
+    }
+
+    public int getInitiativeCount() {
+        return initiativeCount;
+    }
+
+    public void setInitiativeCount(int initiativeCount) {
+        this.initiativeCount = initiativeCount;
     }
 
     public BigDecimal getAvgProgress() {

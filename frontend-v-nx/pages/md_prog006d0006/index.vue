@@ -29,6 +29,7 @@ const qFieldShow = ref(true);
 const emptySummary = () => ({
     objectiveCount: 0,
     keyResultCount: 0,
+    initiativeCount: 0,
     avgProgress: 0,
     goodCount: 0,
     warningCount: 0,
@@ -302,6 +303,12 @@ onMounted(async () => {
   </div>
   <div class="col-md-3 col-lg">
     <div class="border rounded p-3 h-100">
+      <div class="small text-muted">Initiatives</div>
+      <div class="fs-4 fw-semibold">{{ summary.initiativeCount }}</div>
+    </div>
+  </div>
+  <div class="col-md-3 col-lg">
+    <div class="border rounded p-3 h-100">
       <div class="small text-muted">Avg Progress</div>
       <div class="fs-4 fw-semibold">{{ numberText(summary.avgProgress) }}</div>
     </div>
@@ -392,6 +399,18 @@ onMounted(async () => {
         <span v-for="owner in selectedView.ownerList" :key="owner.oid" class="badge text-bg-secondary me-1 mb-1">
           {{ owner.ownerType }} / {{ owner.ownerRole }} / {{ ownerName(owner) }}
         </span>
+      </div>
+
+      <div class="small text-muted mb-2">Initiatives</div>
+      <div v-if="!selectedView.initiativeList || selectedView.initiativeList.length === 0" class="text-muted mb-3">
+        No initiative data.
+      </div>
+      <div v-for="initiative in selectedView.initiativeList" :key="initiative.oid" class="border rounded p-2 mb-2">
+        <div class="d-flex justify-content-between gap-3">
+          <div class="fw-semibold">{{ initiative.initiativeCode }} - {{ initiative.initiativeName }}</div>
+          <span class="badge text-bg-light border">{{ initiative.status }}</span>
+        </div>
+        <div v-if="initiative.content" class="small text-muted mt-1">{{ initiative.content }}</div>
       </div>
 
       <div class="small text-muted mb-2">Key Results</div>

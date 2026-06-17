@@ -678,6 +678,43 @@ COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
+-- Table structure for table `md_okr_initiative`
+--
+
+DROP TABLE IF EXISTS `md_okr_initiative`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `md_okr_initiative` (
+  `OID` char(36) NOT NULL COMMENT '主鍵 OID',
+  `OBJECTIVE_OID` char(36) NOT NULL COMMENT 'Objective OID',
+  `INITIATIVE_CODE` varchar(64) NOT NULL COMMENT 'Initiative 代碼',
+  `INITIATIVE_NAME` varchar(300) NOT NULL COMMENT 'Initiative 名稱',
+  `CONTENT` varchar(2000) DEFAULT NULL COMMENT 'Initiative 說明',
+  `SORT_NO` int(11) NOT NULL DEFAULT 0 COMMENT '排序',
+  `STATUS` varchar(32) NOT NULL DEFAULT 'ACTIVE' COMMENT '狀態',
+  `CUSERID` varchar(24) NOT NULL COMMENT '建立者',
+  `CDATE` datetime NOT NULL COMMENT '建立時間',
+  `UUSERID` varchar(24) DEFAULT NULL COMMENT '更新者',
+  `UDATE` datetime DEFAULT NULL COMMENT '更新時間',
+  PRIMARY KEY (`OID`),
+  UNIQUE KEY `UK_MD_OKR_INITIATIVE_CODE` (`OBJECTIVE_OID`,`INITIATIVE_CODE`),
+  KEY `IDX_MD_OKR_INITIATIVE_OBJECTIVE` (`OBJECTIVE_OID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore OKR Initiative';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `md_okr_initiative`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `md_okr_initiative` WRITE;
+/*!40000 ALTER TABLE `md_okr_initiative` DISABLE KEYS */;
+/*!40000 ALTER TABLE `md_okr_initiative` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
 -- Table structure for table `md_okr_objective`
 --
 

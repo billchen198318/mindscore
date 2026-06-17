@@ -22,6 +22,7 @@ import org.qifu.base.model.PleaseSelect;
 import org.qifu.core.util.CoreApiSupport;
 import org.qifu.md.entity.MdOkrCheckin;
 import org.qifu.md.entity.MdOkrCycle;
+import org.qifu.md.entity.MdOkrInitiative;
 import org.qifu.md.entity.MdOkrKeyResult;
 import org.qifu.md.entity.MdOkrObjective;
 import org.qifu.md.entity.MdOkrObjectiveOwner;
@@ -34,6 +35,7 @@ import org.qifu.md.model.OkrReportSummary;
 import org.qifu.md.model.OkrSnapshotKeyResultDetail;
 import org.qifu.md.service.IMdOkrCheckinService;
 import org.qifu.md.service.IMdOkrCycleService;
+import org.qifu.md.service.IMdOkrInitiativeService;
 import org.qifu.md.service.IMdOkrKeyResultService;
 import org.qifu.md.service.IMdOkrObjectiveOwnerService;
 import org.qifu.md.service.IMdOkrObjectiveService;
@@ -61,6 +63,7 @@ public class MdPROG006D0006Controller extends CoreApiSupport {
     private final IMdOkrCycleService<MdOkrCycle, String> mdOkrCycleService;
     private final IMdOkrObjectiveService<MdOkrObjective, String> mdOkrObjectiveService;
     private final IMdOkrObjectiveOwnerService<MdOkrObjectiveOwner, String> mdOkrObjectiveOwnerService;
+    private final IMdOkrInitiativeService<MdOkrInitiative, String> mdOkrInitiativeService;
     private final IMdOkrKeyResultService<MdOkrKeyResult, String> mdOkrKeyResultService;
     private final IMdOkrCheckinService<MdOkrCheckin, String> mdOkrCheckinService;
     private final IMdOkrSnapshotService<MdOkrSnapshot, String> mdOkrSnapshotService;
@@ -70,6 +73,7 @@ public class MdPROG006D0006Controller extends CoreApiSupport {
     public MdPROG006D0006Controller(IMdOkrCycleService<MdOkrCycle, String> mdOkrCycleService,
             IMdOkrObjectiveService<MdOkrObjective, String> mdOkrObjectiveService,
             IMdOkrObjectiveOwnerService<MdOkrObjectiveOwner, String> mdOkrObjectiveOwnerService,
+            IMdOkrInitiativeService<MdOkrInitiative, String> mdOkrInitiativeService,
             IMdOkrKeyResultService<MdOkrKeyResult, String> mdOkrKeyResultService,
             IMdOkrCheckinService<MdOkrCheckin, String> mdOkrCheckinService,
             IMdOkrSnapshotService<MdOkrSnapshot, String> mdOkrSnapshotService,
@@ -79,6 +83,7 @@ public class MdPROG006D0006Controller extends CoreApiSupport {
         this.mdOkrCycleService = mdOkrCycleService;
         this.mdOkrObjectiveService = mdOkrObjectiveService;
         this.mdOkrObjectiveOwnerService = mdOkrObjectiveOwnerService;
+        this.mdOkrInitiativeService = mdOkrInitiativeService;
         this.mdOkrKeyResultService = mdOkrKeyResultService;
         this.mdOkrCheckinService = mdOkrCheckinService;
         this.mdOkrSnapshotService = mdOkrSnapshotService;
@@ -205,6 +210,7 @@ public class MdPROG006D0006Controller extends CoreApiSupport {
             OkrReportObjectiveView view = new OkrReportObjectiveView();
             view.setObjective(objective);
             view.setOwnerList(ownerList);
+            view.setInitiativeList(loadInitiativeList(objective.getOid()));
             view.setSnapshot(loadLatestSnapshot(objective.getOid(), request.getPeriodKey()));
             view.setKeyResultDetailList(loadKeyResultDetailList(objective.getOid(), request.getPeriodKey()));
             views.add(view);
@@ -217,6 +223,13 @@ public class MdPROG006D0006Controller extends CoreApiSupport {
         params.put("objectiveOid", objectiveOid);
         List<MdOkrObjectiveOwner> ownerList = this.mdOkrObjectiveOwnerService.selectListByParams(params, "OWNER_TYPE, OWNER_ROLE", "ASC").getValue();
         return ownerList == null ? new ArrayList<>() : ownerList;
+    }
+
+    private List<MdOkrInitiative> loadInitiativeList(String objectiveOid) throws ServiceException {
+        Map<String, Object> params = new HashMap<>();
+        params.put("objectiveOid", objectiveOid);
+        List<MdOkrInitiative> initiativeList = this.mdOkrInitiativeService.selectListByParams(params, "SORT_NO, INITIATIVE_CODE", "ASC").getValue();
+        return initiativeList == null ? new ArrayList<>() : initiativeList;
     }
 
     private boolean ownerMatched(List<MdOkrObjectiveOwner> ownerList, OkrReportQueryRequest request) {
@@ -287,6 +300,7 @@ public class MdPROG006D0006Controller extends CoreApiSupport {
         for (OkrReportObjectiveView view : views) {
             summary.setObjectiveCount(summary.getObjectiveCount() + 1);
             summary.setKeyResultCount(summary.getKeyResultCount() + view.getKeyResultDetailList().size());
+            summary.setInitiativeCount(summary.getInitiativeCount() + view.getInitiativeList().size());
             BigDecimal progress = view.getSnapshot() == null ? view.getObjective().getProgressValue() : view.getSnapshot().getProgressValue();
             if (progress != null) {
                 progressTotal = progressTotal.add(progress);
