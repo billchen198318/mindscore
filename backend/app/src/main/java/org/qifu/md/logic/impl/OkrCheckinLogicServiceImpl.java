@@ -3,6 +3,8 @@ package org.qifu.md.logic.impl;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,10 +18,12 @@ import org.qifu.base.model.ServiceMethodType;
 import org.qifu.md.entity.MdOkrCheckin;
 import org.qifu.md.entity.MdOkrKeyResult;
 import org.qifu.md.entity.MdOkrObjective;
+import org.qifu.md.entity.MdOkrSnapshot;
 import org.qifu.md.logic.IOkrCheckinLogicService;
 import org.qifu.md.service.IMdOkrCheckinService;
 import org.qifu.md.service.IMdOkrKeyResultService;
 import org.qifu.md.service.IMdOkrObjectiveService;
+import org.qifu.md.service.IMdOkrSnapshotService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,13 +37,16 @@ public class OkrCheckinLogicServiceImpl implements IOkrCheckinLogicService {
     private final IMdOkrCheckinService<MdOkrCheckin, String> mdOkrCheckinService;
     private final IMdOkrKeyResultService<MdOkrKeyResult, String> mdOkrKeyResultService;
     private final IMdOkrObjectiveService<MdOkrObjective, String> mdOkrObjectiveService;
+    private final IMdOkrSnapshotService<MdOkrSnapshot, String> mdOkrSnapshotService;
 
     public OkrCheckinLogicServiceImpl(IMdOkrCheckinService<MdOkrCheckin, String> mdOkrCheckinService,
             IMdOkrKeyResultService<MdOkrKeyResult, String> mdOkrKeyResultService,
-            IMdOkrObjectiveService<MdOkrObjective, String> mdOkrObjectiveService) {
+            IMdOkrObjectiveService<MdOkrObjective, String> mdOkrObjectiveService,
+            IMdOkrSnapshotService<MdOkrSnapshot, String> mdOkrSnapshotService) {
         this.mdOkrCheckinService = mdOkrCheckinService;
         this.mdOkrKeyResultService = mdOkrKeyResultService;
         this.mdOkrObjectiveService = mdOkrObjectiveService;
+        this.mdOkrSnapshotService = mdOkrSnapshotService;
     }
 
     @ServiceMethodAuthority(type = ServiceMethodType.INSERT)
@@ -56,7 +63,8 @@ public class OkrCheckinLogicServiceImpl implements IOkrCheckinLogicService {
         DefaultResult<MdOkrCheckin> result = this.mdOkrCheckinService.insert(entity);
         MdOkrCheckin saved = result.getValueEmptyThrowMessage();
         MdOkrKeyResult kr = syncKeyResult(saved);
-        rollupObjective(kr.getObjectiveOid());
+        MdOkrObjective objective = rollupObjective(kr.getObjectiveOid());
+        saveObjectiveSnapshot(objective, saved);
         return result;
     }
 
@@ -73,7 +81,8 @@ public class OkrCheckinLogicServiceImpl implements IOkrCheckinLogicService {
         MdOkrCheckin dbEntity = this.mdOkrCheckinService.selectByEntityPrimaryKey(entity).getValueEmptyThrowMessage();
         DefaultResult<Boolean> result = this.mdOkrCheckinService.delete(entity);
         MdOkrKeyResult kr = reloadKeyResultByLatestCheckin(dbEntity.getKrOid());
-        rollupObjective(kr.getObjectiveOid());
+        MdOkrObjective objective = rollupObjective(kr.getObjectiveOid());
+        saveObjectiveSnapshot(objective, dbEntity);
         return result;
     }
 
@@ -105,21 +114,24 @@ public class OkrCheckinLogicServiceImpl implements IOkrCheckinLogicService {
             MdOkrCheckin latest = checkins.get(0);
             kr.setCurrentValue(latest.getCurrentValue());
             kr.setProgressValue(latest.getProgressValue());
+        } else {
+            kr.setCurrentValue(null);
+            kr.setProgressValue(BigDecimal.ZERO);
         }
         this.mdOkrKeyResultService.update(kr).getValueEmptyThrowMessage();
         return kr;
     }
 
-    private void rollupObjective(String objectiveOid) throws ServiceException {
+    private MdOkrObjective rollupObjective(String objectiveOid) throws ServiceException {
         if (StringUtils.isBlank(objectiveOid)) {
-            return;
+            return null;
         }
         Map<String, Object> params = new HashMap<>();
         params.put("objectiveOid", objectiveOid);
         params.put("status", "ACTIVE");
         List<MdOkrKeyResult> krList = this.mdOkrKeyResultService.selectListByParams(params).getValue();
         if (krList == null || krList.isEmpty()) {
-            return;
+            return loadObjective(objectiveOid);
         }
 
         BigDecimal weightTotal = BigDecimal.ZERO;
@@ -142,7 +154,7 @@ public class OkrCheckinLogicServiceImpl implements IOkrCheckinLogicService {
         }
 
         if (progressCount == 0) {
-            return;
+            return loadObjective(objectiveOid);
         }
 
         BigDecimal objectiveProgress = weightTotal.compareTo(BigDecimal.ZERO) > 0
@@ -152,10 +164,80 @@ public class OkrCheckinLogicServiceImpl implements IOkrCheckinLogicService {
             objectiveProgress = ONE_HUNDRED;
         }
 
-        MdOkrObjective objectiveKey = new MdOkrObjective();
-        objectiveKey.setOid(objectiveOid);
-        MdOkrObjective objective = this.mdOkrObjectiveService.selectByEntityPrimaryKey(objectiveKey).getValueEmptyThrowMessage();
+        MdOkrObjective objective = loadObjective(objectiveOid);
         objective.setProgressValue(objectiveProgress);
         this.mdOkrObjectiveService.update(objective).getValueEmptyThrowMessage();
+        return loadObjective(objectiveOid);
+    }
+
+    private MdOkrObjective loadObjective(String objectiveOid) throws ServiceException {
+        MdOkrObjective objectiveKey = new MdOkrObjective();
+        objectiveKey.setOid(objectiveOid);
+        return this.mdOkrObjectiveService.selectByEntityPrimaryKey(objectiveKey).getValueEmptyThrowMessage();
+    }
+
+    private void saveObjectiveSnapshot(MdOkrObjective objective, MdOkrCheckin checkin) throws ServiceException {
+        if (objective == null || checkin == null) {
+            return;
+        }
+        MdOkrSnapshot snapshot = new MdOkrSnapshot();
+        snapshot.setObjectiveOid(objective.getOid());
+        snapshot.setPeriodKey(toPeriodKey(checkin.getCheckinDate()));
+        snapshot.setProgressValue(objective.getProgressValue());
+        snapshot.setConfidenceScore(resolveConfidenceScore(objective, checkin));
+        snapshot.setScoreStatus(resolveScoreStatus(objective.getProgressValue()));
+        snapshot.setCalculationTrace(toCalculationTrace(objective, checkin));
+        snapshot.setSnapshotAt(new Date());
+        saveOrUpdateSnapshot(snapshot);
+    }
+
+    private BigDecimal resolveConfidenceScore(MdOkrObjective objective, MdOkrCheckin checkin) {
+        return checkin.getConfidenceScore() == null ? objective.getConfidenceScore() : checkin.getConfidenceScore();
+    }
+
+    private void saveOrUpdateSnapshot(MdOkrSnapshot snapshot) throws ServiceException {
+        MdOkrSnapshot existing = loadSnapshotByKey(snapshot);
+        if (existing == null) {
+            this.mdOkrSnapshotService.insert(snapshot).getValueEmptyThrowMessage();
+            return;
+        }
+        snapshot.setOid(existing.getOid());
+        this.mdOkrSnapshotService.update(snapshot).getValueEmptyThrowMessage();
+    }
+
+    private MdOkrSnapshot loadSnapshotByKey(MdOkrSnapshot snapshot) throws ServiceException {
+        Map<String, Object> params = new HashMap<>();
+        params.put("objectiveOid", snapshot.getObjectiveOid());
+        params.put("periodKey", snapshot.getPeriodKey());
+        List<MdOkrSnapshot> snapshots = this.mdOkrSnapshotService.selectListByParams(params).getValue();
+        return snapshots == null || snapshots.isEmpty() ? null : snapshots.get(0);
+    }
+
+    private String toPeriodKey(Date checkinDate) {
+        Date date = checkinDate == null ? new Date() : checkinDate;
+        return new SimpleDateFormat("yyyy-MM-dd").format(date);
+    }
+
+    private String resolveScoreStatus(BigDecimal progressValue) {
+        if (progressValue == null) {
+            return "UNKNOWN";
+        }
+        if (progressValue.compareTo(new BigDecimal("70")) >= 0) {
+            return "GOOD";
+        }
+        if (progressValue.compareTo(new BigDecimal("40")) >= 0) {
+            return "WARNING";
+        }
+        return "BAD";
+    }
+
+    private String toCalculationTrace(MdOkrObjective objective, MdOkrCheckin checkin) {
+        return "{\"source\":\"OKR_CHECKIN\",\"objectiveOid\":\"" + escapeJson(objective.getOid())
+                + "\",\"checkinOid\":\"" + escapeJson(checkin.getOid())
+                + "\",\"krOid\":\"" + escapeJson(checkin.getKrOid()) + "\"}";
+    }
+
+    private String escapeJson(String value) {
+        return value == null ? "" : value.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 }
