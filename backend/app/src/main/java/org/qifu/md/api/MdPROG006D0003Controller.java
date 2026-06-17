@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.qifu.base.exception.ControllerException;
 import org.qifu.base.exception.ServiceException;
 import org.qifu.base.model.CheckControllerFieldHandler;
@@ -199,10 +200,10 @@ public class MdPROG006D0003Controller extends CoreApiSupport {
     }
 
     private boolean isValidKrType(String krType) {
-        return StringUtils.equalsAny(krType, "INCREASE", "DECREASE", "PERCENT", "MILESTONE", "BINARY", "MANUAL");
+        return Strings.CS.equalsAny(krType, "INCREASE", "DECREASE", "PERCENT", "MILESTONE", "BINARY", "MANUAL");
     }
 
     private boolean isValidStatus(String status) {
-        return StringUtils.equalsAny(status, "DRAFT", "ACTIVE", "CLOSED", "ARCHIVED");
+        return Strings.CS.equalsAny(status, "DRAFT", "ACTIVE", "CLOSED", "ARCHIVED");
     }
 }

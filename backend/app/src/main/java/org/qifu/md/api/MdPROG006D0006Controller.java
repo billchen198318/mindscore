@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.qifu.base.exception.ControllerException;
 import org.qifu.base.exception.ServiceException;
 import org.qifu.base.model.ControllerMethodAuthority;
@@ -228,10 +229,10 @@ public class MdPROG006D0006Controller extends CoreApiSupport {
             return false;
         }
         for (MdOkrObjectiveOwner owner : ownerList) {
-            if (hasOrg && "ORG".equals(owner.getOwnerType()) && StringUtils.equals(request.getOrgOid(), owner.getOrgOid())) {
+            if (hasOrg && "ORG".equals(owner.getOwnerType()) && Strings.CS.equals(request.getOrgOid(), owner.getOrgOid())) {
                 return true;
             }
-            if (hasAccount && "ACCOUNT".equals(owner.getOwnerType()) && StringUtils.equals(request.getAccount(), owner.getAccount())) {
+            if (hasAccount && "ACCOUNT".equals(owner.getOwnerType()) && Strings.CS.equals(request.getAccount(), owner.getAccount())) {
                 return true;
             }
         }

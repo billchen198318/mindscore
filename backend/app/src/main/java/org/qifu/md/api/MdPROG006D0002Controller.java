@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.qifu.base.exception.ControllerException;
 import org.qifu.base.exception.ServiceException;
 import org.qifu.base.model.CheckControllerFieldHandler;
@@ -221,11 +222,11 @@ public class MdPROG006D0002Controller extends CoreApiSupport {
            .testField("confidenceScore", entity.getConfidenceScore() != null && (entity.getConfidenceScore().compareTo(BigDecimal.ZERO) < 0 || entity.getConfidenceScore().compareTo(new BigDecimal("100")) > 0), "Confidence must be between 0 and 100.")
            .testField("status", PleaseSelect.noSelect(entity.getStatus()), "Please select status.")
            .testField("status", !this.isValidStatus(entity.getStatus()), "Status only allows DRAFT, ACTIVE, CLOSED, or ARCHIVED.")
-           .testField("parentOid", StringUtils.isNotBlank(entity.getOid()) && StringUtils.equals(entity.getOid(), entity.getParentOid()), "Parent objective cannot be itself.")
+           .testField("parentOid", StringUtils.isNotBlank(entity.getOid()) && Strings.CS.equals(entity.getOid(), entity.getParentOid()), "Parent objective cannot be itself.")
            .throwHtmlMessage();
     }
 
     private boolean isValidStatus(String status) {
-        return StringUtils.equalsAny(status, "DRAFT", "ACTIVE", "CLOSED", "ARCHIVED");
+        return Strings.CS.equalsAny(status, "DRAFT", "ACTIVE", "CLOSED", "ARCHIVED");
     }
 }
