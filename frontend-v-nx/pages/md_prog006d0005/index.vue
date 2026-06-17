@@ -27,7 +27,7 @@ const cycleList = ref<any[]>([]);
 const objectiveList = ref<any[]>([]);
 const orgList = ref<any[]>([]);
 const memberList = ref<any[]>([]);
-const selectedSnapshot = ref<any>(null);
+const selectedSnapshotDetail = ref<any>(null);
 const qFieldShow = ref(true);
 
 const scoreStatusList = [
@@ -53,12 +53,37 @@ const accountName = (account: string) => {
     return item ? item.account + (item.displayName ? ' - ' + item.displayName : '') : account;
 };
 
-const showSnapshotDetail = (oid: string) => {
-    const item = dsList.value.find((row: any) => row.oid === oid);
-    if (!item) {
-        return;
+const ownerName = (owner: any) => {
+    if (!owner) {
+        return '';
     }
-    selectedSnapshot.value = item;
+    if (owner.ownerType === 'ORG') {
+        return orgName(owner.orgOid);
+    }
+    if (owner.ownerType === 'ACCOUNT') {
+        return accountName(owner.account);
+    }
+    return owner.ownerType;
+};
+
+const showSnapshotDetail = async (oid: string) => {
+    selectedSnapshotDetail.value = null;
+    showLoading();
+    try {
+        const axiosInstance = getAxiosInstance();
+        const response = await axiosInstance.post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/findSnapshotDetail', { oid });
+        hideLoading();
+        if (response.data) {
+            if (import.meta.env.VITE_SUCCESS_FLAG != response.data.success) {
+                toast.warning(escapeQifuHtmlMsg(response.data.message));
+                return;
+            }
+            selectedSnapshotDetail.value = response.data.value;
+        }
+    } catch (e: any) {
+        hideLoading();
+        toast.warning(e?.message || e);
+    }
 };
 
 const tbRefresh = () => btnClear();
@@ -74,7 +99,7 @@ const btnClear = () => {
     queryPageStore.clearData();
     objectiveList.value = [];
     dsList.value = [];
-    selectedSnapshot.value = null;
+    selectedSnapshotDetail.value = null;
     clearGridConfig();
 };
 
@@ -194,7 +219,7 @@ const loadMemberList = async () => {
 const btnQuery = async () => {
     showLoading();
     dsList.value = [];
-    selectedSnapshot.value = null;
+    selectedSnapshotDetail.value = null;
     try {
         const axiosInstance = getAxiosInstance();
         const response = await axiosInstance.post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/findPage', {
@@ -319,20 +344,77 @@ watch(() => queryPageStore.queryParam.cycleOid, () => loadObjectiveList());
 
 <div class="row">
     <div class="col-12">
-        <div v-if="selectedSnapshot" class="alert alert-secondary mb-3">
-            <div class="d-flex justify-content-between align-items-start gap-3">
+        <div v-if="selectedSnapshotDetail" class="border rounded p-3 mb-3 bg-light">
+            <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
                 <div>
-                    <div class="fw-bold">{{ selectedSnapshot.objectiveOid }}</div>
-                    <div class="small text-muted">{{ selectedSnapshot.periodKey }} / {{ selectedSnapshot.snapshotAt }}</div>
+                    <div class="fw-bold">
+                        {{ selectedSnapshotDetail.objective?.objectiveCode }} - {{ selectedSnapshotDetail.objective?.objectiveName }}
+                    </div>
+                    <div class="small text-muted">
+                        {{ selectedSnapshotDetail.snapshot?.periodKey }} / {{ selectedSnapshotDetail.snapshot?.snapshotAt }}
+                    </div>
                 </div>
-                <button type="button" class="btn-close" aria-label="Close" @click="selectedSnapshot = null"></button>
+                <button type="button" class="btn-close" aria-label="Close" @click="selectedSnapshotDetail = null"></button>
             </div>
-            <div class="row g-2 mt-2">
-                <div class="col-md-3"><span class="text-muted">Progress</span> {{ selectedSnapshot.progressValue }}</div>
-                <div class="col-md-3"><span class="text-muted">Confidence</span> {{ selectedSnapshot.confidenceScore }}</div>
-                <div class="col-md-3"><span class="text-muted">Status</span> {{ selectedSnapshot.scoreStatus }}</div>
+
+            <div class="row g-2 mb-3">
+                <div class="col-md-3"><span class="text-muted">Progress</span> {{ selectedSnapshotDetail.snapshot?.progressValue }}</div>
+                <div class="col-md-3"><span class="text-muted">Confidence</span> {{ selectedSnapshotDetail.snapshot?.confidenceScore }}</div>
+                <div class="col-md-3"><span class="text-muted">Status</span> {{ selectedSnapshotDetail.snapshot?.scoreStatus }}</div>
+                <div class="col-md-3"><span class="text-muted">Objective Status</span> {{ selectedSnapshotDetail.objective?.status }}</div>
             </div>
-            <pre v-if="selectedSnapshot.calculationTrace" class="mt-2 mb-0 small text-wrap">{{ selectedSnapshot.calculationTrace }}</pre>
+
+            <div v-if="selectedSnapshotDetail.ownerList && selectedSnapshotDetail.ownerList.length > 0" class="mb-3">
+                <div class="small text-muted mb-1">Owners</div>
+                <span v-for="owner in selectedSnapshotDetail.ownerList" :key="owner.oid" class="badge text-bg-secondary me-1">
+                    {{ owner.ownerType }} / {{ owner.ownerRole }} / {{ ownerName(owner) }}
+                </span>
+            </div>
+
+            <div class="mb-3">
+                <div class="small text-muted mb-2">Key Results</div>
+                <div v-if="!selectedSnapshotDetail.keyResultDetailList || selectedSnapshotDetail.keyResultDetailList.length === 0" class="text-muted">
+                    No key result data.
+                </div>
+                <div v-for="krDetail in selectedSnapshotDetail.keyResultDetailList" :key="krDetail.keyResult.oid" class="border rounded bg-white p-2 mb-2">
+                    <div class="d-flex justify-content-between gap-3">
+                        <div class="fw-semibold">{{ krDetail.keyResult.krCode }} - {{ krDetail.keyResult.krName }}</div>
+                        <div class="text-muted">{{ krDetail.keyResult.status }}</div>
+                    </div>
+                    <div class="row g-2 mt-1 small">
+                        <div class="col-md-2"><span class="text-muted">Type</span> {{ krDetail.keyResult.krType }}</div>
+                        <div class="col-md-2"><span class="text-muted">Current</span> {{ krDetail.keyResult.currentValue }}</div>
+                        <div class="col-md-2"><span class="text-muted">Target</span> {{ krDetail.keyResult.targetValue }}</div>
+                        <div class="col-md-2"><span class="text-muted">Progress</span> {{ krDetail.keyResult.progressValue }}</div>
+                        <div class="col-md-2"><span class="text-muted">Weight</span> {{ krDetail.keyResult.weightValue }}</div>
+                    </div>
+                    <div v-if="krDetail.checkinList && krDetail.checkinList.length > 0" class="table-responsive mt-2">
+                        <table class="table table-sm table-bordered mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Check-in Date</th>
+                                    <th>Current</th>
+                                    <th>Progress</th>
+                                    <th>Confidence</th>
+                                    <th>Comment</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="checkin in krDetail.checkinList" :key="checkin.oid">
+                                    <td>{{ checkin.checkinDate }}</td>
+                                    <td>{{ checkin.currentValue }}</td>
+                                    <td>{{ checkin.progressValue }}</td>
+                                    <td>{{ checkin.confidenceScore }}</td>
+                                    <td>{{ checkin.commentText }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div v-else class="text-muted small mt-2">No check-in history before this snapshot period.</div>
+                </div>
+            </div>
+
+            <pre v-if="selectedSnapshotDetail.snapshot?.calculationTrace" class="mb-0 small text-wrap">{{ selectedSnapshotDetail.snapshot.calculationTrace }}</pre>
         </div>
         <GridPagination
             :progId="pageProgramId"
