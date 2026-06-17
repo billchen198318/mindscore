@@ -30,8 +30,43 @@
     <if test="objectiveOid != null and objectiveOid != ''.toString() ">
         AND OBJECTIVE_OID = #{objectiveOid,jdbcType=CHAR}
     </if>
+    <if test="cycleOid != null and cycleOid != ''.toString() ">
+        AND EXISTS (
+            select 1
+            from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_okr_objective obj
+            where obj.OID = md_okr_snapshot.OBJECTIVE_OID
+              AND obj.CYCLE_OID = #{cycleOid,jdbcType=CHAR}
+        )
+    </if>
     <if test="periodKey != null and periodKey != ''.toString() ">
         AND PERIOD_KEY = #{periodKey,jdbcType=VARCHAR}
+    </if>
+    <if test="periodKeyFrom != null and periodKeyFrom != ''.toString() ">
+        AND PERIOD_KEY &gt;= #{periodKeyFrom,jdbcType=VARCHAR}
+    </if>
+    <if test="periodKeyTo != null and periodKeyTo != ''.toString() ">
+        AND PERIOD_KEY &lt;= #{periodKeyTo,jdbcType=VARCHAR}
+    </if>
+    <if test="scoreStatus != null and scoreStatus != ''.toString() ">
+        AND SCORE_STATUS = #{scoreStatus,jdbcType=VARCHAR}
+    </if>
+    <if test="orgOid != null and orgOid != ''.toString() ">
+        AND EXISTS (
+            select 1
+            from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_okr_objective_owner owner
+            where owner.OBJECTIVE_OID = md_okr_snapshot.OBJECTIVE_OID
+              AND owner.OWNER_TYPE = 'ORG'
+              AND owner.ORG_OID = #{orgOid,jdbcType=CHAR}
+        )
+    </if>
+    <if test="account != null and account != ''.toString() ">
+        AND EXISTS (
+            select 1
+            from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_okr_objective_owner owner
+            where owner.OBJECTIVE_OID = md_okr_snapshot.OBJECTIVE_OID
+              AND owner.OWNER_TYPE = 'ACCOUNT'
+              AND owner.ACCOUNT = #{account,jdbcType=VARCHAR}
+        )
     </if>
   </sql>
   
