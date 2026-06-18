@@ -3,9 +3,14 @@ package org.qifu.md.logic.impl;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
+import java.time.temporal.WeekFields;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +24,7 @@ import org.qifu.base.model.YesNoKeyProvide;
 import org.qifu.md.entity.MdKpi;
 import org.qifu.md.entity.MdKpiScoreSnapshot;
 import org.qifu.md.entity.MdOkrObjective;
+import org.qifu.md.entity.MdOkrSnapshot;
 import org.qifu.md.entity.MdStrategyObjective;
 import org.qifu.md.entity.MdStrategyObjectiveLink;
 import org.qifu.md.entity.MdStrategySnapshot;
@@ -33,11 +39,13 @@ import org.qifu.md.model.StrategyReportThemeView;
 import org.qifu.md.service.IMdKpiScoreSnapshotService;
 import org.qifu.md.service.IMdKpiService;
 import org.qifu.md.service.IMdOkrObjectiveService;
+import org.qifu.md.service.IMdOkrSnapshotService;
 import org.qifu.md.service.IMdStrategyObjectiveLinkService;
 import org.qifu.md.service.IMdStrategyObjectiveService;
 import org.qifu.md.service.IMdStrategySnapshotService;
 import org.qifu.md.service.IMdStrategyThemeService;
 import org.qifu.md.service.IMdStrategyWorkspaceService;
+import org.qifu.util.LoadResources;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,6 +59,7 @@ public class StrategyReportLogicServiceImpl implements IStrategyReportLogicServi
     private static final String DATA_FOR_GLOBAL = "GLOBAL";
     private static final String DATA_FOR_ACCOUNT = "ACCOUNT";
     private static final String DATA_FOR_ORG = "ORG";
+    private static final DateTimeFormatter OKR_SNAPSHOT_PERIOD_FORMAT = DateTimeFormatter.ISO_LOCAL_DATE;
 
     private final IMdStrategyWorkspaceService<MdStrategyWorkspace, String> mdStrategyWorkspaceService;
     private final IMdStrategyThemeService<MdStrategyTheme, String> mdStrategyThemeService;
@@ -60,6 +69,7 @@ public class StrategyReportLogicServiceImpl implements IStrategyReportLogicServi
     private final IMdKpiService<MdKpi, String> mdKpiService;
     private final IMdKpiScoreSnapshotService<MdKpiScoreSnapshot, String> mdKpiScoreSnapshotService;
     private final IMdOkrObjectiveService<MdOkrObjective, String> mdOkrObjectiveService;
+    private final IMdOkrSnapshotService<MdOkrSnapshot, String> mdOkrSnapshotService;
 
     public StrategyReportLogicServiceImpl(IMdStrategyWorkspaceService<MdStrategyWorkspace, String> mdStrategyWorkspaceService,
             IMdStrategyThemeService<MdStrategyTheme, String> mdStrategyThemeService,
@@ -68,7 +78,8 @@ public class StrategyReportLogicServiceImpl implements IStrategyReportLogicServi
             IMdStrategySnapshotService<MdStrategySnapshot, String> mdStrategySnapshotService,
             IMdKpiService<MdKpi, String> mdKpiService,
             IMdKpiScoreSnapshotService<MdKpiScoreSnapshot, String> mdKpiScoreSnapshotService,
-            IMdOkrObjectiveService<MdOkrObjective, String> mdOkrObjectiveService) {
+            IMdOkrObjectiveService<MdOkrObjective, String> mdOkrObjectiveService,
+            IMdOkrSnapshotService<MdOkrSnapshot, String> mdOkrSnapshotService) {
         this.mdStrategyWorkspaceService = mdStrategyWorkspaceService;
         this.mdStrategyThemeService = mdStrategyThemeService;
         this.mdStrategyObjectiveService = mdStrategyObjectiveService;
@@ -77,6 +88,7 @@ public class StrategyReportLogicServiceImpl implements IStrategyReportLogicServi
         this.mdKpiService = mdKpiService;
         this.mdKpiScoreSnapshotService = mdKpiScoreSnapshotService;
         this.mdOkrObjectiveService = mdOkrObjectiveService;
+        this.mdOkrSnapshotService = mdOkrSnapshotService;
     }
 
     @ServiceMethodAuthority(type = ServiceMethodType.INSERT)
@@ -205,7 +217,7 @@ public class StrategyReportLogicServiceImpl implements IStrategyReportLogicServi
         if (LINK_TYPE_KPI.equals(link.getLinkType())) {
             applyKpiScore(view, link, request);
         } else if (LINK_TYPE_OKR_OBJECTIVE.equals(link.getLinkType())) {
-            applyOkrObjectiveScore(view, link);
+            applyOkrObjectiveScore(view, link, request);
         } else {
             view.setSourceCode(link.getLinkOid());
             view.setSourceName("Unsupported link type");
@@ -259,7 +271,7 @@ public class StrategyReportLogicServiceImpl implements IStrategyReportLogicServi
         return CollectionUtils.isEmpty(snapshots) ? null : snapshots.get(0);
     }
 
-    private void applyOkrObjectiveScore(StrategyReportLinkView view, MdStrategyObjectiveLink link) throws ServiceException {
+    private void applyOkrObjectiveScore(StrategyReportLinkView view, MdStrategyObjectiveLink link, StrategyReportQueryRequest request) throws ServiceException {
         MdOkrObjective key = new MdOkrObjective();
         key.setOid(link.getLinkOid());
         MdOkrObjective objective = this.mdOkrObjectiveService.selectByEntityPrimaryKey(key).getValue();
@@ -269,7 +281,77 @@ public class StrategyReportLogicServiceImpl implements IStrategyReportLogicServi
         }
         view.setSourceCode(objective.getObjectiveCode());
         view.setSourceName(objective.getObjectiveName());
-        view.setScoreValue(objective.getProgressValue());
+        MdOkrSnapshot snapshot = loadOkrSnapshot(link.getLinkOid(), request);
+        if (snapshot != null) {
+            view.setScoreValue(snapshot.getProgressValue());
+            view.setScoreStatus(snapshot.getScoreStatus());
+            view.setCalculationTrace(snapshot.getCalculationTrace());
+            view.setCalculatedAt(snapshot.getSnapshotAt());
+        }
+    }
+
+    private MdOkrSnapshot loadOkrSnapshot(String objectiveOid, StrategyReportQueryRequest request) throws ServiceException {
+        Map<String, Object> params = new HashMap<>();
+        params.put("objectiveOid", objectiveOid);
+        OkrSnapshotPeriodRange periodRange = resolveOkrSnapshotPeriodRange(request);
+        params.put("periodKeyFrom", periodRange.from());
+        params.put("periodKeyTo", periodRange.to());
+        if (DATA_FOR_ACCOUNT.equals(request.getDataForType())) {
+            params.put("account", request.getAccount());
+        }
+        if (DATA_FOR_ORG.equals(request.getDataForType())) {
+            params.put("orgOid", request.getOrgOid());
+        }
+        List<MdOkrSnapshot> snapshots = this.mdOkrSnapshotService.selectListByParams(params, "PERIOD_KEY, SNAPSHOT_AT", "DESC").getValue();
+        return CollectionUtils.isEmpty(snapshots) ? null : snapshots.get(0);
+    }
+
+    private OkrSnapshotPeriodRange resolveOkrSnapshotPeriodRange(StrategyReportQueryRequest request) throws ServiceException {
+        String periodType = StringUtils.trimToEmpty(request.getPeriodType()).toUpperCase();
+        String periodKey = StringUtils.trimToEmpty(request.getPeriodKey());
+        try {
+            if ("DAY".equals(periodType)) {
+                LocalDate date = LocalDate.parse(periodKey);
+                return toOkrSnapshotPeriodRange(date, date);
+            }
+            if ("WEEK".equals(periodType)) {
+                String[] parts = periodKey.split("-W");
+                LocalDate monday = LocalDate.of(Integer.parseInt(parts[0]), 1, 4)
+                        .with(WeekFields.ISO.weekOfWeekBasedYear(), Integer.parseInt(parts[1]))
+                        .with(WeekFields.ISO.dayOfWeek(), 1);
+                return toOkrSnapshotPeriodRange(monday, monday.plusDays(6));
+            }
+            if ("MONTH".equals(periodType)) {
+                LocalDate firstDay = LocalDate.parse(periodKey + "-01");
+                return toOkrSnapshotPeriodRange(firstDay, firstDay.with(TemporalAdjusters.lastDayOfMonth()));
+            }
+            if ("QUARTER".equals(periodType)) {
+                String[] parts = periodKey.split("-Q");
+                LocalDate firstDay = LocalDate.of(Integer.parseInt(parts[0]), (Integer.parseInt(parts[1]) - 1) * 3 + 1, 1);
+                return toOkrSnapshotPeriodRange(firstDay, firstDay.plusMonths(2).with(TemporalAdjusters.lastDayOfMonth()));
+            }
+            if ("HALFYEAR".equals(periodType)) {
+                String[] parts = periodKey.split("-H");
+                LocalDate firstDay = LocalDate.of(Integer.parseInt(parts[0]), "1".equals(parts[1]) ? 1 : 7, 1);
+                return toOkrSnapshotPeriodRange(firstDay, firstDay.plusMonths(5).with(TemporalAdjusters.lastDayOfMonth()));
+            }
+            if ("YEAR".equals(periodType)) {
+                LocalDate firstDay = LocalDate.of(Integer.parseInt(periodKey), 1, 1);
+                return toOkrSnapshotPeriodRange(firstDay, firstDay.with(TemporalAdjusters.lastDayOfYear()));
+            }
+        } catch (RuntimeException e) {
+            throw new ServiceException("Invalid period key: " + periodKey);
+        }
+        throw new ServiceException("Unsupported period type: " + request.getPeriodType());
+    }
+
+    private OkrSnapshotPeriodRange toOkrSnapshotPeriodRange(LocalDate from, LocalDate to) {
+        return new OkrSnapshotPeriodRange(
+                from.format(OKR_SNAPSHOT_PERIOD_FORMAT),
+                to.format(OKR_SNAPSHOT_PERIOD_FORMAT));
+    }
+
+    private record OkrSnapshotPeriodRange(String from, String to) {
     }
 
     private MdStrategySnapshot toSnapshot(StrategyReportQueryRequest request, SnapshotAccumulator accumulator,
@@ -306,37 +388,34 @@ public class StrategyReportLogicServiceImpl implements IStrategyReportLogicServi
     }
 
     private String toCalculationTrace(List<StrategyReportThemeView> themeViews) {
-        StringBuilder trace = new StringBuilder();
-        trace.append("{\"source\":\"STRATEGY_REPORT\",\"themes\":[");
-        for (int i = 0; i < themeViews.size(); i++) {
-            StrategyReportThemeView themeView = themeViews.get(i);
-            if (i > 0) {
-                trace.append(",");
+        Map<String, Object> trace = new LinkedHashMap<>();
+        List<Map<String, Object>> themes = new ArrayList<>();
+        trace.put("source", "STRATEGY_REPORT");
+        trace.put("themes", themes);
+        for (StrategyReportThemeView themeView : themeViews) {
+            Map<String, Object> themeTrace = new LinkedHashMap<>();
+            List<Map<String, Object>> objectives = new ArrayList<>();
+            themeTrace.put("themeOid", themeView.getTheme().getOid());
+            themeTrace.put("scoreValue", themeView.getScoreValue());
+            themeTrace.put("objectives", objectives);
+            themes.add(themeTrace);
+            for (StrategyReportObjectiveView objectiveView : themeView.getObjectiveList()) {
+                Map<String, Object> objectiveTrace = new LinkedHashMap<>();
+                objectiveTrace.put("objectiveOid", objectiveView.getObjective().getOid());
+                objectiveTrace.put("scoreValue", objectiveView.getScoreValue());
+                objectiveTrace.put("linkCount", objectiveView.getLinkList().size());
+                objectives.add(objectiveTrace);
             }
-            trace.append("{\"themeOid\":\"").append(escapeJson(themeView.getTheme().getOid())).append("\",");
-            trace.append("\"scoreValue\":").append(toJsonNumber(themeView.getScoreValue())).append(",");
-            trace.append("\"objectives\":[");
-            for (int j = 0; j < themeView.getObjectiveList().size(); j++) {
-                StrategyReportObjectiveView objectiveView = themeView.getObjectiveList().get(j);
-                if (j > 0) {
-                    trace.append(",");
-                }
-                trace.append("{\"objectiveOid\":\"").append(escapeJson(objectiveView.getObjective().getOid())).append("\",");
-                trace.append("\"scoreValue\":").append(toJsonNumber(objectiveView.getScoreValue())).append(",");
-                trace.append("\"linkCount\":").append(objectiveView.getLinkList().size()).append("}");
-            }
-            trace.append("]}");
         }
-        trace.append("]}");
-        return trace.toString();
+        return toJson(trace);
     }
 
-    private String toJsonNumber(BigDecimal value) {
-        return value == null ? "null" : value.stripTrailingZeros().toPlainString();
-    }
-
-    private String escapeJson(String value) {
-        return value == null ? "" : value.replace("\\", "\\\\").replace("\"", "\\\"");
+    private String toJson(Map<String, Object> trace) {
+        try {
+            return LoadResources.getObjectMapper().writeValueAsString(trace);
+        } catch (Exception e) {
+            throw new IllegalStateException("Build strategy calculation trace failed.", e);
+        }
     }
 
     private static final class SnapshotAccumulator {
