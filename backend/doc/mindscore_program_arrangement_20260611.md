@@ -219,6 +219,7 @@ They should be maintained inside Action Plan / Action Item create, edit, or deta
 | `MD_PROG008D0002` | `md_prog008d0002` | `MdActionItem` | Action item maintenance, including item-level owners, PDCA stage, progress and source links | Medium |
 | `MD_PROG008D0003` | Optional / internal | `MdActionOwner` | Owner binding API / embedded section, not standalone page by default | Low |
 | `MD_PROG008D0004` | Optional / internal | `MdActionSourceLink` | Source linkage API / embedded section, not standalone page by default | Low |
+| `MD_PROG008D0005` | `md_prog008d0005` | Mixed Action View | Action / PDCA report, read-only management view | Medium |
 
 Recommended backend controllers:
 
@@ -226,6 +227,7 @@ Recommended backend controllers:
 - `MdPROG008D0002Controller`
 - `MdPROG008D0003Controller` may exist as internal support API if owner binding is not fully handled by `MD_PROG008D0001/0002`
 - `MdPROG008D0004Controller` may exist as internal support API if source linkage is not fully handled by `MD_PROG008D0001/0002`
+- `MdPROG008D0005Controller`
 
 ### 3.9 MD_PROG009D - Dashboard
 
@@ -307,6 +309,7 @@ pages/md_prog007d0004/
 pages/md_prog007d0005/
 pages/md_prog008d0001/
 pages/md_prog008d0002/
+pages/md_prog008d0005/
 pages/md_prog009d0001/
 pages/md_prog010d0001/
 pages/md_prog010d0002/
@@ -994,12 +997,61 @@ SetParam: MD_PROG003D0001S01Q
 - Strategy Objective 分數不佳時有哪些改善計畫
 - Insight recommendation 是否已被落實成 action
 
+#### MD_PROG008D0005 - Action / PDCA Report
+
+核心用途：
+
+- 提供 Action / PDCA 管理視角
+- 只做查詢、統計、drill-down，不做 create/edit
+- 補足 Action Plan / Action Item 維護頁以外的管理報表能力
+
+建議畫面：
+
+- `index.vue`: Action / PDCA report dashboard
+- `config.ts`
+- `QueryPageStore.ts`
+
+建議查詢條件：
+
+- `PLAN_OID`
+- `ACTION_STAGE`
+- `STATUS`
+- `OWNER_TYPE`
+- `ACCOUNT`
+- `ORG_OID`
+- `SOURCE_TYPE`
+- `SOURCE_OID`
+- `START_DATE_FROM`
+- `START_DATE_TO`
+- `END_DATE_FROM`
+- `END_DATE_TO`
+- `OVERDUE_ONLY`
+
+建議呈現內容：
+
+- Action Plan count
+- Action Item count
+- Overdue action count
+- Completed action count
+- Average progress
+- Status distribution
+- PDCA stage distribution: `PLAN / DO / CHECK / ACT`
+- Owner workload
+- Source coverage: KPI / OKR / Strategy / Insight 來源各自有多少 action
+- Plan -> Item drill-down
+- Timeline / gantt-like list based on `start/end/done`
+
+與 `MD_PROG009D0001` Dashboard 的差異：
+
+- `MD_PROG008D0005` 專注 Action / PDCA
+- `MD_PROG009D0001` 是跨 KPI / OKR / Strategy / Action 的綜合 dashboard
+
 關鍵調整點：
 
 - Action 不只是 task，要能回推來源與改善結果
 - Action Item 建議支援 parent / dependency
 - 若未來要做 gantt chart，`start/end/done` 與 stage 要保留完整
-- 初期獨立開發優先順序應為 `MD_PROG008D0001`、`MD_PROG008D0002`
+- 初期獨立開發優先順序應為 `MD_PROG008D0001`、`MD_PROG008D0002`、`MD_PROG008D0005`
 - `MD_PROG008D0003`、`MD_PROG008D0004` 先作為內嵌功能或支援 API，不列為必要獨立 UI
 
 ### 9.9 MD_PROG009D - Dashboard
@@ -1138,6 +1190,7 @@ SetParam: MD_PROG003D0001S01Q
 14. `MD_PROG006D0005`
 15. `MD_PROG008D0001`
 16. `MD_PROG008D0002`
-17. `MD_PROG009D0001`
+17. `MD_PROG008D0005`
+18. `MD_PROG009D0001`
 
 Strategy / Insight 可後移，除非你要先驗證完整管理視覺化。
