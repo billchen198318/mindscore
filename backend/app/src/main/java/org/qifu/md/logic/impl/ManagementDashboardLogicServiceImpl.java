@@ -21,6 +21,7 @@ import org.qifu.md.entity.MdOkrInitiative;
 import org.qifu.md.entity.MdOkrKeyResult;
 import org.qifu.md.entity.MdOkrObjective;
 import org.qifu.md.entity.MdOkrSnapshot;
+import org.qifu.md.entity.MdOrgUnit;
 import org.qifu.md.entity.MdStrategyObjective;
 import org.qifu.md.entity.MdStrategySnapshot;
 import org.qifu.md.entity.MdStrategyTheme;
@@ -35,15 +36,19 @@ import org.qifu.md.model.ActionReportSummary;
 import org.qifu.md.model.KpiReportQueryRequest;
 import org.qifu.md.model.KpiReportSummary;
 import org.qifu.md.model.ManagementDashboardAlert;
+import org.qifu.md.model.ManagementDashboardAtRiskObjectiveRow;
 import org.qifu.md.model.ManagementDashboardDomainSummary;
+import org.qifu.md.model.ManagementDashboardOrgSummary;
 import org.qifu.md.model.ManagementDashboardQuery;
 import org.qifu.md.model.ManagementDashboardResult;
+import org.qifu.md.model.ManagementDashboardStrategyScorecardRow;
 import org.qifu.md.service.IMdKpiScoreSnapshotService;
 import org.qifu.md.service.IMdKpiService;
 import org.qifu.md.service.IMdOkrInitiativeService;
 import org.qifu.md.service.IMdOkrKeyResultService;
 import org.qifu.md.service.IMdOkrObjectiveService;
 import org.qifu.md.service.IMdOkrSnapshotService;
+import org.qifu.md.service.IMdOrgUnitService;
 import org.qifu.md.service.IMdStrategyObjectiveService;
 import org.qifu.md.service.IMdStrategySnapshotService;
 import org.qifu.md.service.IMdStrategyThemeService;
@@ -68,6 +73,7 @@ public class ManagementDashboardLogicServiceImpl implements IManagementDashboard
     private final IMdOkrKeyResultService<MdOkrKeyResult, String> mdOkrKeyResultService;
     private final IMdOkrInitiativeService<MdOkrInitiative, String> mdOkrInitiativeService;
     private final IMdOkrSnapshotService<MdOkrSnapshot, String> mdOkrSnapshotService;
+    private final IMdOrgUnitService<MdOrgUnit, String> mdOrgUnitService;
     private final IMdStrategyWorkspaceService<MdStrategyWorkspace, String> mdStrategyWorkspaceService;
     private final IMdStrategyThemeService<MdStrategyTheme, String> mdStrategyThemeService;
     private final IMdStrategyObjectiveService<MdStrategyObjective, String> mdStrategyObjectiveService;
@@ -81,6 +87,7 @@ public class ManagementDashboardLogicServiceImpl implements IManagementDashboard
             IMdOkrKeyResultService<MdOkrKeyResult, String> mdOkrKeyResultService,
             IMdOkrInitiativeService<MdOkrInitiative, String> mdOkrInitiativeService,
             IMdOkrSnapshotService<MdOkrSnapshot, String> mdOkrSnapshotService,
+            IMdOrgUnitService<MdOrgUnit, String> mdOrgUnitService,
             IMdStrategyWorkspaceService<MdStrategyWorkspace, String> mdStrategyWorkspaceService,
             IMdStrategyThemeService<MdStrategyTheme, String> mdStrategyThemeService,
             IMdStrategyObjectiveService<MdStrategyObjective, String> mdStrategyObjectiveService,
@@ -93,6 +100,7 @@ public class ManagementDashboardLogicServiceImpl implements IManagementDashboard
         this.mdOkrKeyResultService = mdOkrKeyResultService;
         this.mdOkrInitiativeService = mdOkrInitiativeService;
         this.mdOkrSnapshotService = mdOkrSnapshotService;
+        this.mdOrgUnitService = mdOrgUnitService;
         this.mdStrategyWorkspaceService = mdStrategyWorkspaceService;
         this.mdStrategyThemeService = mdStrategyThemeService;
         this.mdStrategyObjectiveService = mdStrategyObjectiveService;
@@ -105,11 +113,16 @@ public class ManagementDashboardLogicServiceImpl implements IManagementDashboard
         ManagementDashboardResult dashboard = new ManagementDashboardResult();
 
         List<ManagementDashboardAlert> alerts = new ArrayList<>();
+        ActionReportResult actionReport = this.actionReportLogicService.report(new ActionReportQuery()).getValue();
         dashboard.setKpi(buildKpiSummary(q, alerts));
         dashboard.setOkr(buildOkrSummary(q, alerts));
         dashboard.setStrategy(buildStrategySummary(q, alerts));
-        dashboard.setAction(buildActionSummary(alerts));
+        dashboard.setAction(buildActionSummary(actionReport, alerts));
         dashboard.setAlerts(limitAlerts(alerts));
+        dashboard.setOrganizationSummaries(buildOrganizationSummaries(q));
+        dashboard.setStrategyScorecards(buildStrategyScorecards(q));
+        dashboard.setDelayedActions(buildDelayedActions(actionReport));
+        dashboard.setAtRiskObjectives(buildAtRiskObjectives(q));
 
         DefaultResult<ManagementDashboardResult> result = new DefaultResult<>();
         result.setSuccess(YesNoKeyProvide.YES);
@@ -218,8 +231,7 @@ public class ManagementDashboardLogicServiceImpl implements IManagementDashboard
         return summary;
     }
 
-    private ManagementDashboardDomainSummary buildActionSummary(List<ManagementDashboardAlert> alerts) throws ServiceException {
-        ActionReportResult report = this.actionReportLogicService.report(new ActionReportQuery()).getValue();
+    private ManagementDashboardDomainSummary buildActionSummary(ActionReportResult report, List<ManagementDashboardAlert> alerts) {
         ActionReportSummary actionSummary = report == null ? null : report.getSummary();
         ManagementDashboardDomainSummary summary = new ManagementDashboardDomainSummary();
         if (actionSummary != null) {
@@ -239,6 +251,118 @@ public class ManagementDashboardLogicServiceImpl implements IManagementDashboard
             }
         }
         return summary;
+    }
+
+    private List<ManagementDashboardOrgSummary> buildOrganizationSummaries(ManagementDashboardQuery query) throws ServiceException {
+        List<MdOrgUnit> orgs = loadOrgUnits(query);
+        Map<String, ManagementDashboardOrgSummary> summaryMap = new HashMap<>();
+        for (MdOrgUnit org : orgs) {
+            ManagementDashboardOrgSummary summary = new ManagementDashboardOrgSummary();
+            summary.setOrgOid(org.getOid());
+            summary.setOrgCode(org.getOrgCode());
+            summary.setOrgName(org.getOrgName());
+            summaryMap.put(org.getOid(), summary);
+        }
+
+        KpiReportQueryRequest request = toKpiRequest(query);
+        request.setDataForType("ORG");
+        List<MdKpiScoreSnapshot> snapshots = filterKpiSnapshots(loadKpiSnapshots(request), request);
+        Map<String, BigDecimal> totals = new HashMap<>();
+        Map<String, Integer> counts = new HashMap<>();
+        for (MdKpiScoreSnapshot snapshot : snapshots) {
+            if (StringUtils.isBlank(snapshot.getOrgOid())) {
+                continue;
+            }
+            ManagementDashboardOrgSummary summary = summaryMap.computeIfAbsent(snapshot.getOrgOid(), this::unknownOrgSummary);
+            summary.setKpiSnapshotCount(summary.getKpiSnapshotCount() + 1);
+            applyOrgStatusCount(summary, snapshot.getScoreStatus());
+            if (snapshot.getScoreValue() != null) {
+                totals.put(snapshot.getOrgOid(), totals.getOrDefault(snapshot.getOrgOid(), BigDecimal.ZERO).add(snapshot.getScoreValue()));
+                counts.put(snapshot.getOrgOid(), counts.getOrDefault(snapshot.getOrgOid(), 0) + 1);
+            }
+        }
+        for (Map.Entry<String, ManagementDashboardOrgSummary> entry : summaryMap.entrySet()) {
+            int count = counts.getOrDefault(entry.getKey(), 0);
+            if (count > 0) {
+                entry.getValue().setAvgKpiScore(totals.get(entry.getKey()).divide(BigDecimal.valueOf(count), 2, RoundingMode.HALF_UP));
+            }
+        }
+        return summaryMap.values().stream()
+                .sorted(Comparator.comparing(ManagementDashboardOrgSummary::getOrgCode, Comparator.nullsLast(String::compareTo)))
+                .collect(Collectors.toList());
+    }
+
+    private List<ManagementDashboardStrategyScorecardRow> buildStrategyScorecards(ManagementDashboardQuery query) throws ServiceException {
+        List<MdStrategyWorkspace> workspaces = loadStrategyWorkspaces(query);
+        Set<String> workspaceOids = workspaces.stream().map(MdStrategyWorkspace::getOid).filter(StringUtils::isNotBlank).collect(Collectors.toSet());
+        List<MdStrategyTheme> themes = this.mdStrategyThemeService.selectList("WORKSPACE_OID, SORT_NO", "ASC").getValue();
+        List<MdStrategyObjective> objectives = this.mdStrategyObjectiveService.selectList("THEME_OID, SORT_NO", "ASC").getValue();
+        List<MdStrategySnapshot> snapshots = filterStrategySnapshots(this.mdStrategySnapshotService.selectList("WORKSPACE_OID, PERIOD_TYPE, PERIOD_KEY", "ASC").getValue(), query, workspaceOids);
+        Map<String, MdStrategySnapshot> latestSnapshotMap = latestStrategySnapshotMap(snapshots);
+
+        Map<String, Long> themeCountMap = safeList(themes).stream()
+                .filter(item -> workspaceOids.contains(item.getWorkspaceOid()))
+                .collect(Collectors.groupingBy(MdStrategyTheme::getWorkspaceOid, Collectors.counting()));
+        Map<String, String> themeWorkspaceMap = safeList(themes).stream()
+                .collect(Collectors.toMap(MdStrategyTheme::getOid, MdStrategyTheme::getWorkspaceOid, (a, b) -> a));
+        Map<String, Long> objectiveCountMap = safeList(objectives).stream()
+                .filter(item -> themeWorkspaceMap.containsKey(item.getThemeOid()))
+                .collect(Collectors.groupingBy(item -> themeWorkspaceMap.get(item.getThemeOid()), Collectors.counting()));
+
+        List<ManagementDashboardStrategyScorecardRow> rows = new ArrayList<>();
+        for (MdStrategyWorkspace workspace : workspaces) {
+            MdStrategySnapshot snapshot = latestSnapshotMap.get(workspace.getOid());
+            ManagementDashboardStrategyScorecardRow row = new ManagementDashboardStrategyScorecardRow();
+            row.setWorkspaceOid(workspace.getOid());
+            row.setWorkspaceCode(workspace.getWorkspaceCode());
+            row.setWorkspaceName(workspace.getWorkspaceName());
+            row.setThemeCount(themeCountMap.getOrDefault(workspace.getOid(), 0L).intValue());
+            row.setObjectiveCount(objectiveCountMap.getOrDefault(workspace.getOid(), 0L).intValue());
+            if (snapshot != null) {
+                row.setPeriodType(snapshot.getPeriodType());
+                row.setPeriodKey(snapshot.getPeriodKey());
+                row.setScoreValue(defaultDecimal(snapshot.getScoreValue()));
+                row.setKpiCount(snapshot.getKpiCount() == null ? 0 : snapshot.getKpiCount());
+                row.setOkrCount(snapshot.getOkrCount() == null ? 0 : snapshot.getOkrCount());
+            }
+            rows.add(row);
+        }
+        return rows;
+    }
+
+    private List<ActionReportRow> buildDelayedActions(ActionReportResult report) {
+        if (report == null || CollectionUtils.isEmpty(report.getRows())) {
+            return new ArrayList<>();
+        }
+        return report.getRows().stream()
+                .filter(ActionReportRow::isOverdue)
+                .collect(Collectors.toList());
+    }
+
+    private List<ManagementDashboardAtRiskObjectiveRow> buildAtRiskObjectives(ManagementDashboardQuery query) throws ServiceException {
+        List<MdOkrObjective> objectives = loadOkrObjectives(query);
+        Set<String> objectiveOids = objectives.stream().map(MdOkrObjective::getOid).filter(StringUtils::isNotBlank).collect(Collectors.toSet());
+        List<MdOkrSnapshot> snapshots = filterOkrSnapshots(this.mdOkrSnapshotService.selectList("OBJECTIVE_OID, PERIOD_KEY", "ASC").getValue(), query, objectiveOids);
+        Map<String, MdOkrSnapshot> latestSnapshotMap = latestOkrSnapshotMap(snapshots);
+
+        List<ManagementDashboardAtRiskObjectiveRow> rows = new ArrayList<>();
+        for (MdOkrObjective objective : objectives) {
+            MdOkrSnapshot snapshot = latestSnapshotMap.get(objective.getOid());
+            if (snapshot == null || !isWarnStatus(snapshot.getScoreStatus())) {
+                continue;
+            }
+            ManagementDashboardAtRiskObjectiveRow row = new ManagementDashboardAtRiskObjectiveRow();
+            row.setObjectiveOid(objective.getOid());
+            row.setObjectiveCode(objective.getObjectiveCode());
+            row.setObjectiveName(objective.getObjectiveName());
+            row.setCycleOid(objective.getCycleOid());
+            row.setPeriodKey(snapshot.getPeriodKey());
+            row.setProgressValue(defaultDecimal(snapshot.getProgressValue()));
+            row.setConfidenceScore(defaultDecimal(snapshot.getConfidenceScore()));
+            row.setScoreStatus(snapshot.getScoreStatus());
+            rows.add(row);
+        }
+        return rows;
     }
 
     private KpiReportQueryRequest toKpiRequest(ManagementDashboardQuery query) {
@@ -295,6 +419,14 @@ public class ManagementDashboardLogicServiceImpl implements IManagementDashboard
         return params.isEmpty()
                 ? this.mdStrategyWorkspaceService.selectList("WORKSPACE_CODE", "ASC").getValue()
                 : this.mdStrategyWorkspaceService.selectListByParams(params, "WORKSPACE_CODE", "ASC").getValue();
+    }
+
+    private List<MdOrgUnit> loadOrgUnits(ManagementDashboardQuery query) throws ServiceException {
+        Map<String, Object> params = new HashMap<>();
+        putIfNotBlank(params, "oid", query.getOrgOid());
+        return params.isEmpty()
+                ? this.mdOrgUnitService.selectList("ORG_CODE", "ASC").getValue()
+                : this.mdOrgUnitService.selectListByParams(params, "ORG_CODE", "ASC").getValue();
     }
 
     private List<MdOkrSnapshot> filterOkrSnapshots(List<MdOkrSnapshot> snapshots, ManagementDashboardQuery query, Set<String> objectiveOids) {
@@ -375,6 +507,26 @@ public class ManagementDashboardLogicServiceImpl implements IManagementDashboard
         } else {
             summary.setUnknownCount(summary.getUnknownCount() + 1);
         }
+    }
+
+    private void applyOrgStatusCount(ManagementDashboardOrgSummary summary, String status) {
+        if ("GOOD".equals(status)) {
+            summary.setGoodCount(summary.getGoodCount() + 1);
+        } else if ("WARNING".equals(status)) {
+            summary.setWarningCount(summary.getWarningCount() + 1);
+        } else if ("BAD".equals(status)) {
+            summary.setBadCount(summary.getBadCount() + 1);
+        } else {
+            summary.setUnknownCount(summary.getUnknownCount() + 1);
+        }
+    }
+
+    private ManagementDashboardOrgSummary unknownOrgSummary(String orgOid) {
+        ManagementDashboardOrgSummary summary = new ManagementDashboardOrgSummary();
+        summary.setOrgOid(orgOid);
+        summary.setOrgCode(orgOid);
+        summary.setOrgName(orgOid);
+        return summary;
     }
 
     private boolean matchesPeriodKey(String value, String from, String to) {

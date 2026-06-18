@@ -11,6 +11,10 @@ public class ManagementDashboardResult implements java.io.Serializable {
     private ManagementDashboardDomainSummary strategy = new ManagementDashboardDomainSummary();
     private ManagementDashboardDomainSummary action = new ManagementDashboardDomainSummary();
     private List<ManagementDashboardAlert> alerts = new ArrayList<>();
+    private List<ManagementDashboardOrgSummary> organizationSummaries = new ArrayList<>();
+    private List<ManagementDashboardStrategyScorecardRow> strategyScorecards = new ArrayList<>();
+    private List<ActionReportRow> delayedActions = new ArrayList<>();
+    private List<ManagementDashboardAtRiskObjectiveRow> atRiskObjectives = new ArrayList<>();
 
     public ManagementDashboardDomainSummary getKpi() {
         return kpi;
@@ -50,5 +54,37 @@ public class ManagementDashboardResult implements java.io.Serializable {
 
     public void setAlerts(List<ManagementDashboardAlert> alerts) {
         this.alerts = alerts;
+    }
+
+    public List<ManagementDashboardOrgSummary> getOrganizationSummaries() {
+        return organizationSummaries;
+    }
+
+    public void setOrganizationSummaries(List<ManagementDashboardOrgSummary> organizationSummaries) {
+        this.organizationSummaries = organizationSummaries;
+    }
+
+    public List<ManagementDashboardStrategyScorecardRow> getStrategyScorecards() {
+        return strategyScorecards;
+    }
+
+    public void setStrategyScorecards(List<ManagementDashboardStrategyScorecardRow> strategyScorecards) {
+        this.strategyScorecards = strategyScorecards;
+    }
+
+    public List<ActionReportRow> getDelayedActions() {
+        return delayedActions;
+    }
+
+    public void setDelayedActions(List<ActionReportRow> delayedActions) {
+        this.delayedActions = delayedActions;
+    }
+
+    public List<ManagementDashboardAtRiskObjectiveRow> getAtRiskObjectives() {
+        return atRiskObjectives;
+    }
+
+    public void setAtRiskObjectives(List<ManagementDashboardAtRiskObjectiveRow> atRiskObjectives) {
+        this.atRiskObjectives = atRiskObjectives;
     }
 }
