@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.qifu.base.exception.ServiceException;
 import org.qifu.base.message.BaseSystemMessage;
 import org.qifu.base.model.DefaultResult;
@@ -196,7 +197,7 @@ public class OkrObjectiveLogicServiceImpl implements IOkrObjectiveLogicService {
         normalized.setContent(StringUtils.trimToNull(initiative.getContent()));
         normalized.setSortNo(initiative.getSortNo() == null ? 0 : initiative.getSortNo());
         normalized.setStatus(StringUtils.defaultIfBlank(initiative.getStatus(), "ACTIVE"));
-        if (!StringUtils.equalsAny(normalized.getStatus(), "DRAFT", "ACTIVE", "CLOSED", "ARCHIVED")) {
+        if (!Strings.CS.equalsAny(normalized.getStatus(), "DRAFT", "ACTIVE", "CLOSED", "ARCHIVED")) {
             throw new ServiceException("Unsupported OKR initiative status: " + normalized.getStatus());
         }
         return normalized;
@@ -233,7 +234,7 @@ public class OkrObjectiveLogicServiceImpl implements IOkrObjectiveLogicService {
         if (StringUtils.isBlank(ownerRole)) {
             return OWNER_ROLE_OWNER;
         }
-        if (StringUtils.equalsAny(ownerRole, OWNER_ROLE_OWNER, OWNER_ROLE_VIEWER, OWNER_ROLE_APPROVER)) {
+        if (Strings.CS.equalsAny(ownerRole, OWNER_ROLE_OWNER, OWNER_ROLE_VIEWER, OWNER_ROLE_APPROVER)) {
             return ownerRole;
         }
         throw new ServiceException("Unsupported OKR objective owner role: " + ownerRole);

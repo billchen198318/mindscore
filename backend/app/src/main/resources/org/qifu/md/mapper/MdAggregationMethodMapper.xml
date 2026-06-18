@@ -29,8 +29,14 @@
 	<if test="aggrCode != null and aggrCode != ''.toString() ">
 		AND AGGR_CODE = #{aggrCode,jdbcType=VARCHAR}
 	</if>
+	<if test="aggrCodeLike != null and aggrCodeLike != ''.toString() ">
+		AND AGGR_CODE LIKE #{aggrCodeLike,jdbcType=VARCHAR}
+	</if>
 	<if test="aggrName != null and aggrName != ''.toString() ">
 		AND AGGR_NAME = #{aggrName,jdbcType=VARCHAR}
+	</if>
+	<if test="aggrNameLike != null and aggrNameLike != ''.toString() ">
+		AND AGGR_NAME LIKE #{aggrNameLike,jdbcType=VARCHAR}
 	</if>
 	<if test="enabled != null and enabled != ''.toString() ">
 		AND ENABLED = #{enabled,jdbcType=VARCHAR}

@@ -36,7 +36,10 @@
         AND THEME_CODE LIKE #{themeCodeLike,jdbcType=VARCHAR}
     </if>
     <if test="themeName != null and themeName != ''.toString() ">
-        AND THEME_NAME LIKE #{themeName,jdbcType=VARCHAR}
+        AND THEME_NAME = #{themeName,jdbcType=VARCHAR}
+    </if>
+    <if test="themeNameLike != null and themeNameLike != ''.toString() ">
+        AND THEME_NAME LIKE #{themeNameLike,jdbcType=VARCHAR}
     </if>
   </sql>
   

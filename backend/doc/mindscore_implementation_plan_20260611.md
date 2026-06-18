@@ -157,14 +157,16 @@ Implementation decision:
 - `Action Plan` and `Action Item` are the primary user-facing pages.
 - `Action owner` and `Action source link` are necessary data functions, but they should be embedded into Action Plan / Action Item create, edit, and detail screens first.
 - Do not build standalone owner/source-link CRUD pages unless centralized maintenance becomes a real workflow requirement.
+- Action / PDCA needs a dedicated report page before the cross-domain dashboard, because the maintenance pages alone cannot show overdue work, stage distribution, owner workload or source coverage clearly.
 
 Recommended implementation order:
 
 1. Action plan CRUD, including plan-level owner list and source links
 2. Action item CRUD, including item-level owner list, source links, PDCA stage, progress and due dates
 3. Action status flow and progress rollup from item to plan
-4. Source-driven action creation from KPI / OKR / Strategy / Insight reports
-5. Optional centralized Action owner / Action source link maintenance only if needed later
+4. Action / PDCA report for status distribution, PDCA stage distribution, overdue actions, owner workload, source coverage and plan-item drill-down
+5. Source-driven action creation from KPI / OKR / Strategy / Insight reports
+6. Optional centralized Action owner / Action source link maintenance only if needed later
 
 ### Phase 13. 管理儀表板與綜合報表
 

@@ -769,6 +769,28 @@ CREATE TABLE `md_action_source_link` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore Action 來源關聯';
 ```
 
+### 8.5 Action / PDCA Report
+
+Action / PDCA report does not require a separate snapshot or report table in the initial design.
+It should query and aggregate existing action tables:
+
+- `md_action_plan`
+- `md_action_item`
+- `md_action_owner`
+- `md_action_source_link`
+
+Recommended report dimensions:
+
+- action status
+- PDCA stage: `PLAN / DO / CHECK / ACT`
+- owner account / organization
+- source type: `KPI / OKR_OBJECTIVE / OKR_KR / STRATEGY / INSIGHT`
+- overdue status based on `END_DATE` and `DONE_DATE`
+- progress rollup from item to plan
+
+If later reporting needs frozen period evidence, then a dedicated action report snapshot table can be added.
+Do not add a report snapshot table before the operational query/report requirement proves it is necessary.
+
 ## 9. Formula Auto-Selection Flow
 
 When creating or editing KPI:

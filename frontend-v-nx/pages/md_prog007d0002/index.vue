@@ -109,7 +109,7 @@ const btnQuery = async () => {
             "field": {
                 "workspaceOid"   : queryPageStore.queryParam.workspaceOid,
                 "themeCodeLike"  : queryPageStore.queryParam.themeCode,
-                "themeName"      : queryPageStore.queryParam.themeName
+                "themeNameLike"  : queryPageStore.queryParam.themeName
             },
             "pageOf": {
                 "select"  : queryPageStore.gridConfig.page,

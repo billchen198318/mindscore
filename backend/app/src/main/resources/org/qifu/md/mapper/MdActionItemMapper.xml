@@ -38,7 +38,13 @@
 		AND PARENT_OID = #{parentOid,jdbcType=CHAR}
 	</if>
 	<if test="itemName != null and itemName != ''.toString() ">
-		AND ITEM_NAME LIKE #{itemName,jdbcType=VARCHAR}
+		AND ITEM_NAME = #{itemName,jdbcType=VARCHAR}
+	</if>
+	<if test="itemNameLike != null and itemNameLike != ''.toString() ">
+		AND ITEM_NAME LIKE #{itemNameLike,jdbcType=VARCHAR}
+	</if>
+	<if test="actionStage != null and actionStage != ''.toString() ">
+		AND ACTION_STAGE = #{actionStage,jdbcType=VARCHAR}
 	</if>
 	<if test="status != null and status != ''.toString() ">
 		AND STATUS = #{status,jdbcType=VARCHAR}
