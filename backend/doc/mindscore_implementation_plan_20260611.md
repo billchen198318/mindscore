@@ -152,11 +152,19 @@ For ordinary users, strategy snapshot should be exposed as report evidence/histo
 
 把 KPI / OKR 的問題轉成可執行的行動。
 
-1. Action plan CRUD
-2. Action item CRUD
-3. Action owner 綁定
-4. Action source link to KPI / OKR / Strategy / Insight
-5. Action status flow
+Implementation decision:
+
+- `Action Plan` and `Action Item` are the primary user-facing pages.
+- `Action owner` and `Action source link` are necessary data functions, but they should be embedded into Action Plan / Action Item create, edit, and detail screens first.
+- Do not build standalone owner/source-link CRUD pages unless centralized maintenance becomes a real workflow requirement.
+
+Recommended implementation order:
+
+1. Action plan CRUD, including plan-level owner list and source links
+2. Action item CRUD, including item-level owner list, source links, PDCA stage, progress and due dates
+3. Action status flow and progress rollup from item to plan
+4. Source-driven action creation from KPI / OKR / Strategy / Insight reports
+5. Optional centralized Action owner / Action source link maintenance only if needed later
 
 ### Phase 13. 管理儀表板與綜合報表
 

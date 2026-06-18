@@ -721,6 +721,9 @@ CREATE TABLE `md_action_item` (
 
 ### 8.3 `md_action_owner`
 
+用途：Action owner binding。此表是必要資料模型，用來支援 plan-level 與 item-level owner，但初期 UI 不建議做成獨立 CRUD 頁面。
+建議由 Action Plan / Action Item 的 create、edit、detail 畫面以內嵌 owner list 維護。
+
 ```sql
 CREATE TABLE `md_action_owner` (
   `OID` CHAR(36) NOT NULL COMMENT '主鍵 OID',
@@ -744,6 +747,8 @@ CREATE TABLE `md_action_owner` (
 ### 8.4 `md_action_source_link`
 
 用途：Action 可由 KPI 低分、OKR 延遲、策略失衡或 insight 產生。
+此表是必要資料模型，用來保留 action 的來源追溯與 dashboard 統計依據，但初期 UI 不建議做成獨立 CRUD 頁面。
+建議由 Action Plan / Action Item 的 create、edit、detail 畫面以內嵌 source link list 維護；從 KPI / OKR / Strategy / Insight 報表建立 action 時，應自動帶入 source link。
 
 ```sql
 CREATE TABLE `md_action_source_link` (
