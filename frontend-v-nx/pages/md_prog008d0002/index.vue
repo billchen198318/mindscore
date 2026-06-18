@@ -256,9 +256,9 @@ onMounted(async () => {
           <label for="status">Status</label>
         </div>
       </div>
-      <div class="col-md-1 d-flex align-items-end gap-2">
-        <button type="button" class="btn btn-primary" @click="btnQuery"><i class="bi bi-search"></i></button>
-        <button type="button" class="btn btn-outline-secondary" @click="btnClear"><i class="bi bi-eraser"></i></button>
+      <div class="col-md-2 d-flex align-items-end gap-2">
+        <button type="button" class="btn btn-primary flex-fill" @click="btnQuery"><i class="bi bi-search"></i> Query</button>
+        <button type="button" class="btn btn-outline-secondary" @click="btnClear"><i class="bi bi-eraser"></i> Clear</button>
       </div>
     </div>
   </div>
