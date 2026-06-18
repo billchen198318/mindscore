@@ -31,7 +31,10 @@
 		AND PLAN_CODE = #{planCode,jdbcType=VARCHAR}
 	</if>
 	<if test="planName != null and planName != ''.toString() ">
-		AND PLAN_NAME LIKE #{planName,jdbcType=VARCHAR}
+		AND PLAN_NAME = #{planName,jdbcType=VARCHAR}
+	</if>
+	<if test="planNameLike != null and planNameLike != ''.toString() ">
+		AND PLAN_NAME LIKE #{planNameLike,jdbcType=VARCHAR}
 	</if>
 	<if test="status != null and status != ''.toString() ">
 		AND STATUS = #{status,jdbcType=VARCHAR}

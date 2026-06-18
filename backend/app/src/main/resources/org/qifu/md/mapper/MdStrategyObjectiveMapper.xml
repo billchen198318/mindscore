@@ -36,7 +36,10 @@
         AND OBJECTIVE_CODE LIKE #{objectiveCodeLike,jdbcType=VARCHAR}
     </if>
     <if test="objectiveName != null and objectiveName != ''.toString() ">
-        AND OBJECTIVE_NAME LIKE #{objectiveName,jdbcType=VARCHAR}
+        AND OBJECTIVE_NAME = #{objectiveName,jdbcType=VARCHAR}
+    </if>
+    <if test="objectiveNameLike != null and objectiveNameLike != ''.toString() ">
+        AND OBJECTIVE_NAME LIKE #{objectiveNameLike,jdbcType=VARCHAR}
     </if>
   </sql>
   

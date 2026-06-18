@@ -33,7 +33,10 @@
         AND WORKSPACE_CODE LIKE #{workspaceCodeLike,jdbcType=VARCHAR}
     </if>
     <if test="workspaceName != null and workspaceName != ''.toString() ">
-        AND WORKSPACE_NAME LIKE #{workspaceName,jdbcType=VARCHAR}
+        AND WORKSPACE_NAME = #{workspaceName,jdbcType=VARCHAR}
+    </if>
+    <if test="workspaceNameLike != null and workspaceNameLike != ''.toString() ">
+        AND WORKSPACE_NAME LIKE #{workspaceNameLike,jdbcType=VARCHAR}
     </if>
     <if test="status != null and status != ''.toString() ">
         AND STATUS = #{status,jdbcType=VARCHAR}

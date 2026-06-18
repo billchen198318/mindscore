@@ -68,6 +68,47 @@ Meaning:
 - `D` = Delete
 - `S01Q` = SetParam / secondary query screen
 
+### 2.4 Query Parameter And LIKE Field Rules
+
+For MindScore CRUD query pages, exact-match entity fields and fuzzy-search query fields must be kept separate.
+This avoids accidental changes where an AI generator turns a normal field such as `productName` or `itemName` into a `LIKE` condition.
+
+Rules:
+
+- Normal entity fields keep exact-match semantics in mapper XML.
+- A normal field such as `itemName`, `planName`, `workspaceName`, `themeName`, `objectiveName`, `productName`, `aggrName`, or `account` must use `=` unless a specific business rule says otherwise.
+- Fuzzy search must use a separate query-only parameter with the `Like` suffix, for example `itemNameLike`, `planNameLike`, `productNameLike`, `workspaceNameLike`, `themeNameLike`, `objectiveNameLike`, `aggrCodeLike`, `aggrNameLike`, `employeeIdLike`, and `emailLike`.
+- Backend controller query setup must call `.fullLink("xxxLike")` for fuzzy search, not `.fullLink("xxx")`.
+- Frontend query payload in `index.vue` must send the same `xxxLike` key expected by the controller and mapper. The Pinia store may keep a simple UI state field such as `queryParam.itemName`, but the API payload key should be `itemNameLike`.
+- Mapper `findPage` and `count` must apply the same fuzzy filters so pagination count remains correct.
+
+Correct mapper pattern:
+
+```xml
+<if test="itemName != null and itemName != ''.toString() ">
+    AND ITEM_NAME = #{itemName,jdbcType=VARCHAR}
+</if>
+<if test="itemNameLike != null and itemNameLike != ''.toString() ">
+    AND ITEM_NAME LIKE #{itemNameLike,jdbcType=VARCHAR}
+</if>
+```
+
+Correct controller and frontend pattern:
+
+```java
+this.queryParameter(searchBody)
+    .fullLink("itemNameLike")
+    .fullEquals("status")
+    .value()
+```
+
+```ts
+field: {
+    itemNameLike: queryPageStore.queryParam.itemName,
+    status: queryPageStore.queryParam.status
+}
+```
+
 ## 3. Recommended Program Families
 
 ### 3.1 MD_PROG001D - Basic Master Data

@@ -103,7 +103,7 @@ const btnQuery = async () => {
         const response = await axiosInstance.post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/findPage', {
             "field": {
                 "workspaceCodeLike" : queryPageStore.queryParam.workspaceCode,
-                "workspaceName"     : queryPageStore.queryParam.workspaceName,
+                "workspaceNameLike" : queryPageStore.queryParam.workspaceName,
                 "status"            : queryPageStore.queryParam.status
             },
             "pageOf": {

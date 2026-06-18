@@ -125,7 +125,7 @@ const btnQuery = async () => {
             "field": {
                 "themeOid"       : queryPageStore.queryParam.themeOid,
                 "objectiveCodeLike"  : queryPageStore.queryParam.objectiveCode,
-                "objectiveName"  : queryPageStore.queryParam.objectiveName
+                "objectiveNameLike"  : queryPageStore.queryParam.objectiveName
             },
             "pageOf": {
                 "select"  : queryPageStore.gridConfig.page,

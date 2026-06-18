@@ -68,3 +68,27 @@
     - Query `URL`: `#/PROG_ID`
     - Create `URL`: `#/PROG_ID/create`
     - Edit `URL`: `#/PROG_ID/edit` (Edit mode usually set to 'Y').
+
+### 4. Query Parameter And LIKE Field Rules
+- **Do not change an entity field into a LIKE search field.**
+    - Entity fields such as `planName`, `itemName`, `workspaceName`, `themeName`, `objectiveName`, `productName`, `aggrName`, `kpiName`, `formulaName`, and `account` keep their normal exact-match meaning.
+    - Mapper XML conditions for these normal fields must use `=` unless the business rule explicitly says otherwise.
+- **Use a separate `Like` suffixed parameter for fuzzy search.**
+    - Query-only fuzzy fields must be named with the `Like` suffix, for example `planNameLike`, `itemNameLike`, `productNameLike`, `workspaceNameLike`, `themeNameLike`, `objectiveNameLike`, `aggrNameLike`, `employeeIdLike`, `emailLike`.
+    - Mapper XML must bind fuzzy conditions only to these `Like` parameters:
+      ```xml
+      <if test="itemName != null and itemName != ''.toString() ">
+          AND ITEM_NAME = #{itemName,jdbcType=VARCHAR}
+      </if>
+      <if test="itemNameLike != null and itemNameLike != ''.toString() ">
+          AND ITEM_NAME LIKE #{itemNameLike,jdbcType=VARCHAR}
+      </if>
+      ```
+- **Controller and frontend must use the same query-only `Like` name.**
+    - Controller query setup should call `.fullLink("itemNameLike")`, not `.fullLink("itemName")`.
+    - Frontend `index.vue` query payload should send `itemNameLike: queryPageStore.queryParam.itemName`. The UI store can keep the simple field name for screen state, but the API payload key must be the `Like` parameter.
+- **Pagination count must include the same fuzzy filters as `findPage`.**
+    - If `findPage` supports `accountLike`, `displayNameLike`, `employeeIdLike`, or `emailLike`, the mapper `count` query must apply the same conditions.
+- **AI generation guardrail.**
+    - Never "fix" a query by changing `productName` or another entity field from `=` to `LIKE`.
+    - Add a separate `productNameLike` condition and wire controller/frontend query payload to that field.

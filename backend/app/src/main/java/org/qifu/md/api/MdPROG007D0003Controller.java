@@ -64,7 +64,7 @@ public class MdPROG007D0003Controller extends CoreApiSupport {
                     this.queryParameter(searchBody)
                         .fullEquals("themeOid")
                         .fullLink("objectiveCodeLike")
-                        .fullLink("objectiveName")
+                        .fullLink("objectiveNameLike")
                         .value(),
                     searchBody.getPageOf().orderBy("SORT_NO").sortTypeAsc().orderBy("OBJECTIVE_CODE").sortTypeAsc());
             this.setQueryResponseJsonResult(queryResult, result, searchBody.getPageOf());
