@@ -54,6 +54,13 @@ const dataForTypeOptions = [
     { value: 'ACCOUNT', label: 'Account' },
     { value: 'ORG', label: 'Organization' }
 ];
+const dashboardTabs = [
+    { value: 'overview', label: 'Overview' },
+    { value: 'organization', label: 'Organization' },
+    { value: 'scorecard', label: 'Scorecard' },
+    { value: 'delayed', label: 'Delayed Actions' },
+    { value: 'risk', label: 'At-risk Objectives' }
+];
 
 const numberDisplay = (value: any) => value == null ? '0' : value;
 const scoreDisplay = (value: any) => value == null ? '0' : Number(value).toFixed(2);
@@ -341,23 +348,16 @@ onMounted(async () => {
 </div>
 
 <div v-if="dashboard">
-  <ul class="nav nav-tabs mb-3">
-    <li class="nav-item">
-      <button type="button" class="nav-link" :class="{ active: activeTab === 'overview' }" @click="activeTab = 'overview'">Overview</button>
-    </li>
-    <li class="nav-item">
-      <button type="button" class="nav-link" :class="{ active: activeTab === 'organization' }" @click="activeTab = 'organization'">Organization</button>
-    </li>
-    <li class="nav-item">
-      <button type="button" class="nav-link" :class="{ active: activeTab === 'scorecard' }" @click="activeTab = 'scorecard'">Scorecard</button>
-    </li>
-    <li class="nav-item">
-      <button type="button" class="nav-link" :class="{ active: activeTab === 'delayed' }" @click="activeTab = 'delayed'">Delayed Actions</button>
-    </li>
-    <li class="nav-item">
-      <button type="button" class="nav-link" :class="{ active: activeTab === 'risk' }" @click="activeTab = 'risk'">At-risk Objectives</button>
-    </li>
-  </ul>
+  <div class="dashboard-tabs mb-3">
+    <button
+        v-for="item in dashboardTabs"
+        :key="item.value"
+        type="button"
+        class="dashboard-tab"
+        :class="{ active: activeTab === item.value }"
+        @click="activeTab = item.value"
+    >{{ item.label }}</button>
+  </div>
 
   <div v-show="activeTab === 'overview'">
     <div class="row g-3 mb-4">
@@ -434,3 +434,39 @@ onMounted(async () => {
   </div>
 </div>
 </template>
+
+<style scoped>
+.dashboard-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.dashboard-tab {
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.375rem;
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  min-height: 2.375rem;
+  min-width: 8.5rem;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.925rem;
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.dashboard-tab.active {
+  border-color: var(--bs-primary);
+  background: var(--bs-primary);
+  color: #fff;
+}
+
+@media (max-width: 576px) {
+  .dashboard-tab {
+    flex: 1 1 calc(50% - 0.5rem);
+    min-width: 0;
+  }
+}
+</style>
