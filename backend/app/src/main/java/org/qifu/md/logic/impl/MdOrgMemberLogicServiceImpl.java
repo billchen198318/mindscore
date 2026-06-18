@@ -14,6 +14,7 @@ import org.qifu.md.entity.MdOrgMember;
 import org.qifu.md.logic.IMdOrgMemberLogicService;
 import org.qifu.md.service.IMdOrgMemberService;
 import org.qifu.util.SimpleUtils;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,13 +26,16 @@ public class MdOrgMemberLogicServiceImpl implements IMdOrgMemberLogicService {
     private final IMdOrgMemberService<MdOrgMember, String> mdOrgMemberService;
     private final IAccountService<TbAccount, String> accountService;
     private final IUserRoleService<TbUserRole, String> userRoleService;
+    private final PasswordEncoder passwordEncoder;
 
     public MdOrgMemberLogicServiceImpl(IMdOrgMemberService<MdOrgMember, String> mdOrgMemberService,
                                        IAccountService<TbAccount, String> accountService,
-                                       IUserRoleService<TbUserRole, String> userRoleService) {
+                                       IUserRoleService<TbUserRole, String> userRoleService,
+                                       PasswordEncoder passwordEncoder) {
         this.mdOrgMemberService = mdOrgMemberService;
         this.accountService = accountService;
         this.userRoleService = userRoleService;
+        this.passwordEncoder = passwordEncoder;
     }
     
 	@ServiceMethodAuthority(type = {ServiceMethodType.INSERT})
@@ -49,7 +53,7 @@ public class MdOrgMemberLogicServiceImpl implements IMdOrgMemberLogicService {
             throw new ServiceException("帳號已存在: " + entity.getAccount());
         }
         acc.setOid(SimpleUtils.getUUIDStr());
-        acc.setPassword("DefP@ssw0rd123!"); // 建議依實際需求調整
+        acc.setPassword(this.passwordEncoder.encode("DefP@ssw0rd123!")); // 建議依實際需求調整
         acc.setOnJob(YesNo.YES);
         acc.setCuserid(entity.getCuserid());
         acc.setCdate(new Date());
