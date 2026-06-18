@@ -6,6 +6,7 @@ import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +25,7 @@ import org.qifu.md.service.IMdOkrCheckinService;
 import org.qifu.md.service.IMdOkrKeyResultService;
 import org.qifu.md.service.IMdOkrObjectiveService;
 import org.qifu.md.service.IMdOkrSnapshotService;
+import org.qifu.util.LoadResources;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -232,12 +234,19 @@ public class OkrCheckinLogicServiceImpl implements IOkrCheckinLogicService {
     }
 
     private String toCalculationTrace(MdOkrObjective objective, MdOkrCheckin checkin) {
-        return "{\"source\":\"OKR_CHECKIN\",\"objectiveOid\":\"" + escapeJson(objective.getOid())
-                + "\",\"checkinOid\":\"" + escapeJson(checkin.getOid())
-                + "\",\"krOid\":\"" + escapeJson(checkin.getKrOid()) + "\"}";
+        Map<String, Object> trace = new LinkedHashMap<>();
+        trace.put("source", "OKR_CHECKIN");
+        trace.put("objectiveOid", objective.getOid());
+        trace.put("checkinOid", checkin.getOid());
+        trace.put("krOid", checkin.getKrOid());
+        return toJson(trace);
     }
 
-    private String escapeJson(String value) {
-        return value == null ? "" : value.replace("\\", "\\\\").replace("\"", "\\\"");
+    private String toJson(Map<String, Object> trace) {
+        try {
+            return LoadResources.getObjectMapper().writeValueAsString(trace);
+        } catch (Exception e) {
+            throw new IllegalStateException("Build OKR calculation trace failed.", e);
+        }
     }
 }

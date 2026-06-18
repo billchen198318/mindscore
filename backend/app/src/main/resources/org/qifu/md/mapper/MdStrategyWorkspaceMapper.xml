@@ -29,6 +29,9 @@
     <if test="workspaceCode != null and workspaceCode != ''.toString() ">
         AND WORKSPACE_CODE = #{workspaceCode,jdbcType=VARCHAR}
     </if>
+    <if test="workspaceCodeLike != null and workspaceCodeLike != ''.toString() ">
+        AND WORKSPACE_CODE LIKE #{workspaceCodeLike,jdbcType=VARCHAR}
+    </if>
     <if test="workspaceName != null and workspaceName != ''.toString() ">
         AND WORKSPACE_NAME LIKE #{workspaceName,jdbcType=VARCHAR}
     </if>

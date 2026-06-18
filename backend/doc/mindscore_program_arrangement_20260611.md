@@ -191,7 +191,11 @@ This family covers strategy workspace and weighted alignment.
 | `MD_PROG007D0002` | `md_prog007d0002` | `MdStrategyTheme` | Strategy theme / pillar maintenance | Medium |
 | `MD_PROG007D0003` | `md_prog007d0003` | `MdStrategyObjective` | Strategy objective maintenance | Medium |
 | `MD_PROG007D0004` | `md_prog007d0004` | `MdStrategyObjectiveLink` | KPI / OKR alignment maintenance | Medium |
-| `MD_PROG007D0005` | `md_prog007d0005` | `MdStrategySnapshot` | Strategy snapshot query | Medium |
+| `MD_PROG007D0005` | `md_prog007d0005` | `MdStrategySnapshot` | Strategy snapshot report / evidence history, read-only | Medium |
+
+`MdStrategySnapshot` is not a user-maintained master-data program.
+It should be created or reused automatically when a Strategy / BSC report is generated, published, frozen, or closed by schedule.
+The UI, if implemented, should be read-only report evidence/history, not create/edit maintenance.
 
 Recommended backend controllers:
 
@@ -199,25 +203,29 @@ Recommended backend controllers:
 - `MdPROG007D0002Controller`
 - `MdPROG007D0003Controller`
 - `MdPROG007D0004Controller`
-- `MdPROG007D0005Controller`
+
+`MdStrategySnapshot` should be created or reused by Strategy / BSC report logic or an internal snapshot service.
+`MD_PROG007D0005` may exist as a read-only report/history controller, but must not provide create/edit/delete maintenance functions.
 
 ### 3.8 MD_PROG008D - Action / PDCA
 
 This family covers action plan and follow-up items.
+In UI design, Action owner and Action source linkage are necessary functional parts, but they do not need to be exposed as standalone CRUD pages by default.
+They should be maintained inside Action Plan / Action Item create, edit, or detail screens unless a later operational need requires centralized maintenance.
 
 | Program ID | Page Folder | Main Entity | Purpose | Priority |
 |---|---|---|---|---|
-| `MD_PROG008D0001` | `md_prog008d0001` | `MdActionPlan` | Action plan maintenance | Medium |
-| `MD_PROG008D0002` | `md_prog008d0002` | `MdActionItem` | Action item maintenance | Medium |
-| `MD_PROG008D0003` | `md_prog008d0003` | `MdActionOwner` | Action owner binding | Medium |
-| `MD_PROG008D0004` | `md_prog008d0004` | `MdActionSourceLink` | Action source linkage | Medium |
+| `MD_PROG008D0001` | `md_prog008d0001` | `MdActionPlan` | Action plan maintenance, including plan-level owners and source links | Medium |
+| `MD_PROG008D0002` | `md_prog008d0002` | `MdActionItem` | Action item maintenance, including item-level owners, PDCA stage, progress and source links | Medium |
+| `MD_PROG008D0003` | Optional / internal | `MdActionOwner` | Owner binding API / embedded section, not standalone page by default | Low |
+| `MD_PROG008D0004` | Optional / internal | `MdActionSourceLink` | Source linkage API / embedded section, not standalone page by default | Low |
 
 Recommended backend controllers:
 
 - `MdPROG008D0001Controller`
 - `MdPROG008D0002Controller`
-- `MdPROG008D0003Controller`
-- `MdPROG008D0004Controller`
+- `MdPROG008D0003Controller` may exist as internal support API if owner binding is not fully handled by `MD_PROG008D0001/0002`
+- `MdPROG008D0004Controller` may exist as internal support API if source linkage is not fully handled by `MD_PROG008D0001/0002`
 
 ### 3.9 MD_PROG009D - Dashboard
 
@@ -299,8 +307,6 @@ pages/md_prog007d0004/
 pages/md_prog007d0005/
 pages/md_prog008d0001/
 pages/md_prog008d0002/
-pages/md_prog008d0003/
-pages/md_prog008d0004/
 pages/md_prog009d0001/
 pages/md_prog010d0001/
 pages/md_prog010d0002/
@@ -322,6 +328,9 @@ If a program only supports query mode, then only keep:
 - `index.vue`
 - `config.ts`
 - `QueryPageStore.ts`
+
+For `MD_PROG008D`, `md_prog008d0003` and `md_prog008d0004` are not required as standalone page folders in the initial UI.
+Owner binding and source linkage should be implemented as embedded sections in `md_prog008d0001` and/or `md_prog008d0002`.
 
 ## 6. Program Registration Rule
 
@@ -832,10 +841,24 @@ SetParam: MD_PROG003D0001S01Q
 
 #### MD_PROG007D0005 - Strategy Snapshot
 
+調整後範圍：
+
+- 不做一般使用者 CRUD
+- 可做 read-only report / snapshot history 頁面
+- Strategy / BSC 報表產生時自動建立或引用 snapshot
+- Publish / freeze / period-close 排程也可以建立 snapshot
+- 若日後需要 UI，僅做 read-only snapshot evidence/history，不做 create/edit maintenance
+
+設計理由：
+
+- 一般 user 不應該手動維護 snapshot
+- 正式報表需要歷史一致性，報表結果必須指向固定的策略結構
+- Preview / current-state 報表可以直接讀 master data；formal / freeze 報表才使用 snapshot
+
 核心用途：
 
 - 記錄策略快照
-- 供年度 / 季度檢視
+- 供年度 / 季度檢視與正式報表追溯
 
 關鍵調整點：
 
@@ -845,12 +868,43 @@ SetParam: MD_PROG003D0001S01Q
 
 ### 9.8 MD_PROG008D - Action / PDCA
 
+整體定位：
+
+- `MD_PROG008D` 是 PDCA / improvement action 模組。
+- 前台主要稱呼建議使用 `Action Plan / Action Item`，底層用 `ACTION_STAGE = PLAN / DO / CHECK / ACT` 支援 PDCA。
+- `MdActionOwner` 與 `MdActionSourceLink` 是必要資料模型，但初期不建議拆成獨立 CRUD 頁面。
+- Owner 與 Source Link 應嵌入 Action Plan / Action Item 的 create/edit/detail 流程。
+
 #### MD_PROG008D0001 - Action Plan
 
 核心用途：
 
 - 一個改善方案或行動方案
 - 可對應 KPI / OKR / Strategy / Insight
+- 作為 Action Item 的上層容器
+- 維護 plan-level owner 與 source links
+
+建議畫面：
+
+- `index.vue`: Action Plan 清單與狀態查詢
+- `create.vue`: 新增 Action Plan，包含 owner list 與 source link section
+- `edit/[id].vue`: 修改 Action Plan，包含 owner/source link 維護與 item 摘要
+
+建議欄位：
+
+- `PLAN_CODE`
+- `PLAN_NAME`
+- `DESCRIPTION`
+- `START_DATE`
+- `END_DATE`
+- `PROGRESS_VALUE`
+- `STATUS`
+
+建議內嵌區塊：
+
+- `Owner List`: 使用 `MdActionOwner`，支援 `OWNER_TYPE = ACCOUNT / ORG`
+- `Source Links`: 使用 `MdActionSourceLink`，支援 KPI / OKR / Strategy / Insight 來源
+- `Item Summary`: 顯示 Action Item 數量、完成率、逾期數
 
 #### MD_PROG008D0002 - Action Item
 
@@ -858,24 +912,95 @@ SetParam: MD_PROG003D0001S01Q
 
 - Action Plan 下的具體行動項
 - 支援 P / D / C / A 階段
+- 支援 parent / dependency，以便後續 gantt chart 或工作拆解
+- 維護 item-level owner 與 source links
+
+建議畫面：
+
+- `index.vue`: Action Item 清單，可依 plan / owner / stage / status 查詢
+- `create.vue`: 新增 Action Item，包含 owner list 與 source link section
+- `edit/[id].vue`: 修改 Action Item，包含進度、完成日、owner/source link 維護
+
+建議欄位：
+
+- `PLAN_OID`
+- `PARENT_OID`
+- `ITEM_NAME`
+- `ACTION_STAGE`
+- `DESCRIPTION`
+- `START_DATE`
+- `END_DATE`
+- `DONE_DATE`
+- `PROGRESS_VALUE`
+- `STATUS`
+- `SORT_NO`
+
+關鍵調整點：
+
+- `ACTION_STAGE` 必須保留 `PLAN / DO / CHECK / ACT`
+- 若 `DONE_DATE` 有值，應能對應完成狀態或完成率
+- Item owner 可以覆寫 plan owner；若未設定 item owner，可由 plan owner 作為預設責任歸屬
+- Source link 可從 plan 繼承，也可由 item 指向更細的 KPI / OKR / Strategy / Insight 來源
 
 #### MD_PROG008D0003 - Action Owner
 
 核心用途：
 
-- 維護 action 的 owner
+- 維護 action 的 owner binding，支援 plan-level 與 item-level owner
+- 這是必要功能，但不建議作為初期獨立頁面
+
+建議實作方式：
+
+- 由 `MD_PROG008D0001` 和 `MD_PROG008D0002` 的 create/edit/detail 內嵌 owner section 維護
+- 後端可提供 internal API / service 供 plan/item 儲存時一起 rebuild owner list
+- 只有在需要集中查詢或批次維護「誰負責哪些 action」時，才考慮獨立頁面
+
+建議欄位：
+
+- `ACTION_TYPE`: `PLAN / ITEM`
+- `ACTION_OID`
+- `OWNER_TYPE`: `ACCOUNT / ORG`
+- `ACCOUNT`
+- `ORG_OID`
+- `OWNER_ROLE`: `OWNER / VIEWER / APPROVER`
 
 #### MD_PROG008D0004 - Action Source Link
 
 核心用途：
 
 - 維護 action 與 KPI / OKR / Strategy / Insight 的來源關聯
+- 這是必要功能，用來回答 action 是因為哪個問題、目標或 insight 而產生
+- 這是追溯與 dashboard 統計的核心資料，但不建議作為初期獨立頁面
+
+建議實作方式：
+
+- 由 `MD_PROG008D0001` 和 `MD_PROG008D0002` 的 create/edit/detail 內嵌 source link section 維護
+- 後端可提供 internal API / service 供 plan/item 儲存時一起 rebuild source links
+- 從 KPI report、OKR report、Strategy report 或 Insight detail 建立 action 時，應自動帶入 source link
+- 只有在需要集中修正 action-source 關係時，才考慮獨立頁面
+
+建議欄位：
+
+- `ACTION_TYPE`: `PLAN / ITEM`
+- `ACTION_OID`
+- `SOURCE_TYPE`: `KPI / OKR_OBJECTIVE / OKR_KR / STRATEGY / INSIGHT`
+- `SOURCE_OID`
+- `LINK_REASON`
+
+實務用途：
+
+- 低分 KPI 是否已有改善 action
+- 落後 OKR 是否已有追蹤 action
+- Strategy Objective 分數不佳時有哪些改善計畫
+- Insight recommendation 是否已被落實成 action
 
 關鍵調整點：
 
 - Action 不只是 task，要能回推來源與改善結果
 - Action Item 建議支援 parent / dependency
 - 若未來要做 gantt chart，`start/end/done` 與 stage 要保留完整
+- 初期獨立開發優先順序應為 `MD_PROG008D0001`、`MD_PROG008D0002`
+- `MD_PROG008D0003`、`MD_PROG008D0004` 先作為內嵌功能或支援 API，不列為必要獨立 UI
 
 ### 9.9 MD_PROG009D - Dashboard
 
