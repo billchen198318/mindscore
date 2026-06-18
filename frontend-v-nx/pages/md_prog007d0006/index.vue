@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { computed, ref, onMounted, watch } from 'vue';
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
 
@@ -20,6 +20,8 @@ const { showLoading, hideLoading } = useSwalLoading();
 
 const pageProgramId = ref(PageConstants.QueryId);
 const workspaceList = ref<any[]>([]);
+const orgList = ref<any[]>([]);
+const memberList = ref<any[]>([]);
 const report = ref<any>(null);
 const qFieldShow = ref(true);
 
@@ -31,9 +33,16 @@ const periodTypeList = [
     { value: 'HALFYEAR', label: 'HALFYEAR' },
     { value: 'YEAR', label: 'YEAR' }
 ];
+const dataForTypeOptions = [
+    { value: 'GLOBAL', label: 'Global' },
+    { value: 'ORG', label: 'Organization' },
+    { value: 'ACCOUNT', label: 'Account' }
+];
 
 const tbRefresh = () => btnClear();
 const tbQueryFieldShow = () => qFieldShow.value = !qFieldShow.value;
+const showAccountFilter = computed(() => queryPageStore.queryParam.dataForType === 'ACCOUNT');
+const showOrgFilter = computed(() => queryPageStore.queryParam.dataForType === 'ORG');
 
 const formatScore = (value: any) => {
     if (value === null || value === undefined || value === '') {
@@ -42,6 +51,27 @@ const formatScore = (value: any) => {
     const numberValue = Number(value);
     return Number.isNaN(numberValue) ? value : numberValue.toFixed(2);
 };
+const accountName = (account: string) => {
+    const item = memberList.value.find((member: any) => member.account === account);
+    return item ? item.account + (item.displayName ? ' - ' + item.displayName : '') : account;
+};
+const orgName = (oid: string) => {
+    const item = orgList.value.find((org: any) => org.oid === oid);
+    return item ? item.orgCode + ' - ' + item.orgName : oid;
+};
+const snapshotScopeText = (linkView: any) => {
+    if (!linkView || !linkView.dataForType) {
+        return '';
+    }
+    if (linkView.dataForType === 'ACCOUNT') {
+        return 'Account: ' + accountName(linkView.account);
+    }
+    if (linkView.dataForType === 'ORG') {
+        return 'Organization: ' + orgName(linkView.orgOid);
+    }
+    return 'Global';
+};
+const calculatedAtText = (value: any) => value ? String(value).replace('T', ' ').slice(0, 19) : '';
 
 const btnClear = () => {
     queryPageStore.clearData();
@@ -63,8 +93,37 @@ const loadWorkspaceList = async () => {
         toast.warning(e?.message || e);
     }
 };
+const loadOrgList = async () => {
+    const axiosInstance = getAxiosInstance();
+    const response = await axiosInstance.post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/findOrgList', {});
+    if (response.data && import.meta.env.VITE_SUCCESS_FLAG == response.data.success) {
+        orgList.value = (response.data.value || []).filter((item: any) => item.enabled === 'Y');
+    }
+};
+const loadMemberList = async () => {
+    const axiosInstance = getAxiosInstance();
+    const response = await axiosInstance.post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/findMemberList', {});
+    if (response.data && import.meta.env.VITE_SUCCESS_FLAG == response.data.success) {
+        const seen: Record<string, boolean> = {};
+        memberList.value = (response.data.value || []).filter((item: any) => {
+            if (!item.account || seen[item.account]) {
+                return false;
+            }
+            seen[item.account] = true;
+            return true;
+        });
+    }
+};
 
 const btnGenerate = async () => {
+    if (queryPageStore.queryParam.dataForType === 'ACCOUNT' && !queryPageStore.queryParam.account) {
+        toast.warning('Please select account.');
+        return;
+    }
+    if (queryPageStore.queryParam.dataForType === 'ORG' && !queryPageStore.queryParam.orgOid) {
+        toast.warning('Please select organization.');
+        return;
+    }
     showLoading();
     report.value = null;
     try {
@@ -72,7 +131,10 @@ const btnGenerate = async () => {
         const response = await axiosInstance.post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/generate', {
             workspaceOid : queryPageStore.queryParam.workspaceOid,
             periodType   : queryPageStore.queryParam.periodType,
-            periodKey    : queryPageStore.queryParam.periodKey
+            periodKey    : queryPageStore.queryParam.periodKey,
+            dataForType  : queryPageStore.queryParam.dataForType,
+            account      : queryPageStore.queryParam.dataForType === 'ACCOUNT' ? queryPageStore.queryParam.account : '',
+            orgOid       : queryPageStore.queryParam.dataForType === 'ORG' ? queryPageStore.queryParam.orgOid : ''
         });
         hideLoading();
         if (response.data) {
@@ -89,7 +151,16 @@ const btnGenerate = async () => {
 };
 
 onMounted(async () => {
-    await loadWorkspaceList();
+    await Promise.all([loadWorkspaceList(), loadOrgList(), loadMemberList()]);
+});
+
+watch(() => queryPageStore.queryParam.dataForType, (value) => {
+    if (value !== 'ACCOUNT') {
+        queryPageStore.queryParam.account = '';
+    }
+    if (value !== 'ORG') {
+        queryPageStore.queryParam.orgOid = '';
+    }
 });
 </script>
 
@@ -128,6 +199,26 @@ onMounted(async () => {
       <div class="col-md-3">
         <label for="periodKey" class="form-label">Period Key</label>
         <input type="text" class="form-control" id="periodKey" v-model="queryPageStore.queryParam.periodKey">
+      </div>
+      <div class="col-md-3">
+        <label for="dataForType" class="form-label">Data For</label>
+        <select class="form-select" id="dataForType" v-model="queryPageStore.queryParam.dataForType">
+          <option v-for="item in dataForTypeOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+        </select>
+      </div>
+      <div v-if="showAccountFilter" class="col-md-3">
+        <label for="account" class="form-label">Account</label>
+        <select class="form-select" id="account" v-model="queryPageStore.queryParam.account">
+          <option value="">Please select</option>
+          <option v-for="item in memberList" :key="item.account" :value="item.account">{{ accountName(item.account) }}</option>
+        </select>
+      </div>
+      <div v-if="showOrgFilter" class="col-md-3">
+        <label for="orgOid" class="form-label">Organization</label>
+        <select class="form-select" id="orgOid" v-model="queryPageStore.queryParam.orgOid">
+          <option value="">Please select</option>
+          <option v-for="item in orgList" :key="item.oid" :value="item.oid">{{ orgName(item.oid) }}</option>
+        </select>
       </div>
       <div class="col-md-2 d-flex align-items-end gap-2">
         <button type="button" class="btn btn-primary w-100" @click="btnGenerate"><i class="bi bi-bar-chart-line"></i> Generate</button>
@@ -190,6 +281,9 @@ onMounted(async () => {
                                 <div class="small text-muted" v-for="linkView in objective.linkList" :key="linkView.link.oid">
                                     {{ linkView.link.linkType }} / {{ linkView.sourceCode }} - {{ linkView.sourceName || 'Missing source' }}
                                     / score {{ formatScore(linkView.scoreValue) }}
+                                    <span v-if="linkView.scoreStatus">/ {{ linkView.scoreStatus }}</span>
+                                    <span v-if="snapshotScopeText(linkView)">/ {{ snapshotScopeText(linkView) }}</span>
+                                    <span v-if="linkView.calculatedAt">/ {{ calculatedAtText(linkView.calculatedAt) }}</span>
                                     <span v-if="linkView.missingScore" class="text-danger">missing score</span>
                                 </div>
                             </td>

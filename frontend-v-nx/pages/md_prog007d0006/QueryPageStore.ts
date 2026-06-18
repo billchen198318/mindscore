@@ -10,7 +10,10 @@ export const useMdProg007d0006Store = defineStore('md_prog007d0006', {
             queryParam : {
                 workspaceOid : '',
                 periodType : 'MONTH',
-                periodKey : ''
+                periodKey : '',
+                dataForType : 'GLOBAL',
+                account : '',
+                orgOid : ''
             }
         }
     },
@@ -22,6 +25,9 @@ export const useMdProg007d0006Store = defineStore('md_prog007d0006', {
             this.queryParam.workspaceOid = '';
             this.queryParam.periodType = 'MONTH';
             this.queryParam.periodKey = '';
+            this.queryParam.dataForType = 'GLOBAL';
+            this.queryParam.account = '';
+            this.queryParam.orgOid = '';
         }
     },
 })

@@ -6,6 +6,9 @@ public class StrategyReportQueryRequest implements java.io.Serializable {
     private String workspaceOid;
     private String periodType;
     private String periodKey;
+    private String dataForType;
+    private String account;
+    private String orgOid;
 
     public String getWorkspaceOid() {
         return workspaceOid;
@@ -29,5 +32,29 @@ public class StrategyReportQueryRequest implements java.io.Serializable {
 
     public void setPeriodKey(String periodKey) {
         this.periodKey = periodKey;
+    }
+
+    public String getDataForType() {
+        return dataForType;
+    }
+
+    public void setDataForType(String dataForType) {
+        this.dataForType = dataForType;
+    }
+
+    public String getAccount() {
+        return account;
+    }
+
+    public void setAccount(String account) {
+        this.account = account;
+    }
+
+    public String getOrgOid() {
+        return orgOid;
+    }
+
+    public void setOrgOid(String orgOid) {
+        this.orgOid = orgOid;
     }
 }

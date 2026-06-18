@@ -1,6 +1,7 @@
 package org.qifu.md.api;
 
 import java.util.List;
+import java.util.Map;
 
 import org.qifu.base.exception.ControllerException;
 import org.qifu.base.exception.ServiceException;
@@ -9,10 +10,14 @@ import org.qifu.base.model.DefaultControllerJsonResultObj;
 import org.qifu.base.model.DefaultResult;
 import org.qifu.core.util.CoreApiSupport;
 import org.qifu.md.entity.MdStrategyWorkspace;
+import org.qifu.md.entity.MdOrgMember;
+import org.qifu.md.entity.MdOrgUnit;
 import org.qifu.md.logic.IStrategyReportLogicService;
 import org.qifu.md.model.StrategyReportQueryRequest;
 import org.qifu.md.model.StrategyReportResult;
 import org.qifu.md.service.IMdStrategyWorkspaceService;
+import org.qifu.md.service.IMdOrgMemberService;
+import org.qifu.md.service.IMdOrgUnitService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,12 +38,18 @@ public class MdPROG007D0006Controller extends CoreApiSupport {
 
     private final IStrategyReportLogicService strategyReportLogicService;
     private final IMdStrategyWorkspaceService<MdStrategyWorkspace, String> mdStrategyWorkspaceService;
+    private final IMdOrgUnitService<MdOrgUnit, String> mdOrgUnitService;
+    private final IMdOrgMemberService<MdOrgMember, String> mdOrgMemberService;
 
     public MdPROG007D0006Controller(IStrategyReportLogicService strategyReportLogicService,
-            IMdStrategyWorkspaceService<MdStrategyWorkspace, String> mdStrategyWorkspaceService) {
+            IMdStrategyWorkspaceService<MdStrategyWorkspace, String> mdStrategyWorkspaceService,
+            IMdOrgUnitService<MdOrgUnit, String> mdOrgUnitService,
+            IMdOrgMemberService<MdOrgMember, String> mdOrgMemberService) {
         super();
         this.strategyReportLogicService = strategyReportLogicService;
         this.mdStrategyWorkspaceService = mdStrategyWorkspaceService;
+        this.mdOrgUnitService = mdOrgUnitService;
+        this.mdOrgMemberService = mdOrgMemberService;
     }
 
     @ControllerMethodAuthority(programId = "MD_PROG007D0006Q", check = true)
@@ -62,6 +73,34 @@ public class MdPROG007D0006Controller extends CoreApiSupport {
         DefaultControllerJsonResultObj<List<MdStrategyWorkspace>> result = this.initDefaultJsonResult();
         try {
             DefaultResult<List<MdStrategyWorkspace>> listResult = this.mdStrategyWorkspaceService.selectList("WORKSPACE_CODE", "ASC");
+            this.setDefaultResponseJsonResult(listResult, result);
+        } catch (ServiceException | ControllerException e) {
+            this.exceptionResult(result, e);
+        }
+        return ResponseEntity.ok().body(result);
+    }
+
+    @ControllerMethodAuthority(programId = "MD_PROG007D0006Q", check = true)
+    @Operation(summary = "MD_PROG007D0006 - findOrgList", description = "Organization option list")
+    @PostMapping(value = "/findOrgList", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<DefaultControllerJsonResultObj<List<MdOrgUnit>>> findOrgList(@RequestBody Map<String, Object> entity) {
+        DefaultControllerJsonResultObj<List<MdOrgUnit>> result = this.initDefaultJsonResult();
+        try {
+            DefaultResult<List<MdOrgUnit>> listResult = this.mdOrgUnitService.selectList("ORG_CODE", "ASC");
+            this.setDefaultResponseJsonResult(listResult, result);
+        } catch (ServiceException | ControllerException e) {
+            this.exceptionResult(result, e);
+        }
+        return ResponseEntity.ok().body(result);
+    }
+
+    @ControllerMethodAuthority(programId = "MD_PROG007D0006Q", check = true)
+    @Operation(summary = "MD_PROG007D0006 - findMemberList", description = "Member option list")
+    @PostMapping(value = "/findMemberList", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<DefaultControllerJsonResultObj<List<MdOrgMember>>> findMemberList(@RequestBody Map<String, Object> entity) {
+        DefaultControllerJsonResultObj<List<MdOrgMember>> result = this.initDefaultJsonResult();
+        try {
+            DefaultResult<List<MdOrgMember>> listResult = this.mdOrgMemberService.selectList("ACCOUNT", "ASC");
             this.setDefaultResponseJsonResult(listResult, result);
         } catch (ServiceException | ControllerException e) {
             this.exceptionResult(result, e);

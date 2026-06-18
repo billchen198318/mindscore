@@ -48,6 +48,9 @@ public class StrategyReportLogicServiceImpl implements IStrategyReportLogicServi
 
     private static final String LINK_TYPE_KPI = "KPI";
     private static final String LINK_TYPE_OKR_OBJECTIVE = "OKR_OBJECTIVE";
+    private static final String DATA_FOR_GLOBAL = "GLOBAL";
+    private static final String DATA_FOR_ACCOUNT = "ACCOUNT";
+    private static final String DATA_FOR_ORG = "ORG";
 
     private final IMdStrategyWorkspaceService<MdStrategyWorkspace, String> mdStrategyWorkspaceService;
     private final IMdStrategyThemeService<MdStrategyTheme, String> mdStrategyThemeService;
@@ -115,6 +118,14 @@ public class StrategyReportLogicServiceImpl implements IStrategyReportLogicServi
         }
         if (StringUtils.isBlank(request.getPeriodKey())) {
             throw new ServiceException("Please enter period key.");
+        }
+        String dataForType = StringUtils.defaultIfBlank(request.getDataForType(), DATA_FOR_GLOBAL);
+        request.setDataForType(dataForType);
+        if (DATA_FOR_ACCOUNT.equals(dataForType) && StringUtils.isBlank(request.getAccount())) {
+            throw new ServiceException("Please select account.");
+        }
+        if (DATA_FOR_ORG.equals(dataForType) && StringUtils.isBlank(request.getOrgOid())) {
+            throw new ServiceException("Please select organization.");
         }
     }
 
@@ -214,6 +225,12 @@ public class StrategyReportLogicServiceImpl implements IStrategyReportLogicServi
         MdKpiScoreSnapshot snapshot = loadKpiSnapshot(link.getLinkOid(), request);
         if (snapshot != null) {
             view.setScoreValue(snapshot.getScoreValue());
+            view.setScoreStatus(snapshot.getScoreStatus());
+            view.setDataForType(snapshot.getDataForType());
+            view.setAccount(snapshot.getAccount());
+            view.setOrgOid(snapshot.getOrgOid());
+            view.setCalculationTrace(snapshot.getCalculationTrace());
+            view.setCalculatedAt(snapshot.getCalculatedAt());
         }
     }
 
@@ -231,6 +248,13 @@ public class StrategyReportLogicServiceImpl implements IStrategyReportLogicServi
         params.put("kpiOid", kpiOid);
         params.put("periodType", request.getPeriodType());
         params.put("periodKey", request.getPeriodKey());
+        params.put("dataForType", StringUtils.defaultIfBlank(request.getDataForType(), DATA_FOR_GLOBAL));
+        if (DATA_FOR_ACCOUNT.equals(request.getDataForType())) {
+            params.put("account", request.getAccount());
+        }
+        if (DATA_FOR_ORG.equals(request.getDataForType())) {
+            params.put("orgOid", request.getOrgOid());
+        }
         List<MdKpiScoreSnapshot> snapshots = this.mdKpiScoreSnapshotService.selectListByParams(params, "CALCULATED_AT", "DESC").getValue();
         return CollectionUtils.isEmpty(snapshots) ? null : snapshots.get(0);
     }
