@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.qifu.base.exception.ServiceException;
 import org.qifu.base.message.BaseSystemMessage;
 import org.qifu.base.model.DefaultResult;
@@ -144,7 +145,7 @@ public class ActionPlanLogicServiceImpl implements IActionPlanLogicService {
         if (plan.getProgressValue() == null) {
             plan.setProgressValue(BigDecimal.ZERO);
         }
-        if (!StringUtils.equalsAny(plan.getStatus(), "DRAFT", "ACTIVE", "CLOSED", "ARCHIVED")) {
+        if (!Strings.CS.equalsAny(plan.getStatus(), "DRAFT", "ACTIVE", "CLOSED", "ARCHIVED")) {
             throw new ServiceException("Unsupported action plan status: " + plan.getStatus());
         }
         if (plan.getStartDate() != null && plan.getEndDate() != null && plan.getEndDate().before(plan.getStartDate())) {
@@ -208,7 +209,7 @@ public class ActionPlanLogicServiceImpl implements IActionPlanLogicService {
         if (StringUtils.isBlank(ownerRole)) {
             return OWNER_ROLE_OWNER;
         }
-        if (StringUtils.equalsAny(ownerRole, OWNER_ROLE_OWNER, OWNER_ROLE_VIEWER, OWNER_ROLE_APPROVER)) {
+        if (Strings.CS.equalsAny(ownerRole, OWNER_ROLE_OWNER, OWNER_ROLE_VIEWER, OWNER_ROLE_APPROVER)) {
             return ownerRole;
         }
         throw new ServiceException("Unsupported action owner role: " + ownerRole);
@@ -248,7 +249,7 @@ public class ActionPlanLogicServiceImpl implements IActionPlanLogicService {
         normalized.setSourceType(StringUtils.trim(sourceLink.getSourceType()));
         normalized.setSourceOid(StringUtils.trim(sourceLink.getSourceOid()));
         normalized.setLinkReason(StringUtils.trimToNull(sourceLink.getLinkReason()));
-        if (!StringUtils.equalsAny(normalized.getSourceType(), "KPI", "OKR_OBJECTIVE", "OKR_KR", "STRATEGY", "INSIGHT")) {
+        if (!Strings.CS.equalsAny(normalized.getSourceType(), "KPI", "OKR_OBJECTIVE", "OKR_KR", "STRATEGY", "INSIGHT")) {
             throw new ServiceException("Unsupported action source type: " + normalized.getSourceType());
         }
         return normalized;

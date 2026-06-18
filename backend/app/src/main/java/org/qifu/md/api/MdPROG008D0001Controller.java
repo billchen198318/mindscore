@@ -3,7 +3,7 @@ package org.qifu.md.api;
 import java.math.BigDecimal;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.qifu.base.exception.ControllerException;
 import org.qifu.base.exception.ServiceException;
 import org.qifu.base.model.CheckControllerFieldHandler;
@@ -253,7 +253,7 @@ public class MdPROG008D0001Controller extends CoreApiSupport {
             result.getCheckFields().put("planCode", "Plan code only allows 0-9, a-z, A-Z, dash, underscore, and dot.");
             throw new ControllerException("Plan code only allows 0-9, a-z, A-Z, dash, underscore, and dot.");
         }
-        if (!StringUtils.equalsAny(entity.getStatus(), "DRAFT", "ACTIVE", "CLOSED", "ARCHIVED")) {
+        if (!Strings.CS.equalsAny(entity.getStatus(), "DRAFT", "ACTIVE", "CLOSED", "ARCHIVED")) {
             result.getCheckFields().put("status", "Unsupported action plan status.");
             throw new ControllerException("Unsupported action plan status.");
         }
