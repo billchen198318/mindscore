@@ -1752,6 +1752,8 @@ INSERT INTO `tb_sys_menu` VALUES
 ('079c507d-6adc-11f1-8576-2d8a171b1ad4','MD_PROG008D0001Q','8748b563-6ab5-11f1-b802-2d3506a5d7f6','Y','admin','2026-06-18 14:07:47',NULL,NULL),
 ('079f5dbe-6adc-11f1-8576-7d5f2d10c2a1','MD_PROG008D0002Q','8748b563-6ab5-11f1-b802-2d3506a5d7f6','Y','admin','2026-06-18 14:07:47',NULL,NULL),
 ('07a0481f-6adc-11f1-8576-77fc06a38a11','MD_PROG008D0005Q','8748b563-6ab5-11f1-b802-2d3506a5d7f6','Y','admin','2026-06-18 14:07:47',NULL,NULL),
+('2201f1a7-6adf-11f1-ba7d-25acac64ae00','MD_PROG009D','00000000-0000-0000-0000-000000000000','Y','admin','2026-06-18 14:30:00',NULL,NULL),
+('22028de8-6adf-11f1-ba7d-bb09e31178cf','MD_PROG009D0001Q','2201f1a7-6adf-11f1-ba7d-25acac64ae00','Y','admin','2026-06-18 14:30:00',NULL,NULL),
 ('37fa0e49-6674-11f1-9dca-0d721c5c0f0c','MD_PROG004D','00000000-0000-0000-0000-000000000000','Y','admin','2026-06-12 23:34:36',NULL,NULL),
 ('37fb94ea-6674-11f1-9dca-0d6665973f3b','MD_PROG004D0001Q','37fa0e49-6674-11f1-9dca-0d721c5c0f0c','Y','admin','2026-06-12 23:34:36',NULL,NULL),
 ('4bd4d202-5feb-495b-8c8c-ec6b7f5b8041','CORE_PROG002D0002Q','79e1cf24-2522-4cdf-abcc-6455b47d545b','Y','admin','2017-05-10 14:20:12',NULL,NULL),
@@ -1899,6 +1901,7 @@ INSERT INTO `tb_sys_prog` VALUES
 ('467e9bfe-6633-11f1-a6b2-244bfee7c856','MD_PROG002D0003E','AB03 - 公式推薦規則 (編輯)','#/md_prog002d0003/edit','Y','N',0,0,'CORE','ITEM','SYSTEM','diagram-3','admin','2026-06-12 15:48:30',NULL,NULL),
 ('4fbcecfb-692f-11f1-a6b2-244bfee7c856','MD_PROG005D','AE. KPI Report','#','N','N',0,0,'CORE','FOLDER','SYSTEM','graph-up','admin','2026-06-16 10:57:26',NULL,NULL),
 ('4fbd001d-692f-11f1-a6b2-244bfee7c856','MD_PROG005D0001Q','AE01 - KPI Report','#/md_prog005d0001','N','N',0,0,'CORE','ITEM','SYSTEM','speedometer2','admin','2026-06-16 10:57:26',NULL,NULL),
+('5a7d820f-6adf-11f1-a6b2-244bfee7c856','MD_PROG009D','AI. Dashboard','#','N','N',0,0,'CORE','FOLDER','SYSTEM','speedometer2','admin','2026-06-18 14:29:47',NULL,NULL),
 ('5c6f4387-6ab5-11f1-a6b2-244bfee7c856','MD_PROG008D','AH. Action / PDCA','#','N','N',0,0,'CORE','FOLDER','SYSTEM','clipboard-check','admin','2026-06-18 09:29:13',NULL,NULL),
 ('5c6f467a-6ab5-11f1-a6b2-244bfee7c856','MD_PROG008D0001Q','AH01 - Action Plan','#/md_prog008d0001','N','N',0,0,'CORE','ITEM','SYSTEM','clipboard-check','admin','2026-06-18 09:29:13',NULL,NULL),
 ('5c6f46d7-6ab5-11f1-a6b2-244bfee7c856','MD_PROG008D0001A','AH01 - Action Plan (Create)','#/md_prog008d0001/create','N','N',0,0,'CORE','ITEM','SYSTEM','clipboard-check','admin','2026-06-18 09:29:13',NULL,NULL),
@@ -1943,6 +1946,7 @@ INSERT INTO `tb_sys_prog` VALUES
 ('b6b89559-6864-46ab-9ca9-0992dcf238f1','CORE_PROG001D0001Q','ZA01 - System site','#/prog001d0001','N','N',0,0,'CORE','ITEM','COMPUTER','globe2','admin','2014-10-02 00:00:00','admin','2021-01-20 08:20:29'),
 ('b978f706-4c5f-40f8-83b1-395492f141d4','CORE_PROG002D0001Q','ZB01 - Role','#/prog002d0001','N','N',0,0,'CORE','ITEM','PEOPLE','person-square','admin','2017-05-08 21:32:50','admin','2023-08-27 16:46:27'),
 ('bfeb7935-334f-4a94-9666-f77433793a8a','CORE_PROG005D','ZE. MQTT','/','N','N',0,0,'CORE','FOLDER','PROPERTIES','gear-fill','admin','2026-06-04 11:00:54',NULL,NULL),
+('c71ea272-6ade-11f1-a6b2-244bfee7c856','MD_PROG009D0001Q','AI01 - Management Dashboard','#/md_prog009d0001','N','N',0,0,'CORE','ITEM','SYSTEM','speedometer2','admin','2026-06-18 14:25:40',NULL,NULL),
 ('c96ebde8-7044-4b05-a155-68a0c2605619','CORE_PROG002D0003Q','ZB03 - Role for menu','#/prog002d0003','N','N',0,0,'CORE','ITEM','FOLDER','menu-app-fill','admin','2017-05-08 21:37:01','admin','2023-08-28 19:54:34'),
 ('c9d50c9d-6984-11f1-a592-005056c00001','MD_PROG006D','AF. OKR','#','N','N',0,0,'CORE','FOLDER','SYSTEM','diagram-3','admin','2026-06-16 21:10:33',NULL,NULL),
 ('c9d51115-6984-11f1-a592-005056c00001','MD_PROG006D0001Q','AF01 - OKR Cycle','#/md_prog006d0001','N','N',0,0,'CORE','ITEM','SYSTEM','calendar3','admin','2026-06-16 21:10:33',NULL,NULL),
@@ -2227,4 +2231,4 @@ SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2026-06-18 14:08:58
+-- Dump completed on 2026-06-18 14:35:12
