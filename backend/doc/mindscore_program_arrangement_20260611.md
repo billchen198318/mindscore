@@ -1156,6 +1156,12 @@ SetParam: MD_PROG003D0001S01Q
 - LLM 只能解釋與建議，不能成為官方 score 計算者
 - Insight 應可手動接受 / 忽略 / 關閉
 - 先做規則引擎，再做 LLM，避免一開始就依賴外部模型
+- LLM Provider Config 第一版需支援 `OPENAI` 與 `GEMINI`
+- Provider 設定需包含 provider type、API base URL、API key、default model、enabled flag、test connection
+- API key 只能由 backend 使用與保存，frontend 不可直接呼叫 OpenAI / Gemini API
+- API key 儲存後畫面只能顯示遮罩值，不應回傳完整 key
+- 外部 LLM 呼叫需透過 backend 統一 LLM client abstraction，避免業務程式綁死單一供應商
+- LLM Run Log 需記錄 provider、model、request type、success / failure、error message、token usage、cost estimate
 
 ## 10. Page Type Decision Rules
 

@@ -86,7 +86,7 @@ Insight / LLM 是後續規劃階段，預計用於：
 - Insight 清單與明細
 - Recommendation 建議
 - 從 Insight 建立 Action
-- LLM Provider 設定
+- LLM Provider 設定，預計支援 OpenAI 與 Gemini
 - LLM Run Log 稽核紀錄
 
 ## 程式模組

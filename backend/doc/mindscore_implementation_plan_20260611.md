@@ -187,8 +187,17 @@ Recommended implementation order:
 3. Insight generate / list / detail
 4. Recommendation
 5. Action from insight
-6. LLM provider config
+6. LLM provider config, first-class support for `OPENAI` and `GEMINI`
 7. LLM run log
+
+Phase 14 LLM integration principles:
+
+- LLM is an explanation and recommendation layer. It must not replace official KPI / OKR / Strategy / Action calculation logic.
+- `LLM Provider Config` should support at least `OPENAI` and `GEMINI` from the first implementation.
+- Provider configuration should allow provider type, API base URL, API key, default model, enabled flag and connection test.
+- External LLM calls must be executed by the backend through a unified LLM client abstraction. Frontend pages must not call OpenAI, Gemini or other external LLM APIs directly.
+- API keys must be stored securely, masked in UI, and never returned to frontend in full after saving.
+- `LLM Run Log` should record provider, model, request type, success / failure, error message, token usage and cost estimate when available.
 
 ## Recommended MVP Sequence
 
