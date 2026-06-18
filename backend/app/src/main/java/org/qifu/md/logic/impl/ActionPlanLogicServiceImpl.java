@@ -2,6 +2,10 @@ package org.qifu.md.logic.impl;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +24,7 @@ import org.qifu.md.entity.MdActionOwner;
 import org.qifu.md.entity.MdActionPlan;
 import org.qifu.md.entity.MdActionSourceLink;
 import org.qifu.md.logic.IActionPlanLogicService;
+import org.qifu.md.model.ActionPlanItemSummary;
 import org.qifu.md.model.ActionPlanRequest;
 import org.qifu.md.service.IMdActionItemService;
 import org.qifu.md.service.IMdActionOwnerService;
@@ -89,6 +94,7 @@ public class ActionPlanLogicServiceImpl implements IActionPlanLogicService {
         value.setActionPlan(plan);
         value.setOwnerList(ownerResult.getValue());
         value.setSourceLinkList(sourceLinkResult.getValue());
+        value.setItemSummary(buildItemSummary(plan.getOid()));
 
         DefaultResult<ActionPlanRequest> result = new DefaultResult<>();
         result.setSuccess(YesNo.YES);
@@ -263,5 +269,69 @@ public class ActionPlanLogicServiceImpl implements IActionPlanLogicService {
         if (itemList != null && !itemList.isEmpty()) {
             throw new ServiceException("This action plan has action items and cannot be deleted.");
         }
+    }
+
+    private ActionPlanItemSummary buildItemSummary(String planOid) throws ServiceException {
+        Map<String, Object> params = new HashMap<>();
+        params.put("planOid", planOid);
+        DefaultResult<List<MdActionItem>> itemResult = this.mdActionItemService.selectListByParams(params);
+        List<MdActionItem> itemList = itemResult.getValue();
+
+        ActionPlanItemSummary summary = new ActionPlanItemSummary();
+        if (itemList == null || itemList.isEmpty()) {
+            return summary;
+        }
+
+        LocalDate today = LocalDate.now();
+        BigDecimal progressTotal = BigDecimal.ZERO;
+        int progressCount = 0;
+        int completedCount = 0;
+        int overdueCount = 0;
+
+        for (MdActionItem item : itemList) {
+            if (item == null) {
+                continue;
+            }
+            if (item.getProgressValue() != null) {
+                progressTotal = progressTotal.add(item.getProgressValue());
+                progressCount++;
+            }
+            if (isCompleted(item)) {
+                completedCount++;
+            }
+            if (isOverdue(item, today)) {
+                overdueCount++;
+            }
+        }
+
+        summary.setItemCount(itemList.size());
+        summary.setCompletedCount(completedCount);
+        summary.setOverdueCount(overdueCount);
+        if (progressCount > 0) {
+            summary.setAvgProgress(progressTotal.divide(BigDecimal.valueOf(progressCount), 2, RoundingMode.HALF_UP));
+        }
+        return summary;
+    }
+
+    private boolean isCompleted(MdActionItem item) {
+        return item.getDoneDate() != null
+                || "CLOSED".equals(item.getStatus())
+                || (item.getProgressValue() != null && item.getProgressValue().compareTo(new BigDecimal("100")) >= 0);
+    }
+
+    private boolean isOverdue(MdActionItem item, LocalDate today) {
+        return item.getEndDate() != null
+                && toLocalDate(item.getEndDate()).isBefore(today)
+                && item.getDoneDate() == null
+                && !Strings.CS.equalsAny(item.getStatus(), "CLOSED", "ARCHIVED");
+    }
+
+    private LocalDate toLocalDate(Date value) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(value);
+        return LocalDate.of(
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH) + 1,
+                calendar.get(Calendar.DAY_OF_MONTH));
     }
 }

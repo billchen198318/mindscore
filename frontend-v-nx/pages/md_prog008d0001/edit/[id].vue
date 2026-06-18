@@ -31,6 +31,12 @@ const okrObjectiveList = ref<any[]>([]);
 const strategyObjectiveList = ref<any[]>([]);
 const ownerList = ref<any[]>([]);
 const sourceLinkList = ref<any[]>([]);
+const itemSummary = ref<any>({
+    itemCount : 0,
+    avgProgress : 0,
+    completedCount : 0,
+    overdueCount : 0
+});
 
 const selectedOwnerType = ref('ACCOUNT');
 const selectedOwnerAccount = ref(pleaseSelectId);
@@ -136,6 +142,13 @@ const loadOptions = async () => {
 
 const normalizeDate = (value: any) => value ? String(value).slice(0, 10) : '';
 
+const normalizeSummary = (value: any) => ({
+    itemCount : value?.itemCount || 0,
+    avgProgress : value?.avgProgress || 0,
+    completedCount : value?.completedCount || 0,
+    overdueCount : value?.overdueCount || 0
+});
+
 const loadData = async () => {
     showLoading();
     try {
@@ -160,6 +173,7 @@ const loadData = async () => {
         };
         ownerList.value = value.ownerList || [];
         sourceLinkList.value = value.sourceLinkList || [];
+        itemSummary.value = normalizeSummary(value.itemSummary);
     } catch (e: any) {
         hideLoading();
         alert(e);
@@ -310,6 +324,35 @@ onMounted(async () => {
       <div class="col-md-6">
         <label for="description" class="form-label">Description</label>
         <textarea class="form-control" id="description" rows="2" v-model="actionPlan.description"></textarea>
+      </div>
+
+      <div class="col-md-12">
+        <div class="row g-3">
+          <div class="col-md-3">
+            <div class="border rounded p-3 h-100">
+              <div class="small text-muted">Action Items</div>
+              <div class="fs-4 fw-semibold">{{ itemSummary.itemCount }}</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="border rounded p-3 h-100">
+              <div class="small text-muted">Average Progress</div>
+              <div class="fs-4 fw-semibold">{{ itemSummary.avgProgress }}%</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="border rounded p-3 h-100">
+              <div class="small text-muted">Completed</div>
+              <div class="fs-4 fw-semibold">{{ itemSummary.completedCount }}</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="border rounded p-3 h-100">
+              <div class="small text-muted">Overdue</div>
+              <div class="fs-4 fw-semibold">{{ itemSummary.overdueCount }}</div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="col-md-12"><hr></div>

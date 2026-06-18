@@ -12,6 +12,7 @@ public class ActionPlanRequest {
     private MdActionPlan actionPlan;
     private List<MdActionOwner> ownerList = new ArrayList<>();
     private List<MdActionSourceLink> sourceLinkList = new ArrayList<>();
+    private ActionPlanItemSummary itemSummary;
 
     public MdActionPlan getActionPlan() {
         return actionPlan;
@@ -35,5 +36,13 @@ public class ActionPlanRequest {
 
     public void setSourceLinkList(List<MdActionSourceLink> sourceLinkList) {
         this.sourceLinkList = sourceLinkList;
+    }
+
+    public ActionPlanItemSummary getItemSummary() {
+        return itemSummary;
+    }
+
+    public void setItemSummary(ActionPlanItemSummary itemSummary) {
+        this.itemSummary = itemSummary;
     }
 }
