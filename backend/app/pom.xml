@@ -3,11 +3,11 @@
   <modelVersion>4.0.0</modelVersion>
   
   <groupId>org.qifu</groupId>
-  <artifactId>core-app</artifactId>
+  <artifactId>mindscore-app</artifactId>
   <version>0.0.5-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>core-app</name>
+  <name>mindscore-app</name>
   <url>http://maven.apache.org</url>
 
   <properties>
