@@ -10,6 +10,7 @@ export const useMdProg009d0001Store = defineStore('md_prog009d0001', {
         return {
             gridConfig : getInitGridConfigVariable() as GridConfig,
             queryParam : {
+                periodMode : 'SINGLE',
                 periodType : '',
                 periodKey : '',
                 periodKeyFrom : '',
@@ -30,6 +31,7 @@ export const useMdProg009d0001Store = defineStore('md_prog009d0001', {
             this.gridConfig = gJsonRes;
         },
         clearData() {
+            this.queryParam.periodMode = 'SINGLE';
             this.queryParam.periodType = '';
             this.queryParam.periodKey = '';
             this.queryParam.periodKeyFrom = '';

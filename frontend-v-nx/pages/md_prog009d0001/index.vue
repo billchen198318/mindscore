@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { computed, ref, onMounted, watch } from 'vue';
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
 
 import Toolbar from '@/components/Toolbar.vue';
 import Grid from '@/components/Grid.vue';
 import HiddenQueryFieldAlertInfo from '@/components/HiddenQueryFieldAlertInfo.vue';
+import PeriodPicker from '../md_prog005d0001/PeriodPicker.vue';
 import { PageConstants } from './config';
 import { getGridConfig, setConfigTotal, resetConfigByOld } from '../../components/GridHelper';
 import { useMdProg009d0001Store } from './QueryPageStore';
@@ -64,12 +65,48 @@ const dashboardTabs = [
 
 const numberDisplay = (value: any) => value == null ? '0' : value;
 const scoreDisplay = (value: any) => value == null ? '0' : Number(value).toFixed(2);
+const isPeriodRangeMode = computed(() => queryPageStore.queryParam.periodMode === 'RANGE');
+const periodPickerType = computed(() => queryPageStore.queryParam.periodType);
+
+const pad2 = (value: number) => String(value).padStart(2, '0');
+const weekOfYear = (date: Date) => {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    return {
+        year : d.getUTCFullYear(),
+        week : Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7)
+    };
+};
+const defaultPeriodKey = () => {
+    const now = new Date();
+    if (periodPickerType.value === 'DAY') {
+        return now.toISOString().slice(0, 10);
+    }
+    if (periodPickerType.value === 'WEEK') {
+        const info = weekOfYear(now);
+        return info.year + '-W' + pad2(info.week);
+    }
+    if (periodPickerType.value === 'MONTH') {
+        return now.toISOString().slice(0, 7);
+    }
+    if (periodPickerType.value === 'QUARTER') {
+        return now.getFullYear() + '-Q' + Math.floor(now.getMonth() / 3 + 1);
+    }
+    if (periodPickerType.value === 'HALFYEAR') {
+        return now.getFullYear() + '-H' + (now.getMonth() < 6 ? '1' : '2');
+    }
+    if (periodPickerType.value === 'YEAR') {
+        return String(now.getFullYear());
+    }
+    return '';
+};
 
 const requestBody = () => ({
     periodType : queryPageStore.queryParam.periodType,
-    periodKey : queryPageStore.queryParam.periodKey,
-    periodKeyFrom : queryPageStore.queryParam.periodKeyFrom,
-    periodKeyTo : queryPageStore.queryParam.periodKeyTo,
+    periodKey : isPeriodRangeMode.value ? '' : queryPageStore.queryParam.periodKey,
+    periodKeyFrom : isPeriodRangeMode.value ? queryPageStore.queryParam.periodKeyFrom : '',
+    periodKeyTo : isPeriodRangeMode.value ? queryPageStore.queryParam.periodKeyTo : '',
     dataForType : queryPageStore.queryParam.dataForType,
     account : queryPageStore.queryParam.account,
     orgOid : queryPageStore.queryParam.orgOid,
@@ -248,6 +285,30 @@ onMounted(async () => {
         ]
     );
 });
+
+watch(periodPickerType, (value) => {
+    queryPageStore.queryParam.periodKey = value ? defaultPeriodKey() : '';
+    queryPageStore.queryParam.periodKeyFrom = '';
+    queryPageStore.queryParam.periodKeyTo = '';
+});
+
+watch(() => queryPageStore.queryParam.periodMode, (value) => {
+    if (!queryPageStore.queryParam.periodType) {
+        queryPageStore.queryParam.periodKey = '';
+        queryPageStore.queryParam.periodKeyFrom = '';
+        queryPageStore.queryParam.periodKeyTo = '';
+        return;
+    }
+    if (value === 'RANGE') {
+        queryPageStore.queryParam.periodKey = '';
+        queryPageStore.queryParam.periodKeyFrom = queryPageStore.queryParam.periodKeyFrom || defaultPeriodKey();
+        queryPageStore.queryParam.periodKeyTo = queryPageStore.queryParam.periodKeyTo || defaultPeriodKey();
+        return;
+    }
+    queryPageStore.queryParam.periodKeyFrom = '';
+    queryPageStore.queryParam.periodKeyTo = '';
+    queryPageStore.queryParam.periodKey = queryPageStore.queryParam.periodKey || defaultPeriodKey();
+});
 </script>
 
 <template>
@@ -277,23 +338,23 @@ onMounted(async () => {
           <label for="periodType">Period Type</label>
         </div>
       </div>
-      <div class="col-md-2">
-        <div class="form-group form-floating">
-          <input type="text" class="form-control" id="periodKey" placeholder="Period Key" v-model="queryPageStore.queryParam.periodKey">
-          <label for="periodKey">Period Key</label>
+      <div class="col-md-3">
+        <label class="form-label">Period Mode</label>
+        <div class="btn-group w-100" role="group" aria-label="Period Mode">
+          <input type="radio" class="btn-check" id="periodModeSingle" value="SINGLE" v-model="queryPageStore.queryParam.periodMode">
+          <label class="btn btn-outline-secondary" for="periodModeSingle">Single</label>
+          <input type="radio" class="btn-check" id="periodModeRange" value="RANGE" v-model="queryPageStore.queryParam.periodMode">
+          <label class="btn btn-outline-secondary" for="periodModeRange">Range</label>
         </div>
       </div>
-      <div class="col-md-2">
-        <div class="form-group form-floating">
-          <input type="text" class="form-control" id="periodKeyFrom" placeholder="Period From" v-model="queryPageStore.queryParam.periodKeyFrom">
-          <label for="periodKeyFrom">Period From</label>
-        </div>
+      <div v-if="!isPeriodRangeMode" class="col-md-3">
+        <PeriodPicker label="Period" :periodType="queryPageStore.queryParam.periodType" v-model="queryPageStore.queryParam.periodKey" />
       </div>
-      <div class="col-md-2">
-        <div class="form-group form-floating">
-          <input type="text" class="form-control" id="periodKeyTo" placeholder="Period To" v-model="queryPageStore.queryParam.periodKeyTo">
-          <label for="periodKeyTo">Period To</label>
-        </div>
+      <div v-if="isPeriodRangeMode" class="col-md-3">
+        <PeriodPicker label="Period From" :periodType="queryPageStore.queryParam.periodType" v-model="queryPageStore.queryParam.periodKeyFrom" />
+      </div>
+      <div v-if="isPeriodRangeMode" class="col-md-3">
+        <PeriodPicker label="Period To" :periodType="queryPageStore.queryParam.periodType" v-model="queryPageStore.queryParam.periodKeyTo" />
       </div>
       <div class="col-md-2">
         <div class="form-group form-floating">
