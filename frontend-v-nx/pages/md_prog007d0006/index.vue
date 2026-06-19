@@ -5,6 +5,7 @@ import 'vue3-toastify/dist/index.css';
 
 import Toolbar from '@/components/Toolbar.vue';
 import HiddenQueryFieldAlertInfo from '@/components/HiddenQueryFieldAlertInfo.vue';
+import PeriodPicker from '../md_prog005d0001/PeriodPicker.vue';
 import { PageConstants } from './config';
 import { useMdProg007d0006Store } from './QueryPageStore';
 import {
@@ -43,6 +44,41 @@ const tbRefresh = () => btnClear();
 const tbQueryFieldShow = () => qFieldShow.value = !qFieldShow.value;
 const showAccountFilter = computed(() => queryPageStore.queryParam.dataForType === 'ACCOUNT');
 const showOrgFilter = computed(() => queryPageStore.queryParam.dataForType === 'ORG');
+const periodPickerType = computed(() => queryPageStore.queryParam.periodType);
+
+const pad2 = (value: number) => String(value).padStart(2, '0');
+const weekOfYear = (date: Date) => {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    return {
+        year : d.getUTCFullYear(),
+        week : Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7)
+    };
+};
+const defaultPeriodKey = () => {
+    const now = new Date();
+    if (periodPickerType.value === 'DAY') {
+        return now.toISOString().slice(0, 10);
+    }
+    if (periodPickerType.value === 'WEEK') {
+        const info = weekOfYear(now);
+        return info.year + '-W' + pad2(info.week);
+    }
+    if (periodPickerType.value === 'MONTH') {
+        return now.toISOString().slice(0, 7);
+    }
+    if (periodPickerType.value === 'QUARTER') {
+        return now.getFullYear() + '-Q' + Math.floor(now.getMonth() / 3 + 1);
+    }
+    if (periodPickerType.value === 'HALFYEAR') {
+        return now.getFullYear() + '-H' + (now.getMonth() < 6 ? '1' : '2');
+    }
+    if (periodPickerType.value === 'YEAR') {
+        return String(now.getFullYear());
+    }
+    return '';
+};
 
 const formatScore = (value: any) => {
     if (value === null || value === undefined || value === '') {
@@ -75,6 +111,7 @@ const calculatedAtText = (value: any) => value ? String(value).replace('T', ' ')
 
 const btnClear = () => {
     queryPageStore.clearData();
+    queryPageStore.queryParam.periodKey = defaultPeriodKey();
     report.value = null;
 };
 
@@ -116,6 +153,10 @@ const loadMemberList = async () => {
 };
 
 const btnGenerate = async () => {
+    if (!queryPageStore.queryParam.periodKey) {
+        toast.warning('Please select period.');
+        return;
+    }
     if (queryPageStore.queryParam.dataForType === 'ACCOUNT' && !queryPageStore.queryParam.account) {
         toast.warning('Please select account.');
         return;
@@ -151,6 +192,9 @@ const btnGenerate = async () => {
 };
 
 onMounted(async () => {
+    if (!queryPageStore.queryParam.periodKey) {
+        queryPageStore.queryParam.periodKey = defaultPeriodKey();
+    }
     await Promise.all([loadWorkspaceList(), loadOrgList(), loadMemberList()]);
 });
 
@@ -161,6 +205,10 @@ watch(() => queryPageStore.queryParam.dataForType, (value) => {
     if (value !== 'ORG') {
         queryPageStore.queryParam.orgOid = '';
     }
+});
+
+watch(periodPickerType, () => {
+    queryPageStore.queryParam.periodKey = defaultPeriodKey();
 });
 </script>
 
@@ -197,8 +245,8 @@ watch(() => queryPageStore.queryParam.dataForType, (value) => {
         </select>
       </div>
       <div class="col-md-3">
-        <label for="periodKey" class="form-label">Period Key</label>
-        <input type="text" class="form-control" id="periodKey" v-model="queryPageStore.queryParam.periodKey">
+        <PeriodPicker label="Period" :periodType="queryPageStore.queryParam.periodType" v-model="queryPageStore.queryParam.periodKey" />
+        <div class="form-text">Generated as the period key used by report snapshots.</div>
       </div>
       <div class="col-md-3">
         <label for="dataForType" class="form-label">Data For</label>

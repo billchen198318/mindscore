@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { computed, ref, onMounted, watch } from 'vue';
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
 
@@ -7,6 +7,7 @@ import Toolbar from '@/components/Toolbar.vue';
 import Grid from '@/components/Grid.vue';
 import GridPagination from '@/components/GridPagination.vue';
 import HiddenQueryFieldAlertInfo from '@/components/HiddenQueryFieldAlertInfo.vue';
+import PeriodPicker from '../md_prog005d0001/PeriodPicker.vue';
 import { PageConstants } from './config';
 import { getGridConfig, setConfigRow, setConfigPage, setConfigTotal, resetConfigByOld } from '../../components/GridHelper';
 import { useMdProg007d0005Store } from './QueryPageStore';
@@ -29,11 +30,48 @@ const qFieldShow = ref(true);
 
 const periodTypeList = [
     { value: '', label: 'All' },
+    { value: 'DAY', label: 'DAY' },
+    { value: 'WEEK', label: 'WEEK' },
     { value: 'MONTH', label: 'MONTH' },
     { value: 'QUARTER', label: 'QUARTER' },
-    { value: 'YEAR', label: 'YEAR' },
-    { value: 'CUSTOM', label: 'CUSTOM' }
+    { value: 'HALFYEAR', label: 'HALFYEAR' },
+    { value: 'YEAR', label: 'YEAR' }
 ];
+
+const periodPickerType = computed(() => queryPageStore.queryParam.periodType);
+const pad2 = (value: number) => String(value).padStart(2, '0');
+const weekOfYear = (date: Date) => {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    return {
+        year : d.getUTCFullYear(),
+        week : Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7)
+    };
+};
+const defaultPeriodKey = () => {
+    const now = new Date();
+    if (periodPickerType.value === 'DAY') {
+        return now.toISOString().slice(0, 10);
+    }
+    if (periodPickerType.value === 'WEEK') {
+        const info = weekOfYear(now);
+        return info.year + '-W' + pad2(info.week);
+    }
+    if (periodPickerType.value === 'MONTH') {
+        return now.toISOString().slice(0, 7);
+    }
+    if (periodPickerType.value === 'QUARTER') {
+        return now.getFullYear() + '-Q' + Math.floor(now.getMonth() / 3 + 1);
+    }
+    if (periodPickerType.value === 'HALFYEAR') {
+        return now.getFullYear() + '-H' + (now.getMonth() < 6 ? '1' : '2');
+    }
+    if (periodPickerType.value === 'YEAR') {
+        return String(now.getFullYear());
+    }
+    return '';
+};
 
 const workspaceName = (workspaceOid: string) => {
     const item = workspaceList.value.find((workspace: any) => workspace.oid === workspaceOid);
@@ -179,6 +217,10 @@ onMounted(async () => {
     }
     queryPageStore.gridConfig = newGridConfig;
 });
+
+watch(periodPickerType, (value) => {
+    queryPageStore.queryParam.periodKey = value ? defaultPeriodKey() : '';
+});
 </script>
 
 <template>
@@ -214,8 +256,8 @@ onMounted(async () => {
         </select>
       </div>
       <div class="col-md-4">
-        <label for="periodKey" class="form-label">Period Key</label>
-        <input type="text" class="form-control" id="periodKey" v-model="queryPageStore.queryParam.periodKey">
+        <PeriodPicker label="Period" :periodType="queryPageStore.queryParam.periodType" v-model="queryPageStore.queryParam.periodKey" />
+        <div class="form-text">Generated as the period key used by snapshots.</div>
       </div>
       <div class="col-12 d-flex gap-2">
         <button type="button" class="btn btn-primary" @click="btnQuery"><i class="bi bi-search"></i> Query</button>
