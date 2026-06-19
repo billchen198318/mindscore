@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { computed, ref, onMounted, watch } from 'vue';
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
 
@@ -26,6 +26,10 @@ const dsList = ref<any[]>([]);
 const planList = ref<any[]>([]);
 const memberList = ref<any[]>([]);
 const orgList = ref<any[]>([]);
+const kpiList = ref<any[]>([]);
+const okrObjectiveList = ref<any[]>([]);
+const okrKeyResultList = ref<any[]>([]);
+const strategyObjectiveList = ref<any[]>([]);
 const reportSummary = ref<any>(null);
 const qFieldShow = ref(true);
 
@@ -61,6 +65,22 @@ const statusName = (value: string) => (statusOptions.find((item) => item.value =
 const stageName = (value: string) => (stageOptions.find((item) => item.value === value)?.label || value);
 const dateDisplay = (value: any) => value ? String(value).slice(0, 10) : '';
 const percentDisplay = (value: any) => value == null ? '' : `${value}%`;
+const currentSourceOptions = computed(() => {
+    if (queryPageStore.queryParam.sourceType === 'KPI') {
+        return kpiList.value.map((item: any) => ({ oid: item.oid, label: item.kpiCode + ' - ' + item.kpiName }));
+    }
+    if (queryPageStore.queryParam.sourceType === 'OKR_OBJECTIVE') {
+        return okrObjectiveList.value.map((item: any) => ({ oid: item.oid, label: item.objectiveCode + ' - ' + item.objectiveName }));
+    }
+    if (queryPageStore.queryParam.sourceType === 'OKR_KR') {
+        return okrKeyResultList.value.map((item: any) => ({ oid: item.oid, label: item.krCode + ' - ' + item.krName }));
+    }
+    if (queryPageStore.queryParam.sourceType === 'STRATEGY') {
+        return strategyObjectiveList.value.map((item: any) => ({ oid: item.oid, label: item.objectiveCode + ' - ' + item.objectiveName }));
+    }
+    return [];
+});
+const sourceSelectDisabled = computed(() => !queryPageStore.queryParam.sourceType || currentSourceOptions.value.length < 1);
 
 const requestBody = () => ({
     field: {
@@ -163,6 +183,14 @@ const loadOrgList = async () => {
     }
 };
 
+const loadOptionList = async (path: string, target: any, filterEnabled = true) => {
+    const axiosInstance = getAxiosInstance();
+    const response = await axiosInstance.post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + path, {});
+    if (response.data && import.meta.env.VITE_SUCCESS_FLAG == response.data.success) {
+        target.value = filterEnabled ? (response.data.value || []).filter((item: any) => item.enabled !== 'N') : (response.data.value || []);
+    }
+};
+
 const loadSummary = async () => {
     const axiosInstance = getAxiosInstance();
     const response = await axiosInstance.post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/summary', requestBody());
@@ -204,12 +232,24 @@ const btnQuery = async () => {
 };
 
 onMounted(async () => {
-    await Promise.all([loadPlanList(), loadMemberList(), loadOrgList()]);
+    await Promise.all([
+        loadPlanList(),
+        loadMemberList(),
+        loadOrgList(),
+        loadOptionList('/findKpiList', kpiList),
+        loadOptionList('/findOkrObjectiveList', okrObjectiveList, false),
+        loadOptionList('/findKrList', okrKeyResultList, false),
+        loadOptionList('/findStrategyObjectiveList', strategyObjectiveList, false)
+    ]);
     const newGridConfig = initQueryGridConfig();
     if (queryPageStore.gridConfig.column) {
         resetConfigByOld(newGridConfig, queryPageStore.gridConfig);
     }
     queryPageStore.gridConfig = newGridConfig;
+});
+
+watch(() => queryPageStore.queryParam.sourceType, () => {
+    queryPageStore.queryParam.sourceOid = '';
 });
 </script>
 
@@ -299,8 +339,11 @@ onMounted(async () => {
       </div>
       <div class="col-md-3">
         <div class="form-group form-floating">
-          <input type="text" class="form-control" id="sourceOid" placeholder="Source OID" v-model="queryPageStore.queryParam.sourceOid">
-          <label for="sourceOid">Source OID</label>
+          <select class="form-select" id="sourceOid" v-model="queryPageStore.queryParam.sourceOid" :disabled="sourceSelectDisabled">
+            <option value="">{{ queryPageStore.queryParam.sourceType ? 'All' : 'Select source type first' }}</option>
+            <option v-for="item in currentSourceOptions" :key="item.oid" :value="item.oid">{{ item.label }}</option>
+          </select>
+          <label for="sourceOid">Source</label>
         </div>
       </div>
       <div class="col-md-3">

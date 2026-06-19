@@ -19,15 +19,23 @@ import org.qifu.base.model.SearchBody;
 import org.qifu.base.model.YesNo;
 import org.qifu.core.util.CoreApiSupport;
 import org.qifu.md.entity.MdActionPlan;
+import org.qifu.md.entity.MdKpi;
+import org.qifu.md.entity.MdOkrKeyResult;
+import org.qifu.md.entity.MdOkrObjective;
 import org.qifu.md.entity.MdOrgMember;
 import org.qifu.md.entity.MdOrgUnit;
+import org.qifu.md.entity.MdStrategyObjective;
 import org.qifu.md.logic.IActionReportLogicService;
 import org.qifu.md.model.ActionReportQuery;
 import org.qifu.md.model.ActionReportResult;
 import org.qifu.md.model.ActionReportRow;
 import org.qifu.md.service.IMdActionPlanService;
+import org.qifu.md.service.IMdKpiService;
+import org.qifu.md.service.IMdOkrKeyResultService;
+import org.qifu.md.service.IMdOkrObjectiveService;
 import org.qifu.md.service.IMdOrgMemberService;
 import org.qifu.md.service.IMdOrgUnitService;
+import org.qifu.md.service.IMdStrategyObjectiveService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -50,16 +58,28 @@ public class MdPROG008D0005Controller extends CoreApiSupport {
     private final IMdActionPlanService<MdActionPlan, String> mdActionPlanService;
     private final IMdOrgUnitService<MdOrgUnit, String> mdOrgUnitService;
     private final IMdOrgMemberService<MdOrgMember, String> mdOrgMemberService;
+    private final IMdKpiService<MdKpi, String> mdKpiService;
+    private final IMdOkrObjectiveService<MdOkrObjective, String> mdOkrObjectiveService;
+    private final IMdOkrKeyResultService<MdOkrKeyResult, String> mdOkrKeyResultService;
+    private final IMdStrategyObjectiveService<MdStrategyObjective, String> mdStrategyObjectiveService;
 
     public MdPROG008D0005Controller(IActionReportLogicService actionReportLogicService,
             IMdActionPlanService<MdActionPlan, String> mdActionPlanService,
             IMdOrgUnitService<MdOrgUnit, String> mdOrgUnitService,
-            IMdOrgMemberService<MdOrgMember, String> mdOrgMemberService) {
+            IMdOrgMemberService<MdOrgMember, String> mdOrgMemberService,
+            IMdKpiService<MdKpi, String> mdKpiService,
+            IMdOkrObjectiveService<MdOkrObjective, String> mdOkrObjectiveService,
+            IMdOkrKeyResultService<MdOkrKeyResult, String> mdOkrKeyResultService,
+            IMdStrategyObjectiveService<MdStrategyObjective, String> mdStrategyObjectiveService) {
         super();
         this.actionReportLogicService = actionReportLogicService;
         this.mdActionPlanService = mdActionPlanService;
         this.mdOrgUnitService = mdOrgUnitService;
         this.mdOrgMemberService = mdOrgMemberService;
+        this.mdKpiService = mdKpiService;
+        this.mdOkrObjectiveService = mdOkrObjectiveService;
+        this.mdOkrKeyResultService = mdOkrKeyResultService;
+        this.mdStrategyObjectiveService = mdStrategyObjectiveService;
     }
 
     @ControllerMethodAuthority(programId = "MD_PROG008D0005Q", check = true)
@@ -132,6 +152,62 @@ public class MdPROG008D0005Controller extends CoreApiSupport {
         DefaultControllerJsonResultObj<List<MdOrgMember>> result = this.initDefaultJsonResult();
         try {
             DefaultResult<List<MdOrgMember>> listResult = this.mdOrgMemberService.selectList("ACCOUNT", "ASC");
+            this.setDefaultResponseJsonResult(listResult, result);
+        } catch (ServiceException | ControllerException e) {
+            this.exceptionResult(result, e);
+        }
+        return ResponseEntity.ok().body(result);
+    }
+
+    @ControllerMethodAuthority(programId = "MD_PROG008D0005Q", check = true)
+    @Operation(summary = "MD_PROG008D0005 - findKpiList", description = "Action report KPI source option list")
+    @PostMapping(value = "/findKpiList", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<DefaultControllerJsonResultObj<List<MdKpi>>> findKpiList(@RequestBody MdKpi entity) {
+        DefaultControllerJsonResultObj<List<MdKpi>> result = this.initDefaultJsonResult();
+        try {
+            DefaultResult<List<MdKpi>> listResult = this.mdKpiService.selectList("KPI_CODE", "ASC");
+            this.setDefaultResponseJsonResult(listResult, result);
+        } catch (ServiceException | ControllerException e) {
+            this.exceptionResult(result, e);
+        }
+        return ResponseEntity.ok().body(result);
+    }
+
+    @ControllerMethodAuthority(programId = "MD_PROG008D0005Q", check = true)
+    @Operation(summary = "MD_PROG008D0005 - findOkrObjectiveList", description = "Action report OKR objective source option list")
+    @PostMapping(value = "/findOkrObjectiveList", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<DefaultControllerJsonResultObj<List<MdOkrObjective>>> findOkrObjectiveList(@RequestBody MdOkrObjective entity) {
+        DefaultControllerJsonResultObj<List<MdOkrObjective>> result = this.initDefaultJsonResult();
+        try {
+            DefaultResult<List<MdOkrObjective>> listResult = this.mdOkrObjectiveService.selectList("OBJECTIVE_CODE", "ASC");
+            this.setDefaultResponseJsonResult(listResult, result);
+        } catch (ServiceException | ControllerException e) {
+            this.exceptionResult(result, e);
+        }
+        return ResponseEntity.ok().body(result);
+    }
+
+    @ControllerMethodAuthority(programId = "MD_PROG008D0005Q", check = true)
+    @Operation(summary = "MD_PROG008D0005 - findKrList", description = "Action report OKR key result source option list")
+    @PostMapping(value = "/findKrList", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<DefaultControllerJsonResultObj<List<MdOkrKeyResult>>> findKrList(@RequestBody MdOkrKeyResult entity) {
+        DefaultControllerJsonResultObj<List<MdOkrKeyResult>> result = this.initDefaultJsonResult();
+        try {
+            DefaultResult<List<MdOkrKeyResult>> listResult = this.mdOkrKeyResultService.selectList("OBJECTIVE_OID, SORT_NO, KR_CODE", "ASC");
+            this.setDefaultResponseJsonResult(listResult, result);
+        } catch (ServiceException | ControllerException e) {
+            this.exceptionResult(result, e);
+        }
+        return ResponseEntity.ok().body(result);
+    }
+
+    @ControllerMethodAuthority(programId = "MD_PROG008D0005Q", check = true)
+    @Operation(summary = "MD_PROG008D0005 - findStrategyObjectiveList", description = "Action report strategy source option list")
+    @PostMapping(value = "/findStrategyObjectiveList", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<DefaultControllerJsonResultObj<List<MdStrategyObjective>>> findStrategyObjectiveList(@RequestBody MdStrategyObjective entity) {
+        DefaultControllerJsonResultObj<List<MdStrategyObjective>> result = this.initDefaultJsonResult();
+        try {
+            DefaultResult<List<MdStrategyObjective>> listResult = this.mdStrategyObjectiveService.selectList("OBJECTIVE_CODE", "ASC");
             this.setDefaultResponseJsonResult(listResult, result);
         } catch (ServiceException | ControllerException e) {
             this.exceptionResult(result, e);
