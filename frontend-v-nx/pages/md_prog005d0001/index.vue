@@ -17,7 +17,7 @@ import Toolbar from '@/components/Toolbar.vue';
 import Grid from '@/components/Grid.vue';
 import GridPagination from '@/components/GridPagination.vue';
 import HiddenQueryFieldAlertInfo from '@/components/HiddenQueryFieldAlertInfo.vue';
-import PeriodPicker from './PeriodPicker.vue';
+import PeriodPicker from '@/components/PeriodPicker.vue';
 import { PageConstants } from './config';
 import { getGridConfig, resetConfigByOld, setConfigPage, setConfigRow, setConfigTotal } from '../../components/GridHelper';
 import { useMdProg005d0001Store } from './QueryPageStore';

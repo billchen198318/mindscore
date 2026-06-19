@@ -5,7 +5,7 @@ import 'vue3-toastify/dist/index.css';
 
 import Toolbar from '@/components/Toolbar.vue';
 import HiddenQueryFieldAlertInfo from '@/components/HiddenQueryFieldAlertInfo.vue';
-import PeriodPicker from '../md_prog005d0001/PeriodPicker.vue';
+import PeriodPicker from '@/components/PeriodPicker.vue';
 import { PageConstants } from './config';
 import { useMdProg007d0006Store } from './QueryPageStore';
 import {
