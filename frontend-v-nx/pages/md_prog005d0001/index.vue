@@ -47,6 +47,8 @@ const kpiList = ref<any[]>([]);
 const orgList = ref<any[]>([]);
 const memberList = ref<any[]>([]);
 const qFieldShow = ref(true);
+const showTraceModal = ref(false);
+const selectedTraceRow = ref<any>(null);
 const summary = ref<any>({
     kpiCount : 0,
     avgScore : 0,
@@ -94,11 +96,59 @@ const accountName = (account: string) => {
     return item ? item.account + (item.displayName ? ' - ' + item.displayName : '') : account;
 };
 const statusName = (value: string) => optionName(scoreStatusOptions, value || 'UNKNOWN');
-const statusClass = (value: string) => {
-    if (value === 'GOOD') return 'text-bg-success';
-    if (value === 'WARNING') return 'text-bg-warning';
-    if (value === 'BAD') return 'text-bg-danger';
-    return 'text-bg-secondary';
+const fallbackStatusColors: Record<string, { font: string; background: string }> = {
+    GOOD: { font: '#ffffff', background: '#198754' },
+    WARNING: { font: '#212529', background: '#ffc107' },
+    BAD: { font: '#ffffff', background: '#dc3545' },
+    UNKNOWN: { font: '#ffffff', background: '#6c757d' }
+};
+const safeCssColor = (value: any, fallback: string) => {
+    const color = String(value || '').trim();
+    if (!color) {
+        return fallback;
+    }
+    if (typeof CSS !== 'undefined' && CSS.supports('color', color)) {
+        return color;
+    }
+    return fallback;
+};
+const escapeHtml = (value: any) => String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+const scoreColor = (item: any) => {
+    const fallback = fallbackStatusColors[item.scoreStatus] || fallbackStatusColors.UNKNOWN;
+    return {
+        font: safeCssColor(item.fontColor, fallback.font),
+        background: safeCssColor(item.bgColor, fallback.background)
+    };
+};
+const scoreBadgeHtml = (item: any, text: string) => {
+    const color = scoreColor(item);
+    const title = item.colorName ? ' title="' + escapeHtml(item.colorName) + '"' : '';
+    return '<span class="badge score-color-badge" style="color:' + color.font
+        + ';background-color:' + color.background + '"' + title + '>' + escapeHtml(text) + '</span>';
+};
+const formattedTrace = computed(() => {
+    const trace = selectedTraceRow.value?.calculationTrace;
+    if (!trace) {
+        return '';
+    }
+    try {
+        return JSON.stringify(JSON.parse(trace), null, 2);
+    } catch {
+        return String(trace);
+    }
+});
+const openTrace = (oid: string) => {
+    selectedTraceRow.value = dsList.value.find((item: any) => item.oid === oid) || null;
+    showTraceModal.value = true;
+};
+const closeTrace = () => {
+    showTraceModal.value = false;
+    selectedTraceRow.value = null;
 };
 const firstScore = computed(() => dsList.value.length > 0 ? dsList.value[0] : null);
 const showOrgFilter = computed(() => queryPageStore.queryParam.dataForType === 'ORG');
@@ -268,16 +318,19 @@ const rowView = (item: any) => ({
     aggrDisplay : item.aggrCode ? item.aggrCode + ' - ' + (item.aggrName || '') : '',
     ownerDisplay : item.ownerName || 'Global',
     scoreDisplay : numberText(item.scoreValue),
+    scoreHtml : scoreBadgeHtml(item, numberText(item.scoreValue)),
     targetDisplay : numberText(item.rawTarget),
     actualDisplay : numberText(item.rawActual),
     statusDisplay : statusName(item.scoreStatus),
-    statusHtml : '<span class="badge ' + statusClass(item.scoreStatus) + '">' + statusName(item.scoreStatus) + '</span>',
+    statusHtml : scoreBadgeHtml(item, statusName(item.scoreStatus)),
     calculatedAtText : item.calculatedAt ? String(item.calculatedAt).replace('T', ' ').slice(0, 19) : ''
 });
 
 const initQueryGridConfig = () => getGridConfig(
     'oid',
-    [],
+    [
+        { type: 'trace', method: openTrace, icon: 'card-list', class: 'btn btn-outline-primary btn-sm', memo: 'Calculation trace' }
+    ],
     [
         { label: 'KPI', field: 'kpiDisplay' },
         { label: 'Period', field: 'periodKey' },
@@ -287,9 +340,10 @@ const initQueryGridConfig = () => getGridConfig(
         { label: 'Aggregation', field: 'aggrDisplay' },
         { label: 'Target', field: 'targetDisplay' },
         { label: 'Actual', field: 'actualDisplay' },
-        { label: 'Score', field: 'scoreDisplay' },
+        { label: 'Score', field: 'scoreHtml', colHtml: true, colMethod: (val: any) => val },
         { label: 'Status', field: 'statusHtml', colHtml: true, colMethod: (val: any) => val },
-        { label: 'Calculated At', field: 'calculatedAtText' }
+        { label: 'Calculated At', field: 'calculatedAtText' },
+        { label: 'Trace', field: 'oid', textAlign: 'center' }
     ]
 );
 
@@ -339,6 +393,7 @@ const clearGridConfig = () => {
 const tbRefresh = () => btnQuery();
 const tbQueryFieldShow = () => qFieldShow.value = !qFieldShow.value;
 const btnClear = () => {
+    closeTrace();
     queryPageStore.clearData();
     dsList.value = [];
     summary.value = { kpiCount : 0, avgScore : 0, goodCount : 0, warningCount : 0, badCount : 0, unknownCount : 0 };
@@ -440,6 +495,8 @@ const loadTargetActual = async () => {
 };
 const updateGauge = () => {
     gaugeOption.series[0].data[0].value = firstScore.value ? Number(firstScore.value.scoreValue || 0) : Number(summary.value.avgScore || 0);
+    const color = firstScore.value ? scoreColor(firstScore.value).background : fallbackStatusColors.UNKNOWN.background;
+    gaugeOption.series[0].itemStyle = { color };
 };
 
 onMounted(async () => {
@@ -649,6 +706,36 @@ watch(() => queryPageStore.queryParam.periodMode, (value) => {
     <Grid :progId="pageProgramId" :dataSource="dsList" :config="queryPageStore.gridConfig" />
   </div>
 </div>
+
+<div v-if="showTraceModal" class="modal-overlay" @click.self="closeTrace">
+  <div class="trace-modal" role="dialog" aria-modal="true" aria-labelledby="traceModalTitle">
+    <div class="modal-header">
+      <div>
+        <h5 id="traceModalTitle" class="modal-title">KPI Calculation Trace</h5>
+        <div v-if="selectedTraceRow" class="small text-muted mt-1">
+          {{ selectedTraceRow.kpiDisplay }} / {{ selectedTraceRow.periodKey }} / {{ selectedTraceRow.ownerDisplay }}
+        </div>
+      </div>
+      <button type="button" class="btn-close" aria-label="Close" @click="closeTrace"></button>
+    </div>
+    <div v-if="selectedTraceRow" class="modal-body">
+      <div class="row g-3 mb-3">
+        <div class="col-md-6"><span class="trace-label">Formula</span>{{ selectedTraceRow.formulaDisplay || '-' }}</div>
+        <div class="col-md-6"><span class="trace-label">Aggregation</span>{{ selectedTraceRow.aggrDisplay || '-' }}</div>
+        <div class="col-md-3"><span class="trace-label">Target</span>{{ selectedTraceRow.targetDisplay || '-' }}</div>
+        <div class="col-md-3"><span class="trace-label">Actual</span>{{ selectedTraceRow.actualDisplay || '-' }}</div>
+        <div class="col-md-3"><span class="trace-label">Score</span><span v-html="selectedTraceRow.scoreHtml"></span></div>
+        <div class="col-md-3"><span class="trace-label">Color Rule</span>{{ selectedTraceRow.colorName || '-' }}</div>
+      </div>
+      <div class="trace-label">Calculation Trace</div>
+      <pre v-if="formattedTrace" class="trace-content"><code>{{ formattedTrace }}</code></pre>
+      <div v-else class="alert alert-secondary mb-0">No calculation trace is available for this score snapshot.</div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" @click="closeTrace">Close</button>
+    </div>
+  </div>
+</div>
 </template>
 
 <style scoped>
@@ -659,6 +746,53 @@ watch(() => queryPageStore.queryParam.periodMode, (value) => {
     padding: 12px 14px;
     background: #ffffff;
     min-height: 82px;
+}
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1050;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.5);
+}
+.trace-modal {
+    width: min(900px, 100%);
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 0.5rem;
+    background: #ffffff;
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.25);
+}
+.modal-header,
+.modal-footer {
+    padding: 1rem 1.25rem;
+}
+.modal-body {
+    padding: 1.25rem;
+}
+.trace-label {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: #6c757d;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+.trace-content {
+    max-height: 420px;
+    margin: 0;
+    overflow: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+:deep(.score-color-badge) {
+    min-width: 4.5rem;
 }
 .kpi-stat.good {
     border-left-color: #198754;

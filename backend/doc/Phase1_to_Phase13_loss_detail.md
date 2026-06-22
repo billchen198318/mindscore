@@ -20,8 +20,8 @@ This is a code-level review. It does not represent browser, database, or end-to-
 | Phase 3 | No explicit gap found | None found during this review |
 | Phase 4 | Partial | Measure Data import API and file-import UI are missing |
 | Phase 5 | No explicit gap found | None found during this review |
-| Phase 6 | Partial | Calculation trace and configured score color are not displayed by the frontend |
-| Phase 7 | Partial | OKR cycle status transition rules are not enforced |
+| Phase 6 | Completed in code | Calculation trace and configured score color are displayed by the KPI report frontend |
+| Phase 7 | Completed in code | OKR cycle status transition rules are enforced in backend and constrained in frontend |
 | Phase 8 | No explicit gap found | None found during this review |
 | Phase 9 | No explicit gap found | None found during this review |
 | Phase 10 | No explicit gap found | None found during this review |
@@ -70,6 +70,10 @@ Implement after the core KPI workflow is stable. This item does not block manual
 
 ## 4. Phase 6 - KPI Report Trace and Score Color
 
+### Resolution status
+
+Resolved in code on 2026-06-22.
+
 ### Existing implementation
 
 - Report query triggers backend recalculation before reading score snapshots.
@@ -77,30 +81,34 @@ Implement after the core KPI workflow is stable. This item does not block manual
 - Formula and aggregation information are displayed.
 - Backend report models return `calculationTrace` and configured color information.
 
-### Missing implementation
+### Implemented resolution
 
-- The KPI report frontend does not render `calculationTrace`.
-- The frontend uses fixed Bootstrap status classes instead of the score color returned by the backend.
-- No trace detail panel, dialog, or drill-down was found.
+- KPI score and status badges use backend `fontColor` and `bgColor` values after CSS color validation.
+- Missing or invalid configured colors fall back to the standard status colors.
+- The score gauge uses the selected report row's configured background color.
+- Each report row provides a calculation-trace action.
+- The trace dialog displays KPI context, formula, aggregation method, target, actual, score, color rule, and formatted JSON trace.
+- Missing or legacy non-JSON trace data is handled without breaking the report.
 
-### Impact
+### Remaining runtime verification
 
-- Users cannot inspect how the official KPI score was calculated.
-- Configured KPI score colors may not match the colors displayed in the report.
-- The report does not fully satisfy the auditability requirement in the implementation plan.
+- Verify configured colors with light, dark, named, RGB, and hex color values.
+- Verify fallback colors for missing and invalid configuration.
+- Verify JSON, legacy text, and empty calculation traces.
+- Verify the trace dialog at desktop and mobile widths.
 
-### Recommended timing
+### Acceptance criteria status
 
-Implement now. The backend already supplies the required data, so this is mainly a frontend presentation change with limited scope.
-
-### Acceptance criteria
-
-1. Display the configured background/font color returned by the backend.
-2. Provide a trace action for every score row.
-3. Show formula, aggregation method, source values, raw score, final score, and matched color rule.
-4. Handle missing or legacy trace data without breaking the report.
+1. Implemented: display configured background/font colors.
+2. Implemented: provide a trace action for every score row.
+3. Implemented: show formula, aggregation, target, actual, score, color rule, and full calculation trace.
+4. Implemented: handle missing, invalid JSON, and legacy text trace data.
 
 ## 5. Phase 7 - OKR Cycle Status Flow
+
+### Resolution status
+
+Resolved in code on 2026-06-22.
 
 ### Existing implementation
 
@@ -109,22 +117,21 @@ Implement now. The backend already supplies the required data, so this is mainly
 - Frontend create/edit pages expose the status field.
 - Backend validation rejects values outside the supported set.
 
-### Missing implementation
+### Implemented resolution
 
-- The frontend allows users to select any status directly.
-- The backend validates only the status value, not the transition from the stored status.
-- No dedicated activate, close, reopen, or archive command was found.
-- No restrictions based on cycle contents or dates were found.
+- A new cycle can only be created in `DRAFT` status.
+- Backend service logic reads the stored cycle and enforces the transition before update.
+- Allowed transitions are `DRAFT -> ACTIVE`, `DRAFT -> ARCHIVED`, `ACTIVE -> CLOSED`, and `CLOSED -> ARCHIVED`.
+- Updating other cycle fields without changing the status remains allowed.
+- `ARCHIVED` is terminal and reopening is not supported.
+- The create page displays a fixed Draft status.
+- The edit page only lists the current status and its allowed next statuses.
 
-### Impact
+### Remaining runtime verification
 
-- A cycle can skip required lifecycle steps.
-- Closed or archived cycles can potentially return to an earlier state without an explicit rule.
-- Snapshot and reporting behavior may become inconsistent if lifecycle meaning is not enforced.
-
-### Recommended timing
-
-Implement now. This is a domain integrity rule, and postponing it can create invalid production data.
+- Verify every allowed transition through the browser and API.
+- Verify rejected direct transitions return the expected message.
+- Confirm whether closing a cycle must create a final OKR snapshot. This was not required by the original Phase 7 list and remains a business decision.
 
 ### Proposed transition baseline
 
@@ -137,14 +144,14 @@ Implement now. This is a domain integrity rule, and postponing it can create inv
 
 Reopen behavior should be added only when there is a confirmed business requirement and audit trail.
 
-### Acceptance criteria
+### Acceptance criteria status
 
-1. Enforce transitions in backend logic using the stored status.
-2. Prevent direct status changes through generic update from bypassing the rule.
-3. Show only allowed actions or next statuses in the frontend.
-4. Return a clear validation error for invalid transitions.
-5. Define whether closing a cycle creates a final OKR snapshot.
-6. Add tests for every allowed and rejected transition.
+1. Implemented: enforce transitions using the stored status.
+2. Implemented: enforce the rule in the domain service used by backend callers.
+3. Implemented: show only allowed statuses in the frontend.
+4. Implemented: return a clear service error for invalid transitions.
+5. Pending business decision: whether closing creates a final snapshot.
+6. Pending: automated transition tests.
 
 ## 6. Phase 12 - Source-Driven Action Creation
 
@@ -185,11 +192,9 @@ Implement after the core Phase 1 to Phase 13 workflow has passed acceptance. The
 
 ## 7. Recommended Implementation Order
 
-1. Phase 7 OKR cycle status transition enforcement.
-2. Phase 6 KPI calculation trace and configured score color display.
-3. Complete Phase 1 to Phase 13 code and runtime acceptance.
-4. Phase 4 Measure Data file import.
-5. Phase 12 source-driven Action creation.
+1. Complete Phase 1 to Phase 13 code and runtime acceptance.
+2. Phase 4 Measure Data file import.
+3. Phase 12 source-driven Action creation.
 
 ## 8. Remaining Verification
 
