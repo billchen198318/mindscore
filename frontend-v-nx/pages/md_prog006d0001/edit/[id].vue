@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useSwalLoading } from '@/composables/useSwalLoading';
 import { toast } from 'vue3-toastify';
@@ -48,6 +48,26 @@ const formParam = ref({
     status : 'DRAFT'
 });
 
+const originalStatus = ref('DRAFT');
+const statusLabel: Record<string, string> = {
+    DRAFT: 'Draft',
+    ACTIVE: 'Active',
+    CLOSED: 'Closed',
+    ARCHIVED: 'Archived'
+};
+const allowedStatusTransitions: Record<string, string[]> = {
+    DRAFT: ['DRAFT', 'ACTIVE', 'ARCHIVED'],
+    ACTIVE: ['ACTIVE', 'CLOSED'],
+    CLOSED: ['CLOSED', 'ARCHIVED'],
+    ARCHIVED: ['ARCHIVED']
+};
+const allowedStatusOptions = computed(() =>
+    (allowedStatusTransitions[originalStatus.value] || [originalStatus.value]).map(value => ({
+        value,
+        label: statusLabel[value] || value
+    }))
+);
+
 const btnBack = () => router.back();
 
 const loadData = async () => {
@@ -67,6 +87,7 @@ const loadData = async () => {
                 startDate: toDateInputValue(response.data.value.startDate),
                 endDate: toDateInputValue(response.data.value.endDate)
             };
+            originalStatus.value = response.data.value.status;
         } else {
             toast.error('error, null');
             router.push(getUrlPrefixFromProgItem(getProgItem(PageConstants.QueryId)));
@@ -92,6 +113,7 @@ const btnUpdate = async () => {
                 return;
             }
             toast.success(response.data.message);
+            originalStatus.value = formParam.value.status;
         } else {
             toast.error('error, null');
         }
@@ -160,10 +182,7 @@ onMounted(() => {
       <div class="col-md-4">
         <label for="status" class="form-label">Status</label>
         <select :class="['form-select', checkInvalid('status', checkFields) ? 'is-invalid' : '']" id="status" v-model="formParam.status">
-          <option value="DRAFT">Draft</option>
-          <option value="ACTIVE">Active</option>
-          <option value="CLOSED">Closed</option>
-          <option value="ARCHIVED">Archived</option>
+          <option v-for="item in allowedStatusOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
         </select>
         <div v-if="checkInvalid('status', checkFields)" class="invalid-feedback">{{ invalidFeedback('status', checkFields) }}</div>
       </div>

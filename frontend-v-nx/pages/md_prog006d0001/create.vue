@@ -120,12 +120,7 @@ const btnSave = async () => {
       </div>
       <div class="col-md-4">
         <label for="status" class="form-label">Status</label>
-        <select :class="['form-select', checkInvalid('status', checkFields) ? 'is-invalid' : '']" id="status" v-model="formParam.status">
-          <option value="DRAFT">Draft</option>
-          <option value="ACTIVE">Active</option>
-          <option value="CLOSED">Closed</option>
-          <option value="ARCHIVED">Archived</option>
-        </select>
+        <input type="text" class="form-control" id="status" value="Draft" readonly>
         <div v-if="checkInvalid('status', checkFields)" class="invalid-feedback">{{ invalidFeedback('status', checkFields) }}</div>
       </div>
     </div>
