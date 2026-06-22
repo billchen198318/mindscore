@@ -1,5 +1,7 @@
 package org.qifu.md.api;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.qifu.base.exception.ControllerException;
@@ -17,17 +19,24 @@ import org.qifu.md.entity.MdKpiMeasureData;
 import org.qifu.md.entity.MdOrgMember;
 import org.qifu.md.entity.MdOrgUnit;
 import org.qifu.md.logic.IKpiMeasureDataLogicService;
+import org.qifu.md.model.KpiMeasureDataImportPreview;
+import org.qifu.md.model.KpiMeasureDataImportRequest;
+import org.qifu.md.model.KpiMeasureDataImportResult;
 import org.qifu.md.service.IMdKpiMeasureDataService;
 import org.qifu.md.service.IMdKpiService;
 import org.qifu.md.service.IMdOrgMemberService;
 import org.qifu.md.service.IMdOrgUnitService;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -38,6 +47,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequestMapping("/api/MD_PROG004D0001")
 public class MdPROG004D0001Controller extends CoreApiSupport {
     private static final long serialVersionUID = 1L;
+    private static final long MAX_IMPORT_FILE_SIZE = 2L * 1024L * 1024L;
+    private static final String IMPORT_TEMPLATE = "\uFEFF"
+            + "kpi_code,period_type,period_key,data_for_type,org_code,account,target_value,actual_value,note\r\n"
+            + "KPI_CODE_HERE,MONTH,2026-06,GLOBAL,,,1000000,980000,Global monthly example\r\n"
+            + "KPI_CODE_HERE,MONTH,2026-06,ORG,ORG_CODE_HERE,,100,92,Organization example\r\n"
+            + "KPI_CODE_HERE,WEEK,2026-W25,ACCOUNT,,ACCOUNT_HERE,100,88,Account example\r\n";
 
     private final IMdKpiMeasureDataService<MdKpiMeasureData, String> mdKpiMeasureDataService;
     private final IMdKpiService<MdKpi, String> mdKpiService;
@@ -124,6 +139,48 @@ public class MdPROG004D0001Controller extends CoreApiSupport {
     }
 
     @ControllerMethodAuthority(programId = "MD_PROG004D0001Q", check = true)
+    @Operation(summary = "MD_PROG004D0001 - downloadImportTemplate", description = "Download KPI measure data CSV import template")
+    @GetMapping(value = "/downloadImportTemplate", produces = "text/csv")
+    public ResponseEntity<byte[]> downloadImportTemplate() {
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"kpi-measure-data-import.csv\"")
+                .contentType(MediaType.parseMediaType("text/csv;charset=UTF-8"))
+                .body(IMPORT_TEMPLATE.getBytes(StandardCharsets.UTF_8));
+    }
+
+    @ControllerMethodAuthority(programId = "MD_PROG004D0001A", check = true)
+    @Operation(summary = "MD_PROG004D0001 - previewImport", description = "Validate and preview KPI measure data CSV")
+    @PostMapping(value = "/previewImport", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<DefaultControllerJsonResultObj<KpiMeasureDataImportPreview>> previewImport(
+            @RequestParam("file") MultipartFile file) {
+        DefaultControllerJsonResultObj<KpiMeasureDataImportPreview> result = this.initDefaultJsonResult();
+        try {
+            validateImportFile(file);
+            DefaultResult<KpiMeasureDataImportPreview> preview = this.kpiMeasureDataLogicService.previewImport(file.getInputStream());
+            this.setDefaultResponseJsonResult(preview, result);
+        } catch (ServiceException | ControllerException | IOException e) {
+            this.exceptionResult(result, e);
+        }
+        return ResponseEntity.ok().body(result);
+    }
+
+    @ControllerMethodAuthority(programId = "MD_PROG004D0001A", check = true)
+    @Operation(summary = "MD_PROG004D0001 - importCsv", description = "Confirm and import validated KPI measure data rows")
+    @PostMapping(value = "/importCsv", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<DefaultControllerJsonResultObj<KpiMeasureDataImportResult>> importCsv(
+            @RequestBody KpiMeasureDataImportRequest request) {
+        DefaultControllerJsonResultObj<KpiMeasureDataImportResult> result = this.initDefaultJsonResult();
+        try {
+            DefaultResult<KpiMeasureDataImportResult> imported = this.kpiMeasureDataLogicService.importRows(request);
+            this.setDefaultResponseJsonResult(imported, result);
+        } catch (ServiceException | ControllerException e) {
+            this.exceptionResult(result, e);
+        }
+        return ResponseEntity.ok().body(result);
+    }
+
+    @ControllerMethodAuthority(programId = "MD_PROG004D0001Q", check = true)
     @Operation(summary = "MD_PROG004D0001 - load", description = "KPI measure data load")
     @PostMapping(value = "/load", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<DefaultControllerJsonResultObj<MdKpiMeasureData>> doLoad(@RequestBody MdKpiMeasureData entity) {
@@ -190,5 +247,18 @@ public class MdPROG004D0001Controller extends CoreApiSupport {
            .testField("actualValue", entity, "actualValue == null", "Please enter actual value.")
            .testField("locked", PleaseSelect.noSelect(entity.getLocked()), "Please select locked flag.")
            .throwHtmlMessage();
+    }
+
+    private void validateImportFile(MultipartFile file) throws ControllerException {
+        if (file == null || file.isEmpty()) {
+            throw new ControllerException("Please select a CSV file.");
+        }
+        if (file.getSize() > MAX_IMPORT_FILE_SIZE) {
+            throw new ControllerException("CSV file cannot exceed 2 MB.");
+        }
+        String filename = file.getOriginalFilename();
+        if (filename == null || !filename.toLowerCase().endsWith(".csv")) {
+            throw new ControllerException("Only CSV files are supported.");
+        }
     }
 }

@@ -38,6 +38,10 @@ const loadingByKey = ref(false);
 const kpiList = ref<any[]>([]);
 const orgList = ref<any[]>([]);
 const memberList = ref<any[]>([]);
+const importFileInput = ref<HTMLInputElement | null>(null);
+const importFile = ref<File | null>(null);
+const importPreview = ref<any>(null);
+const showImportModal = ref(false);
 const pleaseSelectId = import.meta.env.VITE_PLEASE_SELECT_ID;
 const today = new Date().toISOString().slice(0, 10);
 
@@ -242,6 +246,94 @@ const loadMemberList = async () => {
 
 const tbRefresh = () => btnClear();
 const tbQueryFieldShow = () => qFieldShow.value = !qFieldShow.value;
+
+const downloadImportTemplate = async () => {
+    try {
+        const axiosInstance = getAxiosInstance();
+        const response = await axiosInstance.get(
+            import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/downloadImportTemplate',
+            { responseType: 'blob' }
+        );
+        const url = URL.createObjectURL(new Blob([response.data], { type: 'text/csv;charset=UTF-8' }));
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'kpi-measure-data-import.csv';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+    } catch (e: any) {
+        toast.error(e?.message || String(e));
+    }
+};
+
+const selectImportFile = () => importFileInput.value?.click();
+
+const previewImportFile = async (event: Event) => {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] || null;
+    input.value = '';
+    if (!file) {
+        return;
+    }
+    importFile.value = file;
+    importPreview.value = null;
+    showLoading('Validating CSV...', 'Please wait...');
+    try {
+        const formData = new FormData();
+        formData.append('file', file);
+        const axiosInstance = getAxiosInstance();
+        const response = await axiosInstance.post(
+            import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/previewImport',
+            formData
+        );
+        if (!response.data || import.meta.env.VITE_SUCCESS_FLAG != response.data.success) {
+            toast.warning(escapeQifuHtmlMsg(response.data?.message || 'CSV preview failed.'));
+            return;
+        }
+        importPreview.value = response.data.value;
+        showImportModal.value = true;
+    } catch (e: any) {
+        toast.error(e?.message || String(e));
+    } finally {
+        hideLoading();
+    }
+};
+
+const closeImportModal = () => {
+    showImportModal.value = false;
+    importFile.value = null;
+    importPreview.value = null;
+};
+
+const importErrorText = (row: any) => (row.errors || []).join(' ');
+
+const confirmImport = async () => {
+    if (!importPreview.value?.canImport || !importFile.value) {
+        return;
+    }
+    showLoading('Importing CSV...', 'All rows will be written in one transaction.');
+    try {
+        const axiosInstance = getAxiosInstance();
+        const response = await axiosInstance.post(
+            import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/importCsv',
+            { sourceRef: importFile.value.name, rows: importPreview.value.rows }
+        );
+        if (!response.data || import.meta.env.VITE_SUCCESS_FLAG != response.data.success) {
+            toast.warning(escapeQifuHtmlMsg(response.data?.message || 'CSV import failed.'));
+            return;
+        }
+        const value = response.data.value || {};
+        toast.success('Imported ' + (value.totalCount || 0) + ' rows: '
+            + (value.insertCount || 0) + ' inserted, ' + (value.updateCount || 0) + ' updated.');
+        closeImportModal();
+        await btnQuery();
+    } catch (e: any) {
+        toast.error(e?.message || String(e));
+    } finally {
+        hideLoading();
+    }
+};
 
 const btnClear = () => {
     checkFields.value = {};
@@ -515,6 +607,16 @@ onMounted(async () => {
   </div>
 </div>
 
+<div class="d-flex flex-wrap gap-2 mb-3">
+  <button type="button" class="btn btn-outline-secondary" @click="downloadImportTemplate">
+    <i class="bi bi-download"></i> Download CSV Example
+  </button>
+  <button type="button" class="btn btn-outline-primary" @click="selectImportFile">
+    <i class="bi bi-upload"></i> Import CSV
+  </button>
+  <input ref="importFileInput" type="file" class="d-none" accept=".csv,text/csv" @change="previewImportFile">
+</div>
+
 <div class="card mb-4">
   <div class="card-body">
     <div class="row g-3">
@@ -670,4 +772,105 @@ onMounted(async () => {
         <Grid :progId="pageProgramId" :dataSource="dsList" :config="queryPageStore.gridConfig" />
     </div>
 </div>
+
+<div v-if="showImportModal" class="import-modal-overlay" @click.self="closeImportModal">
+  <div class="import-modal" role="dialog" aria-modal="true" aria-labelledby="importModalTitle">
+    <div class="modal-header">
+      <div>
+        <h5 id="importModalTitle" class="modal-title">KPI Measure Data CSV Preview</h5>
+        <div class="small text-muted mt-1">{{ importFile?.name }}</div>
+      </div>
+      <button type="button" class="btn-close" aria-label="Close" @click="closeImportModal"></button>
+    </div>
+    <div v-if="importPreview" class="modal-body">
+      <div class="row g-2 mb-3">
+        <div class="col"><div class="import-stat">Total <strong>{{ importPreview.totalCount }}</strong></div></div>
+        <div class="col"><div class="import-stat text-success">Valid <strong>{{ importPreview.validCount }}</strong></div></div>
+        <div class="col"><div class="import-stat text-danger">Errors <strong>{{ importPreview.errorCount }}</strong></div></div>
+        <div class="col"><div class="import-stat">Insert <strong>{{ importPreview.insertCount }}</strong></div></div>
+        <div class="col"><div class="import-stat">Update <strong>{{ importPreview.updateCount }}</strong></div></div>
+      </div>
+      <div v-if="!importPreview.canImport" class="alert alert-warning">
+        Fix every validation error in the CSV and preview it again. No rows have been written.
+      </div>
+      <div class="table-responsive import-preview-table">
+        <table class="table table-sm table-bordered align-middle mb-0">
+          <thead class="table-dark">
+            <tr>
+              <th>Row</th><th>KPI</th><th>Period</th><th>Data For</th><th>Org</th><th>Account</th>
+              <th>Target</th><th>Actual</th><th>Action</th><th>Validation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="row in importPreview.rows" :key="row.rowNumber" :class="row.valid ? '' : 'table-danger'">
+              <td>{{ row.rowNumber }}</td>
+              <td>{{ row.kpiCode }}<div v-if="row.kpiName" class="small text-muted">{{ row.kpiName }}</div></td>
+              <td>{{ row.periodType }} / {{ row.periodKey }}</td>
+              <td>{{ row.dataForType }}</td>
+              <td>{{ row.orgCode || '-' }}</td>
+              <td>{{ row.account || '-' }}</td>
+              <td>{{ row.targetValue }}</td>
+              <td>{{ row.actualValue }}</td>
+              <td><span v-if="row.action" class="badge" :class="row.action === 'INSERT' ? 'text-bg-success' : 'text-bg-warning'">{{ row.action }}</span></td>
+              <td><span v-if="row.valid" class="text-success">OK</span><span v-else class="text-danger">{{ importErrorText(row) }}</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer d-flex justify-content-between">
+      <button type="button" class="btn btn-secondary" @click="closeImportModal">Close</button>
+      <button type="button" class="btn btn-primary" :disabled="!importPreview?.canImport"
+          @click="confirmFire('Import all validated CSV rows?', confirmImport, null)">
+        <i class="bi bi-database-add"></i> Confirm Import
+      </button>
+    </div>
+  </div>
+</div>
 </template>
+
+<style scoped>
+.import-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1050;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.5);
+}
+.import-modal {
+    width: min(1400px, 100%);
+    max-height: 92vh;
+    overflow: hidden;
+    border-radius: 0.5rem;
+    background: #ffffff;
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.25);
+}
+.modal-header,
+.modal-footer {
+    padding: 1rem 1.25rem;
+}
+.modal-body {
+    padding: 1.25rem;
+}
+.import-stat {
+    min-width: 110px;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 0.65rem 0.8rem;
+    background: #f8f9fa;
+}
+.import-stat strong {
+    float: right;
+}
+.import-preview-table {
+    max-height: 58vh;
+}
+.import-preview-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+</style>

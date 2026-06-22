@@ -18,7 +18,7 @@ This is a code-level review. It does not represent browser, database, or end-to-
 | Phase 1 | No explicit gap found | None found during this review |
 | Phase 2 | No explicit gap found | None found during this review |
 | Phase 3 | No explicit gap found | None found during this review |
-| Phase 4 | Partial | Measure Data import API and file-import UI are missing |
+| Phase 4 | Completed in code | CSV template download, validation preview, and atomic UPSERT import are implemented |
 | Phase 5 | No explicit gap found | None found during this review |
 | Phase 6 | Completed in code | Calculation trace and configured score color are displayed by the KPI report frontend |
 | Phase 7 | Completed in code | OKR cycle status transition rules are enforced in backend and constrained in frontend |
@@ -33,6 +33,10 @@ This is a code-level review. It does not represent browser, database, or end-to-
 
 ## 3. Phase 4 - KPI Measure Data Import
 
+### Resolution status
+
+Resolved in code on 2026-06-22.
+
 ### Existing implementation
 
 - Measure Data query, load, create/update, and delete are available.
@@ -40,33 +44,43 @@ This is a code-level review. It does not represent browser, database, or end-to-
 - `DAY`, `WEEK`, `MONTH`, `QUARTER`, `HALFYEAR`, and `YEAR` period rules are implemented.
 - The frontend contains `IMPORT` as a Measure Data source type.
 
-### Missing implementation
+### Implemented resolution
 
-- No CSV or Excel file selector/upload UI was found.
-- No import preview or validation result UI was found.
-- No backend file-import endpoint was found in `MdPROG004D0001Controller`.
-- No batch import service covering row validation, duplicate handling, and transaction behavior was found.
+- A downloadable UTF-8 BOM CSV example is provided by the backend.
+- The Measure Data page provides `Download CSV Example` and `Import CSV` actions.
+- CSV upload is limited to `.csv`, 2 MB, and 1,000 data rows.
+- Preview resolves `kpi_code`, `org_code`, and `account` without exposing database OIDs.
+- Preview validates enabled master data, KPI period type, period key format, dimensions, numeric precision, note length, duplicate natural keys, and locked existing data.
+- Each row is classified as `INSERT`, `UPDATE`, or invalid before confirmation.
+- Confirmation revalidates all submitted raw fields on the backend instead of trusting preview flags or resolved IDs from the client.
+- Import uses the existing natural-key `saveOrUpdate` behavior, writes `SOURCE_TYPE=IMPORT`, and stores the CSV filename in `SOURCE_REF`.
+- The confirmed batch is atomic; any validation or persistence error rolls back the entire import.
 
-The existing `IMPORT` value only identifies the source type of a manually submitted record. It is not an import function.
+### CSV format
 
-### Impact
+```csv
+kpi_code,period_type,period_key,data_for_type,org_code,account,target_value,actual_value,note
+KPI_CODE_HERE,MONTH,2026-06,GLOBAL,,,1000000,980000,Global monthly example
+KPI_CODE_HERE,MONTH,2026-06,ORG,ORG_CODE_HERE,,100,92,Organization example
+KPI_CODE_HERE,WEEK,2026-W25,ACCOUNT,,ACCOUNT_HERE,100,88,Account example
+```
 
-- Users must enter Measure Data manually or call the single-record API.
-- Bulk initialization and periodic data loading cannot be performed through the planned UI/API.
+### Remaining runtime verification
 
-### Recommended timing
+- Verify template download and UTF-8 display in supported spreadsheet applications.
+- Verify quoted commas, quotes, CRLF/LF, and UTF-8 note values.
+- Verify insert, update, locked-row rejection, duplicate-row rejection, and transaction rollback against the database.
+- Verify authorization behavior for users with query-only and add permissions.
 
-Implement after the core KPI workflow is stable. This item does not block manual Measure Data entry or KPI calculation.
+### Acceptance criteria status
 
-### Acceptance criteria
-
-1. Provide a documented CSV or Excel template.
-2. Provide file upload and preview APIs.
-3. Validate KPI, period, target/actual, organization, and account values per row.
-4. Define duplicate handling as reject, replace, or upsert.
-5. Return row-level validation errors without silently dropping records.
-6. Define whether import is atomic or allows partial success.
-7. Provide a frontend upload, preview, confirmation, and result flow.
+1. Implemented: downloadable and documented CSV template.
+2. Implemented: CSV upload and preview API.
+3. Implemented: row-level master-data, period, dimension, and value validation.
+4. Implemented: UPSERT against the Measure Data natural key; duplicates inside one CSV are rejected.
+5. Implemented: row-level validation errors.
+6. Implemented: atomic import with rollback on any failure.
+7. Implemented: frontend download, upload, preview, confirmation, and result flow.
 
 ## 4. Phase 6 - KPI Report Trace and Score Color
 
@@ -193,8 +207,7 @@ Implement after the core Phase 1 to Phase 13 workflow has passed acceptance. The
 ## 7. Recommended Implementation Order
 
 1. Complete Phase 1 to Phase 13 code and runtime acceptance.
-2. Phase 4 Measure Data file import.
-3. Phase 12 source-driven Action creation.
+2. Phase 12 source-driven Action creation.
 
 ## 8. Remaining Verification
 
