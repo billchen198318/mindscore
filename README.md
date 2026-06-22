@@ -117,6 +117,52 @@ backend/doc
   DDL、功能規劃與程式安排文件
 ```
 
+## 資料庫密碼加密
+
+資料庫連線設定位於
+`backend/app/src/main/resources/db1-config.properties`。`db1.datasource.password`
+可使用明文，也可使用 Jasypt 的 `ENC(...)` 加密格式。
+
+### 使用 DatabasePasswordJasyptTest
+
+可使用
+`backend/app/src/test/java/org/qifu/test/DatabasePasswordJasyptTest.java`
+產生加密後的資料庫密碼：
+
+1. 在 `testEncryptAndDecryptDatabasePassword()` 中，將 `rawPassword` 改成實際的資料庫密碼。
+2. 將 `encryptorPassword` 改成應用程式使用的 Jasypt 密鑰。本機使用預設設定時，密鑰為 `mindscore-dev-jasypt-key`。
+3. 以 JUnit 執行 `testEncryptAndDecryptDatabasePassword()`。
+4. 從 Console 找到 `cipherText>>>` 後面的密文，包成 `ENC(...)` 後寫入 `db1-config.properties`：
+
+```properties
+db1.datasource.password=ENC(cipherText 輸出的密文)
+```
+
+### 使用 Jasypt 1.9.3 CLI
+
+也可以將 `jasypt-1.9.3.jar` 放在目前目錄，然後於 PowerShell 執行：
+
+```powershell
+java -cp "jasypt-1.9.3.jar" `
+  org.jasypt.intf.cli.JasyptPBEStringEncryptionCLI `
+  input="mariadb-password" `
+  password="mindscore-dev-jasypt-key" `
+  algorithm="PBEWithMD5AndDES" `
+  ivGeneratorClassName="org.jasypt.iv.NoIvGenerator" `
+  verbose=false
+```
+
+CLI 只會輸出密文本身，寫入 `db1-config.properties` 前需自行加上 `ENC(...)`：
+
+```properties
+db1.datasource.password=ENC(CLI 輸出的密文)
+```
+
+加密使用的密鑰必須與 `JASYPT_ENCRYPTOR_PASSWORD` 完全一致。若未設定此環境變數，
+`application.properties` 的本機預設密鑰為 `mindscore-dev-jasypt-key`。生產環境應設定自己的
+`JASYPT_ENCRYPTOR_PASSWORD`，並以相同密鑰重新產生密文；否則應用程式啟動時將無法解密及綁定
+`db1.datasource.password`。
+
 ## 目前狀態
 
 目前核心功能已推進到 Phase 13 管理儀表板：
