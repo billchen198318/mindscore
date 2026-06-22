@@ -1271,7 +1271,7 @@ CREATE TABLE md_llm_provider_config (
   PROVIDER_NAME VARCHAR(200) NOT NULL,
   BASE_URL VARCHAR(500) NULL,
   MODEL_NAME VARCHAR(128) NOT NULL,
-  API_KEY_REF VARCHAR(255) NOT NULL,
+  API_KEY_ENCRYPTED TEXT NOT NULL,
   API_KEY_MASKED VARCHAR(128) NULL,
   ENABLED_FLAG VARCHAR(1) NOT NULL DEFAULT 'Y',
   DEFAULT_FLAG VARCHAR(1) NOT NULL DEFAULT 'N',
@@ -1326,7 +1326,7 @@ Purpose:
 - `md_insight_recommendation`: suggested next step
 - `md_action_item`: work item created from insight
 - `md_action_link`: relation between action and KPI / OKR / BSC / PDCA / insight
-- `md_llm_provider_config`: user-managed LLM provider and encrypted API key reference
+- `md_llm_provider_config`: user-managed LLM provider and AES-GCM encrypted API key
 - `md_llm_run_log`: prompt / model / usage / output audit log
 
 Key field notes:
@@ -1343,7 +1343,7 @@ Key field notes:
 - `md_insight_recommendation`: stores recommended actions separately from insight summary, so users can accept or ignore suggestions.
 - `md_action_item`: tracks actual follow-up work created from insight.
 - `md_action_link`: links an action back to KPI / OKR / BSC / PDCA / insight without hard-coding one parent type.
-- `md_llm_provider_config.API_KEY_REF`: stores encrypted key reference or secret reference, not plain API key.
+- `md_llm_provider_config.API_KEY_ENCRYPTED`: stores the AES-GCM encrypted API key, never the plain API key.
 - `md_llm_run_log`: keeps prompt, input, output, token usage, status, and error detail for audit and debugging.
 
 ### 20.10 Minimum API extension

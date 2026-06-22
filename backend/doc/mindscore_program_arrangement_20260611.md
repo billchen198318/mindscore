@@ -1125,6 +1125,17 @@ SetParam: MD_PROG003D0001S01Q
 - LLM provider 設定
 - 追蹤 prompt / output / token / cost
 
+對應資料表：
+
+- `md_llm_provider_config`: `OPENAI` / `GEMINI` provider、API base URL、default model、AES-GCM encrypted API key、啟用狀態與連線測試結果
+- `md_llm_run_log`: connection test / insight / recommendation 呼叫的 provider、model、狀態、耗時、token、cost 與錯誤紀錄
+
+API key 實作規則：
+
+- 資料庫欄位使用 `API_KEY_ENCRYPTED`，不可保存明文 API key
+- 畫面與 API response 只能回傳 `API_KEY_MASKED`
+- AES-GCM 主金鑰由 `appConfig.properties` 的 `mindscore.llm.encryption-key=${MINDSCORE_LLM_ENCRYPTION_KEY:}` 取得
+
 #### MD_PROG010D0002 - Performance Signal
 
 核心用途：

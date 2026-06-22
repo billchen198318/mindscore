@@ -47,6 +47,9 @@ Naming rules:
 | `md_action_owner` | Action owner |
 | `md_action_source_link` | Action 與 KPI / OKR / Strategy / Insight 的來源關聯 |
 
+| `md_llm_provider_config` | OpenAI / Gemini provider, model and encrypted API key configuration |
+| `md_llm_run_log` | LLM connection test and invocation audit log |
+
 ## 2. Common Code Values
 
 Recommended code values:
@@ -791,7 +794,82 @@ Recommended report dimensions:
 If later reporting needs frozen period evidence, then a dedicated action report snapshot table can be added.
 Do not add a report snapshot table before the operational query/report requirement proves it is necessary.
 
-## 9. Formula Auto-Selection Flow
+## 9. Insight / LLM Tables
+
+### 9.1 `md_llm_provider_config`
+
+Stores backend-managed OpenAI and Gemini provider settings. `API_KEY_ENCRYPTED`
+contains an AES-GCM encrypted value; the encryption key is supplied through
+`MINDSCORE_LLM_ENCRYPTION_KEY` and is never stored in this table. API responses
+must expose only `API_KEY_MASKED`, never the encrypted or decrypted API key.
+
+```sql
+CREATE TABLE `md_llm_provider_config` (
+  `OID` CHAR(36) NOT NULL COMMENT 'Primary key OID',
+  `PROVIDER_CODE` VARCHAR(64) NOT NULL COMMENT 'Provider configuration code',
+  `PROVIDER_NAME` VARCHAR(200) NOT NULL COMMENT 'Provider display name',
+  `PROVIDER_TYPE` VARCHAR(32) NOT NULL COMMENT 'OPENAI/GEMINI',
+  `API_BASE_URL` VARCHAR(500) NOT NULL COMMENT 'Provider API base URL',
+  `DEFAULT_MODEL` VARCHAR(128) NOT NULL COMMENT 'Default model',
+  `API_KEY_ENCRYPTED` TEXT NOT NULL COMMENT 'AES-GCM encrypted API key',
+  `API_KEY_MASKED` VARCHAR(128) DEFAULT NULL COMMENT 'Masked value for UI display',
+  `ENABLED_FLAG` CHAR(1) NOT NULL DEFAULT 'Y' COMMENT 'Y/N',
+  `DEFAULT_FLAG` CHAR(1) NOT NULL DEFAULT 'N' COMMENT 'Default provider Y/N',
+  `CONNECT_STATUS` VARCHAR(32) DEFAULT NULL COMMENT 'SUCCESS/FAILED',
+  `LAST_TEST_AT` DATETIME DEFAULT NULL COMMENT 'Last connection test time',
+  `LAST_ERROR_MESSAGE` VARCHAR(2000) DEFAULT NULL COMMENT 'Last connection error',
+  `CONFIG_JSON` LONGTEXT DEFAULT NULL COMMENT 'Additional provider configuration JSON',
+  `CUSERID` VARCHAR(24) NOT NULL COMMENT 'Created by',
+  `CDATE` DATETIME NOT NULL COMMENT 'Created at',
+  `UUSERID` VARCHAR(24) DEFAULT NULL COMMENT 'Updated by',
+  `UDATE` DATETIME DEFAULT NULL COMMENT 'Updated at',
+  PRIMARY KEY (`OID`),
+  UNIQUE KEY `UK_MD_LLM_PROVIDER_CODE` (`PROVIDER_CODE`),
+  KEY `IDX_MD_LLM_PROVIDER_TYPE` (`PROVIDER_TYPE`),
+  KEY `IDX_MD_LLM_PROVIDER_ENABLED` (`ENABLED_FLAG`, `DEFAULT_FLAG`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci
+  COMMENT='MindScore LLM Provider Config';
+```
+
+### 9.2 `md_llm_run_log`
+
+Stores connection tests and later LLM invocation metadata. The initial version
+does not store full prompt or output content, reducing exposure of KPI, OKR,
+organization and employee data.
+
+```sql
+CREATE TABLE `md_llm_run_log` (
+  `OID` CHAR(36) NOT NULL COMMENT 'Primary key OID',
+  `PROVIDER_OID` CHAR(36) NOT NULL COMMENT 'Provider Config OID',
+  `PROVIDER_TYPE` VARCHAR(32) NOT NULL COMMENT 'OPENAI/GEMINI',
+  `MODEL_NAME` VARCHAR(128) NOT NULL COMMENT 'Model used by the request',
+  `REQUEST_TYPE` VARCHAR(32) NOT NULL COMMENT 'TEST/INSIGHT/RECOMMENDATION',
+  `REF_TYPE` VARCHAR(32) DEFAULT NULL COMMENT 'Business reference type',
+  `REF_OID` CHAR(36) DEFAULT NULL COMMENT 'Business reference OID',
+  `REQUEST_ID` VARCHAR(128) DEFAULT NULL COMMENT 'External provider request ID',
+  `STATUS` VARCHAR(32) NOT NULL COMMENT 'RUNNING/SUCCESS/FAILED',
+  `STARTED_AT` DATETIME NOT NULL COMMENT 'Request start time',
+  `FINISHED_AT` DATETIME DEFAULT NULL COMMENT 'Request finish time',
+  `DURATION_MS` BIGINT DEFAULT NULL COMMENT 'Request duration in milliseconds',
+  `INPUT_TOKENS` INT DEFAULT NULL COMMENT 'Input token count',
+  `OUTPUT_TOKENS` INT DEFAULT NULL COMMENT 'Output token count',
+  `TOTAL_TOKENS` INT DEFAULT NULL COMMENT 'Total token count',
+  `COST_ESTIMATE` DECIMAL(18,8) DEFAULT NULL COMMENT 'Estimated cost',
+  `CURRENCY_CODE` VARCHAR(8) DEFAULT NULL COMMENT 'Cost currency',
+  `ERROR_CODE` VARCHAR(128) DEFAULT NULL COMMENT 'Error code',
+  `ERROR_MESSAGE` VARCHAR(4000) DEFAULT NULL COMMENT 'Error message',
+  `CUSERID` VARCHAR(24) NOT NULL COMMENT 'Created by',
+  `CDATE` DATETIME NOT NULL COMMENT 'Created at',
+  PRIMARY KEY (`OID`),
+  KEY `IDX_MD_LLM_RUN_PROVIDER` (`PROVIDER_OID`),
+  KEY `IDX_MD_LLM_RUN_REF` (`REF_TYPE`, `REF_OID`),
+  KEY `IDX_MD_LLM_RUN_STATUS` (`STATUS`, `STARTED_AT`),
+  KEY `IDX_MD_LLM_RUN_REQUEST_ID` (`REQUEST_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci
+  COMMENT='MindScore LLM Run Log';
+```
+
+## 10. Formula Auto-Selection Flow
 
 When creating or editing KPI:
 
@@ -815,11 +893,13 @@ Recommended default formula mappings:
 | `QUASI` | `QUASI_IS_BETTER_RANGE` | 越接近 target 越好，target 正負 quasi range 內得 100 |
 | `MANUAL` | `MANUAL_SCORE` | 手動評分 |
 
-## 10. Notes For Implementation
+## 11. Notes For Implementation
 
 - qifu4 account / role / permission / menu should be reused, not recreated.
 - `ACCOUNT` fields should point to qifu4 `tb_account.ACCOUNT`.
 - `OID`, `CUSERID`, `CDATE`, `UUSERID`, `UDATE` follow QIFU conventions so BaseService can handle audit behavior.
 - KPI official score must be deterministic and stored in `md_kpi_score_snapshot`.
 - LLM should explain scores and generate insights, but should not calculate official KPI score.
+- LLM API keys must be AES-GCM encrypted in `md_llm_provider_config.API_KEY_ENCRYPTED`.
+- `MINDSCORE_LLM_ENCRYPTION_KEY` must be a Base64-encoded AES key and must remain stable after API keys are saved.
 - Formula changes must not overwrite historical score meaning; keep `FORMULA_VERSION_NO` and `CALCULATION_TRACE`.

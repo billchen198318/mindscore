@@ -190,6 +190,11 @@ Recommended implementation order:
 6. Recommendation
 7. Action from insight
 
+Phase 14 foundation tables:
+
+- `md_llm_provider_config`: provider type, API base URL, default model, AES-GCM encrypted API key, enabled/default flags and connection test status.
+- `md_llm_run_log`: provider/model/request type, status, duration, token usage, estimated cost and error metadata.
+
 Phase 14 LLM integration principles:
 
 - LLM is an explanation and recommendation layer. It must not replace official KPI / OKR / Strategy / Action calculation logic.
