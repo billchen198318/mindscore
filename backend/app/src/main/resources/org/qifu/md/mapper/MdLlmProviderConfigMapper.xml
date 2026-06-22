@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.qifu.md.mapper.MdLlmProviderConfigMapper">
+  <resultMap id="BaseResultMap" type="org.qifu.md.entity.MdLlmProviderConfig">
+    <id column="OID" jdbcType="CHAR" property="oid" />
+    <result column="PROVIDER_CODE" property="providerCode" />
+    <result column="PROVIDER_NAME" property="providerName" />
+    <result column="PROVIDER_TYPE" property="providerType" />
+    <result column="API_BASE_URL" property="apiBaseUrl" />
+    <result column="DEFAULT_MODEL" property="defaultModel" />
+    <result column="API_KEY_ENCRYPTED" jdbcType="LONGVARCHAR" property="apiKeyEncrypted" />
+    <result column="API_KEY_MASKED" property="apiKeyMasked" />
+    <result column="ENABLED_FLAG" property="enabledFlag" />
+    <result column="DEFAULT_FLAG" property="defaultFlag" />
+    <result column="CONNECT_STATUS" property="connectStatus" />
+    <result column="LAST_TEST_AT" property="lastTestAt" />
+    <result column="LAST_ERROR_MESSAGE" property="lastErrorMessage" />
+    <result column="CONFIG_JSON" jdbcType="LONGVARCHAR" property="configJson" />
+    <result column="CUSERID" property="cuserid" />
+    <result column="CDATE" property="cdate" />
+    <result column="UUSERID" property="uuserid" />
+    <result column="UDATE" property="udate" />
+  </resultMap>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select * from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_llm_provider_config where OID=#{oid}
+  </select>
+  <sql id="conditions">
+    <if test="oid != null and oid != ''">AND OID=#{oid}</if>
+    <if test="providerCode != null and providerCode != ''">AND PROVIDER_CODE=#{providerCode}</if>
+    <if test="providerCodeLike != null and providerCodeLike != ''">AND PROVIDER_CODE LIKE #{providerCodeLike}</if>
+    <if test="providerNameLike != null and providerNameLike != ''">AND PROVIDER_NAME LIKE #{providerNameLike}</if>
+    <if test="providerType != null and providerType != ''">AND PROVIDER_TYPE=#{providerType}</if>
+    <if test="enabledFlag != null and enabledFlag != ''">AND ENABLED_FLAG=#{enabledFlag}</if>
+  </sql>
+  <select id="selectListByParams" parameterType="java.util.HashMap" resultMap="BaseResultMap">
+    select * from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_llm_provider_config where 1=1
+    <include refid="conditions"/>
+    <if test="orderBy != null and orderBy != ''">ORDER BY ${orderBy} ${sortType}</if>
+  </select>
+  <select id="findPage" parameterType="java.util.HashMap" resultMap="BaseResultMap">
+    <include refid="org.qifu.core.mapper.DB1Config.sql1"/>
+    select * from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_llm_provider_config where 1=1
+    <include refid="conditions"/>
+    <include refid="org.qifu.core.mapper.DB1Config.sql2"/>
+  </select>
+  <select id="count" parameterType="java.util.HashMap" resultType="java.lang.Long">
+    select count(*) from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_llm_provider_config where 1=1
+    <include refid="conditions"/>
+  </select>
+  <insert id="insert" parameterType="org.qifu.md.entity.MdLlmProviderConfig">
+    insert into <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_llm_provider_config
+    (OID,PROVIDER_CODE,PROVIDER_NAME,PROVIDER_TYPE,API_BASE_URL,DEFAULT_MODEL,API_KEY_ENCRYPTED,API_KEY_MASKED,
+     ENABLED_FLAG,DEFAULT_FLAG,CONNECT_STATUS,LAST_TEST_AT,LAST_ERROR_MESSAGE,CONFIG_JSON,CUSERID,CDATE,UUSERID,UDATE)
+    values (#{oid},#{providerCode},#{providerName},#{providerType},#{apiBaseUrl},#{defaultModel},#{apiKeyEncrypted},#{apiKeyMasked},
+     #{enabledFlag},#{defaultFlag},#{connectStatus},#{lastTestAt},#{lastErrorMessage},#{configJson},#{cuserid},#{cdate},#{uuserid},#{udate})
+  </insert>
+  <update id="update" parameterType="org.qifu.md.entity.MdLlmProviderConfig">
+    update <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_llm_provider_config set
+      PROVIDER_NAME=#{providerName}, PROVIDER_TYPE=#{providerType}, API_BASE_URL=#{apiBaseUrl}, DEFAULT_MODEL=#{defaultModel},
+      API_KEY_ENCRYPTED=#{apiKeyEncrypted}, API_KEY_MASKED=#{apiKeyMasked}, ENABLED_FLAG=#{enabledFlag}, DEFAULT_FLAG=#{defaultFlag},
+      CONNECT_STATUS=#{connectStatus}, LAST_TEST_AT=#{lastTestAt}, LAST_ERROR_MESSAGE=#{lastErrorMessage}, CONFIG_JSON=#{configJson},
+      UUSERID=#{uuserid}, UDATE=#{udate}
+    where OID=#{oid}
+  </update>
+  <delete id="delete" parameterType="org.qifu.md.entity.MdLlmProviderConfig">
+    delete from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_llm_provider_config where OID=#{oid}
+  </delete>
+</mapper>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.qifu.md.mapper.MdLlmRunLogMapper">
+  <resultMap id="BaseResultMap" type="org.qifu.md.entity.MdLlmRunLog">
+    <id column="OID" property="oid" />
+    <result column="PROVIDER_OID" property="providerOid" />
+    <result column="PROVIDER_TYPE" property="providerType" />
+    <result column="MODEL_NAME" property="modelName" />
+    <result column="REQUEST_TYPE" property="requestType" />
+    <result column="REF_TYPE" property="refType" />
+    <result column="REF_OID" property="refOid" />
+    <result column="REQUEST_ID" property="requestId" />
+    <result column="STATUS" property="status" />
+    <result column="STARTED_AT" property="startedAt" />
+    <result column="FINISHED_AT" property="finishedAt" />
+    <result column="DURATION_MS" property="durationMs" />
+    <result column="INPUT_TOKENS" property="inputTokens" />
+    <result column="OUTPUT_TOKENS" property="outputTokens" />
+    <result column="TOTAL_TOKENS" property="totalTokens" />
+    <result column="COST_ESTIMATE" property="costEstimate" />
+    <result column="CURRENCY_CODE" property="currencyCode" />
+    <result column="ERROR_CODE" property="errorCode" />
+    <result column="ERROR_MESSAGE" property="errorMessage" />
+    <result column="CUSERID" property="cuserid" />
+    <result column="CDATE" property="cdate" />
+  </resultMap>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select * from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_llm_run_log where OID=#{oid}
+  </select>
+  <sql id="conditions">
+    <if test="providerOid != null and providerOid != ''">AND PROVIDER_OID=#{providerOid}</if>
+    <if test="providerType != null and providerType != ''">AND PROVIDER_TYPE=#{providerType}</if>
+    <if test="requestType != null and requestType != ''">AND REQUEST_TYPE=#{requestType}</if>
+    <if test="status != null and status != ''">AND STATUS=#{status}</if>
+  </sql>
+  <select id="selectListByParams" parameterType="java.util.HashMap" resultMap="BaseResultMap">
+    select * from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_llm_run_log where 1=1
+    <include refid="conditions"/><if test="orderBy != null and orderBy != ''">ORDER BY ${orderBy} ${sortType}</if>
+  </select>
+  <select id="findPage" parameterType="java.util.HashMap" resultMap="BaseResultMap">
+    <include refid="org.qifu.core.mapper.DB1Config.sql1"/>
+    select * from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_llm_run_log where 1=1
+    <include refid="conditions"/><include refid="org.qifu.core.mapper.DB1Config.sql2"/>
+  </select>
+  <select id="count" parameterType="java.util.HashMap" resultType="java.lang.Long">
+    select count(*) from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_llm_run_log where 1=1 <include refid="conditions"/>
+  </select>
+  <insert id="insert" parameterType="org.qifu.md.entity.MdLlmRunLog">
+    insert into <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_llm_run_log
+    (OID,PROVIDER_OID,PROVIDER_TYPE,MODEL_NAME,REQUEST_TYPE,REF_TYPE,REF_OID,REQUEST_ID,STATUS,STARTED_AT,FINISHED_AT,DURATION_MS,
+     INPUT_TOKENS,OUTPUT_TOKENS,TOTAL_TOKENS,COST_ESTIMATE,CURRENCY_CODE,ERROR_CODE,ERROR_MESSAGE,CUSERID,CDATE)
+    values (#{oid},#{providerOid},#{providerType},#{modelName},#{requestType},#{refType},#{refOid},#{requestId},#{status},#{startedAt},
+     #{finishedAt},#{durationMs},#{inputTokens},#{outputTokens},#{totalTokens},#{costEstimate},#{currencyCode},#{errorCode},#{errorMessage},#{cuserid},#{cdate})
+  </insert>
+  <update id="update" parameterType="org.qifu.md.entity.MdLlmRunLog">
+    update <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_llm_run_log set STATUS=#{status},FINISHED_AT=#{finishedAt},DURATION_MS=#{durationMs},ERROR_CODE=#{errorCode},ERROR_MESSAGE=#{errorMessage} where OID=#{oid}
+  </update>
+  <delete id="delete" parameterType="org.qifu.md.entity.MdLlmRunLog">
+    delete from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_llm_run_log where OID=#{oid}
+  </delete>
+</mapper>
