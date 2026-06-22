@@ -11,7 +11,6 @@ import org.qifu.base.model.DefaultControllerJsonResultObj;
 import org.qifu.base.model.DefaultResult;
 import org.qifu.base.model.QueryResult;
 import org.qifu.base.model.SearchBody;
-import org.qifu.base.model.YesNoKeyProvide;
 import org.qifu.core.util.CoreApiSupport;
 import org.qifu.md.entity.MdFormula;
 import org.qifu.md.model.FormulaTestRequest;
@@ -145,7 +144,7 @@ public class MdPROG002D0001Controller extends CoreApiSupport {
         try {
             Object testResult = FormulaUtils.test(request);
             result.setValue(testResult);
-            result.setSuccess(YesNoKeyProvide.YES);
+            result.setSuccess(YES);
             result.setMessage("公式測試成功：" + testResult);
         } catch (Exception e) {
             this.exceptionResult(result, e);
@@ -171,7 +170,7 @@ public class MdPROG002D0001Controller extends CoreApiSupport {
     }
 
     private void syncSystemFlag(MdFormula entity) {
-        entity.setIsSystem(Strings.CS.equals("BUILTIN", entity.getFormulaType()) ? "Y" : "N");
+        entity.setIsSystem(Strings.CS.equals("BUILTIN", entity.getFormulaType()) ? YES : NO);
     }
 
     private void checkBuiltinReadonly(MdFormula entity) throws ServiceException, ControllerException {

@@ -56,8 +56,8 @@ public class KpiMeasureDataLogicServiceImpl implements IKpiMeasureDataLogicServi
     public static final String DATA_FOR_ORG = "ORG";
     public static final String SOURCE_MANUAL = "MANUAL";
     public static final String SOURCE_IMPORT = "IMPORT";
-    public static final String LOCKED_YES = "Y";
-    public static final String LOCKED_NO = "N";
+    public static final String LOCKED_YES = YesNoKeyProvide.YES;
+    public static final String LOCKED_NO = YesNoKeyProvide.NO;
     public static final String PERIOD_DAY = "DAY";
     public static final String PERIOD_WEEK = "WEEK";
     public static final String PERIOD_MONTH = "MONTH";
@@ -91,7 +91,7 @@ public class KpiMeasureDataLogicServiceImpl implements IKpiMeasureDataLogicServi
         DefaultResult<MdKpiMeasureData> result = new DefaultResult<>();
         List<MdKpiMeasureData> list = this.mdKpiMeasureDataService.selectListByParams(toKeyParams(normalized)).getValue();
         result.setValue(list == null || list.isEmpty() ? null : list.get(0));
-        result.setSuccess("Y");
+        result.setSuccess(YesNoKeyProvide.YES);
         return result;
     }
 
@@ -141,7 +141,7 @@ public class KpiMeasureDataLogicServiceImpl implements IKpiMeasureDataLogicServi
         List<KpiMeasureDataImportRow> rows = parseCsv(inputStream);
         KpiMeasureDataImportPreview preview = validateImportRows(rows, false).preview;
         DefaultResult<KpiMeasureDataImportPreview> result = new DefaultResult<>();
-        result.setSuccess("Y");
+        result.setSuccess(YesNoKeyProvide.YES);
         result.setValue(preview);
         result.setMessage(preview.isCanImport() ? "CSV validation passed." : "CSV contains validation errors.");
         return result;
@@ -179,7 +179,7 @@ public class KpiMeasureDataLogicServiceImpl implements IKpiMeasureDataLogicServi
         }
         imported.setTotalCount(batch.entities.size());
         DefaultResult<KpiMeasureDataImportResult> result = new DefaultResult<>();
-        result.setSuccess("Y");
+        result.setSuccess(YesNoKeyProvide.YES);
         result.setValue(imported);
         result.setMessage("CSV import completed.");
         return result;

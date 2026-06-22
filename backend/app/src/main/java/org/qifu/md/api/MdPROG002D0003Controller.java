@@ -155,12 +155,12 @@ public class MdPROG002D0003Controller extends CoreApiSupport {
     }
 
     private void checkSingleEnabledDefault(MdFormulaRecommendRule entity) throws ServiceException, ControllerException {
-        if (!Strings.CS.equals("Y", entity.getIsDefault()) || !Strings.CS.equals("Y", entity.getEnabled())) {
+        if (!Strings.CS.equals(YES, entity.getIsDefault()) || !Strings.CS.equals(YES, entity.getEnabled())) {
             return;
         }
         Map<String, Object> param = new HashMap<>();
-        param.put("isDefault", "Y");
-        param.put("enabled", "Y");
+        param.put("isDefault", YES);
+        param.put("enabled", YES);
         List<MdFormulaRecommendRule> defaultRules = this.mdFormulaRecommendRuleService.selectListByParams(param).getValue();
         if (CollectionUtils.isEmpty(defaultRules)) {
             return;
