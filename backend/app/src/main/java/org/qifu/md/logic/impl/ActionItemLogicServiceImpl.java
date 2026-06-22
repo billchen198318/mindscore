@@ -2,9 +2,12 @@ package org.qifu.md.logic.impl;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
@@ -19,6 +22,7 @@ import org.qifu.md.entity.MdActionItem;
 import org.qifu.md.entity.MdActionOwner;
 import org.qifu.md.entity.MdActionSourceLink;
 import org.qifu.md.logic.IActionItemLogicService;
+import org.qifu.md.logic.IActionSourceValidationService;
 import org.qifu.md.model.ActionItemRequest;
 import org.qifu.md.service.IMdActionItemService;
 import org.qifu.md.service.IMdActionOwnerService;
@@ -41,13 +45,16 @@ public class ActionItemLogicServiceImpl implements IActionItemLogicService {
     private final IMdActionItemService<MdActionItem, String> mdActionItemService;
     private final IMdActionOwnerService<MdActionOwner, String> mdActionOwnerService;
     private final IMdActionSourceLinkService<MdActionSourceLink, String> mdActionSourceLinkService;
+    private final IActionSourceValidationService actionSourceValidationService;
 
     public ActionItemLogicServiceImpl(IMdActionItemService<MdActionItem, String> mdActionItemService,
             IMdActionOwnerService<MdActionOwner, String> mdActionOwnerService,
-            IMdActionSourceLinkService<MdActionSourceLink, String> mdActionSourceLinkService) {
+            IMdActionSourceLinkService<MdActionSourceLink, String> mdActionSourceLinkService,
+            IActionSourceValidationService actionSourceValidationService) {
         this.mdActionItemService = mdActionItemService;
         this.mdActionOwnerService = mdActionOwnerService;
         this.mdActionSourceLinkService = mdActionSourceLinkService;
+        this.actionSourceValidationService = actionSourceValidationService;
     }
 
     @ServiceMethodAuthority(type = ServiceMethodType.INSERT)
@@ -225,15 +232,26 @@ public class ActionItemLogicServiceImpl implements IActionItemLogicService {
     }
 
     private void rebuildSourceLinks(String itemOid, List<MdActionSourceLink> sourceLinkList) throws ServiceException {
-        deleteSourceLinks(itemOid);
         if (sourceLinkList == null) {
+            deleteSourceLinks(itemOid);
             return;
         }
+        List<MdActionSourceLink> normalizedList = new ArrayList<>();
+        Set<String> sourceKeys = new HashSet<>();
         for (MdActionSourceLink sourceLink : sourceLinkList) {
             MdActionSourceLink normalized = normalizeSourceLink(itemOid, sourceLink);
             if (normalized != null) {
-                this.mdActionSourceLinkService.insert(normalized);
+                String sourceKey = normalized.getSourceType() + "|" + normalized.getSourceOid();
+                if (!sourceKeys.add(sourceKey)) {
+                    throw new ServiceException("Duplicate action source: " + normalized.getSourceType() + " / " + normalized.getSourceOid());
+                }
+                this.actionSourceValidationService.validate(normalized.getSourceType(), normalized.getSourceOid());
+                normalizedList.add(normalized);
             }
+        }
+        deleteSourceLinks(itemOid);
+        for (MdActionSourceLink normalized : normalizedList) {
+            this.mdActionSourceLinkService.insert(normalized);
         }
     }
 

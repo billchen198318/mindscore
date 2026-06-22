@@ -4,11 +4,14 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
@@ -24,6 +27,7 @@ import org.qifu.md.entity.MdActionOwner;
 import org.qifu.md.entity.MdActionPlan;
 import org.qifu.md.entity.MdActionSourceLink;
 import org.qifu.md.logic.IActionPlanLogicService;
+import org.qifu.md.logic.IActionSourceValidationService;
 import org.qifu.md.model.ActionPlanItemSummary;
 import org.qifu.md.model.ActionPlanRequest;
 import org.qifu.md.service.IMdActionItemService;
@@ -49,15 +53,18 @@ public class ActionPlanLogicServiceImpl implements IActionPlanLogicService {
     private final IMdActionOwnerService<MdActionOwner, String> mdActionOwnerService;
     private final IMdActionSourceLinkService<MdActionSourceLink, String> mdActionSourceLinkService;
     private final IMdActionItemService<MdActionItem, String> mdActionItemService;
+    private final IActionSourceValidationService actionSourceValidationService;
 
     public ActionPlanLogicServiceImpl(IMdActionPlanService<MdActionPlan, String> mdActionPlanService,
             IMdActionOwnerService<MdActionOwner, String> mdActionOwnerService,
             IMdActionSourceLinkService<MdActionSourceLink, String> mdActionSourceLinkService,
-            IMdActionItemService<MdActionItem, String> mdActionItemService) {
+            IMdActionItemService<MdActionItem, String> mdActionItemService,
+            IActionSourceValidationService actionSourceValidationService) {
         this.mdActionPlanService = mdActionPlanService;
         this.mdActionOwnerService = mdActionOwnerService;
         this.mdActionSourceLinkService = mdActionSourceLinkService;
         this.mdActionItemService = mdActionItemService;
+        this.actionSourceValidationService = actionSourceValidationService;
     }
 
     @ServiceMethodAuthority(type = ServiceMethodType.INSERT)
@@ -222,15 +229,26 @@ public class ActionPlanLogicServiceImpl implements IActionPlanLogicService {
     }
 
     private void rebuildSourceLinks(String planOid, List<MdActionSourceLink> sourceLinkList) throws ServiceException {
-        deleteSourceLinks(planOid);
         if (sourceLinkList == null) {
+            deleteSourceLinks(planOid);
             return;
         }
+        List<MdActionSourceLink> normalizedList = new ArrayList<>();
+        Set<String> sourceKeys = new HashSet<>();
         for (MdActionSourceLink sourceLink : sourceLinkList) {
             MdActionSourceLink normalized = normalizeSourceLink(planOid, sourceLink);
             if (normalized != null) {
-                this.mdActionSourceLinkService.insert(normalized);
+                String sourceKey = normalized.getSourceType() + "|" + normalized.getSourceOid();
+                if (!sourceKeys.add(sourceKey)) {
+                    throw new ServiceException("Duplicate action source: " + normalized.getSourceType() + " / " + normalized.getSourceOid());
+                }
+                this.actionSourceValidationService.validate(normalized.getSourceType(), normalized.getSourceOid());
+                normalizedList.add(normalized);
             }
+        }
+        deleteSourceLinks(planOid);
+        for (MdActionSourceLink normalized : normalizedList) {
+            this.mdActionSourceLinkService.insert(normalized);
         }
     }
 

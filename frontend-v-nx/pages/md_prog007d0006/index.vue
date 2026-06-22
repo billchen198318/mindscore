@@ -13,11 +13,13 @@ import {
     escapeQifuHtmlMsg
 } from '../../components/BaseHelper';
 import { useSwalLoading } from '@/composables/useSwalLoading';
+import { useActionSourceNavigation } from '@/composables/useActionSourceNavigation';
 
 definePageMeta({ middleware: ['auth'] });
 
 const queryPageStore = useMdProg007d0006Store();
 const { showLoading, hideLoading } = useSwalLoading();
+const { createActionFromSource } = useActionSourceNavigation();
 
 const pageProgramId = ref(PageConstants.QueryId);
 const workspaceList = ref<any[]>([]);
@@ -108,6 +110,12 @@ const snapshotScopeText = (linkView: any) => {
     return 'Global';
 };
 const calculatedAtText = (value: any) => value ? String(value).replace('T', ' ').slice(0, 19) : '';
+const createStrategyAction = async (objective: any) => {
+    const name = objective.objectiveCode + ' - ' + objective.objectiveName;
+    if (!await createActionFromSource('STRATEGY', objective.oid, name)) {
+        toast.warning('You do not have permission to create an Action Plan.');
+    }
+};
 
 const btnClear = () => {
     queryPageStore.clearData();
@@ -320,6 +328,7 @@ watch(periodPickerType, () => {
                             <th>KPI</th>
                             <th>OKR</th>
                             <th>Links</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -340,9 +349,14 @@ watch(periodPickerType, () => {
                             <td>{{ objective.kpiCount }}</td>
                             <td>{{ objective.okrCount }}</td>
                             <td>{{ objective.linkList.length }}</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-outline-success" @click="createStrategyAction(objective.objective)">
+                                    <i class="bi bi-clipboard-plus"></i> Create
+                                </button>
+                            </td>
                         </tr>
                         <tr v-if="theme.objectiveList.length < 1">
-                            <td colspan="6" class="text-muted">No objectives.</td>
+                            <td colspan="7" class="text-muted">No objectives.</td>
                         </tr>
                     </tbody>
                 </table>

@@ -16,6 +16,7 @@ import org.qifu.base.model.SearchBody;
 import org.qifu.core.util.CoreApiSupport;
 import org.qifu.md.entity.MdActionPlan;
 import org.qifu.md.entity.MdKpi;
+import org.qifu.md.entity.MdOkrKeyResult;
 import org.qifu.md.entity.MdOkrObjective;
 import org.qifu.md.entity.MdOrgMember;
 import org.qifu.md.entity.MdOrgUnit;
@@ -24,6 +25,7 @@ import org.qifu.md.logic.IActionPlanLogicService;
 import org.qifu.md.model.ActionPlanRequest;
 import org.qifu.md.service.IMdActionPlanService;
 import org.qifu.md.service.IMdKpiService;
+import org.qifu.md.service.IMdOkrKeyResultService;
 import org.qifu.md.service.IMdOkrObjectiveService;
 import org.qifu.md.service.IMdOrgMemberService;
 import org.qifu.md.service.IMdOrgUnitService;
@@ -52,6 +54,7 @@ public class MdPROG008D0001Controller extends CoreApiSupport {
     private final IMdOrgMemberService<MdOrgMember, String> mdOrgMemberService;
     private final IMdKpiService<MdKpi, String> mdKpiService;
     private final IMdOkrObjectiveService<MdOkrObjective, String> mdOkrObjectiveService;
+    private final IMdOkrKeyResultService<MdOkrKeyResult, String> mdOkrKeyResultService;
     private final IMdStrategyObjectiveService<MdStrategyObjective, String> mdStrategyObjectiveService;
     private final IActionPlanLogicService actionPlanLogicService;
 
@@ -60,6 +63,7 @@ public class MdPROG008D0001Controller extends CoreApiSupport {
             IMdOrgMemberService<MdOrgMember, String> mdOrgMemberService,
             IMdKpiService<MdKpi, String> mdKpiService,
             IMdOkrObjectiveService<MdOkrObjective, String> mdOkrObjectiveService,
+            IMdOkrKeyResultService<MdOkrKeyResult, String> mdOkrKeyResultService,
             IMdStrategyObjectiveService<MdStrategyObjective, String> mdStrategyObjectiveService,
             IActionPlanLogicService actionPlanLogicService) {
         super();
@@ -68,6 +72,7 @@ public class MdPROG008D0001Controller extends CoreApiSupport {
         this.mdOrgMemberService = mdOrgMemberService;
         this.mdKpiService = mdKpiService;
         this.mdOkrObjectiveService = mdOkrObjectiveService;
+        this.mdOkrKeyResultService = mdOkrKeyResultService;
         this.mdStrategyObjectiveService = mdStrategyObjectiveService;
         this.actionPlanLogicService = actionPlanLogicService;
     }
@@ -155,6 +160,20 @@ public class MdPROG008D0001Controller extends CoreApiSupport {
         DefaultControllerJsonResultObj<List<MdOkrObjective>> result = this.initDefaultJsonResult();
         try {
             DefaultResult<List<MdOkrObjective>> listResult = this.mdOkrObjectiveService.selectList("OBJECTIVE_CODE", "ASC");
+            this.setDefaultResponseJsonResult(listResult, result);
+        } catch (ServiceException | ControllerException e) {
+            this.exceptionResult(result, e);
+        }
+        return ResponseEntity.ok().body(result);
+    }
+
+    @ControllerMethodAuthority(programId = "MD_PROG008D0001Q", check = true)
+    @Operation(summary = "MD_PROG008D0001 - findOkrKeyResultList", description = "Action Plan OKR key result source option list")
+    @PostMapping(value = "/findOkrKeyResultList", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<DefaultControllerJsonResultObj<List<MdOkrKeyResult>>> findOkrKeyResultList(@RequestBody MdOkrKeyResult entity) {
+        DefaultControllerJsonResultObj<List<MdOkrKeyResult>> result = this.initDefaultJsonResult();
+        try {
+            DefaultResult<List<MdOkrKeyResult>> listResult = this.mdOkrKeyResultService.selectList("KR_CODE", "ASC");
             this.setDefaultResponseJsonResult(listResult, result);
         } catch (ServiceException | ControllerException e) {
             this.exceptionResult(result, e);

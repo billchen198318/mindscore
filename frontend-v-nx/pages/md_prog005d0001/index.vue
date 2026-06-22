@@ -23,6 +23,7 @@ import { getGridConfig, resetConfigByOld, setConfigPage, setConfigRow, setConfig
 import { useMdProg005d0001Store } from './QueryPageStore';
 import { escapeQifuHtmlMsg, getAxiosInstance } from '../../components/BaseHelper';
 import { useSwalLoading } from '@/composables/useSwalLoading';
+import { useActionSourceNavigation } from '@/composables/useActionSourceNavigation';
 import { optionName, periodTypeOptions, withAllOption } from '@/types/MindScoreOptions';
 
 definePageMeta({ middleware: ['auth'] });
@@ -40,6 +41,7 @@ use([
 
 const queryPageStore = useMdProg005d0001Store();
 const { showLoading, hideLoading } = useSwalLoading();
+const { createActionFromSource } = useActionSourceNavigation();
 
 const pageProgramId = ref(PageConstants.QueryId);
 const dsList = ref<any[]>([]);
@@ -149,6 +151,15 @@ const openTrace = (oid: string) => {
 const closeTrace = () => {
     showTraceModal.value = false;
     selectedTraceRow.value = null;
+};
+const createActionForKpi = async (snapshotOid: string) => {
+    const row = dsList.value.find((item: any) => item.oid === snapshotOid);
+    if (!row) {
+        return;
+    }
+    if (!await createActionFromSource('KPI', row.kpiOid, row.kpiDisplay)) {
+        toast.warning('You do not have permission to create an Action Plan.');
+    }
 };
 const firstScore = computed(() => dsList.value.length > 0 ? dsList.value[0] : null);
 const showOrgFilter = computed(() => queryPageStore.queryParam.dataForType === 'ORG');
@@ -329,7 +340,8 @@ const rowView = (item: any) => ({
 const initQueryGridConfig = () => getGridConfig(
     'oid',
     [
-        { type: 'trace', method: openTrace, icon: 'card-list', class: 'btn btn-outline-primary btn-sm', memo: 'Calculation trace' }
+        { type: 'trace', method: openTrace, icon: 'card-list', class: 'btn btn-outline-primary btn-sm', memo: 'Calculation trace' },
+        { type: 'action', method: createActionForKpi, icon: 'clipboard-plus', class: 'btn btn-outline-success btn-sm', memo: 'Create Action Plan' }
     ],
     [
         { label: 'KPI', field: 'kpiDisplay' },
@@ -343,7 +355,7 @@ const initQueryGridConfig = () => getGridConfig(
         { label: 'Score', field: 'scoreHtml', colHtml: true, colMethod: (val: any) => val },
         { label: 'Status', field: 'statusHtml', colHtml: true, colMethod: (val: any) => val },
         { label: 'Calculated At', field: 'calculatedAtText' },
-        { label: 'Trace', field: 'oid', textAlign: 'center' }
+        { label: 'Actions', field: 'oid', textAlign: 'center' }
     ]
 );
 

@@ -12,11 +12,13 @@ import {
     escapeQifuHtmlMsg
 } from '../../components/BaseHelper';
 import { useSwalLoading } from '@/composables/useSwalLoading';
+import { useActionSourceNavigation } from '@/composables/useActionSourceNavigation';
 
 definePageMeta({ middleware: ['auth'] });
 
 const queryPageStore = useMdProg006d0006Store();
 const { showLoading, hideLoading } = useSwalLoading();
+const { createActionFromSource } = useActionSourceNavigation();
 
 const pageProgramId = ref(PageConstants.QueryId);
 const hierarchyList = ref<any[]>([]);
@@ -85,6 +87,20 @@ const ownerName = (owner: any) => {
         return accountName(owner.account);
     }
     return owner.ownerType;
+};
+
+const createObjectiveAction = async (objective: any) => {
+    const name = objective.objectiveCode + ' - ' + objective.objectiveName;
+    if (!await createActionFromSource('OKR_OBJECTIVE', objective.oid, name)) {
+        toast.warning('You do not have permission to create an Action Plan.');
+    }
+};
+
+const createKeyResultAction = async (keyResult: any) => {
+    const name = keyResult.krCode + ' - ' + keyResult.krName;
+    if (!await createActionFromSource('OKR_KR', keyResult.oid, name)) {
+        toast.warning('You do not have permission to create an Action Plan.');
+    }
 };
 
 const numberText = (value: any) => {
@@ -383,9 +399,14 @@ onMounted(async () => {
           <div class="fw-bold">{{ selectedView.objective.objectiveCode }} - {{ selectedView.objective.objectiveName }}</div>
           <div class="small text-muted">{{ selectedView.snapshot?.periodKey || queryPageStore.queryParam.periodKey }} / {{ selectedView.snapshot?.snapshotAt || 'No snapshot' }}</div>
         </div>
-        <span class="badge" :class="statusClass(selectedView.snapshot?.scoreStatus)">
-          {{ selectedView.snapshot?.scoreStatus || 'UNKNOWN' }}
-        </span>
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge" :class="statusClass(selectedView.snapshot?.scoreStatus)">
+            {{ selectedView.snapshot?.scoreStatus || 'UNKNOWN' }}
+          </span>
+          <button type="button" class="btn btn-sm btn-outline-success" @click="createObjectiveAction(selectedView.objective)">
+            <i class="bi bi-clipboard-plus"></i> Action
+          </button>
+        </div>
       </div>
 
       <div class="row g-2 mb-3">
@@ -420,7 +441,12 @@ onMounted(async () => {
       <div v-for="krDetail in selectedView.keyResultDetailList" :key="krDetail.keyResult.oid" class="border rounded p-2 mb-2">
         <div class="d-flex justify-content-between gap-3">
           <div class="fw-semibold">{{ krDetail.keyResult.krCode }} - {{ krDetail.keyResult.krName }}</div>
-          <div class="text-muted">{{ krDetail.keyResult.status }}</div>
+          <div class="d-flex align-items-center gap-2">
+            <div class="text-muted">{{ krDetail.keyResult.status }}</div>
+            <button type="button" class="btn btn-sm btn-outline-success" @click="createKeyResultAction(krDetail.keyResult)">
+              <i class="bi bi-clipboard-plus"></i> Action
+            </button>
+          </div>
         </div>
         <div class="row g-2 mt-1 small">
           <div class="col-4"><span class="text-muted">Current</span> {{ numberText(krDetail.keyResult.currentValue) }}</div>

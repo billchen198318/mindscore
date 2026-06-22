@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useSwalLoading } from '@/composables/useSwalLoading';
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
@@ -17,6 +17,7 @@ import {
 definePageMeta({ middleware: ['auth'] });
 
 const router = useRouter();
+const route = useRoute();
 const { showLoading, hideLoading } = useSwalLoading();
 const pageProgramId = ref(PageConstants.CreateId);
 const checkFields = ref<any>({});
@@ -27,6 +28,7 @@ const orgList = ref<any[]>([]);
 const memberList = ref<any[]>([]);
 const kpiList = ref<any[]>([]);
 const okrObjectiveList = ref<any[]>([]);
+const okrKeyResultList = ref<any[]>([]);
 const strategyObjectiveList = ref<any[]>([]);
 const ownerList = ref<any[]>([]);
 const sourceLinkList = ref<any[]>([]);
@@ -57,6 +59,7 @@ const ownerRoleOptions = [
 const sourceTypeOptions = [
     { value: 'KPI', label: 'KPI' },
     { value: 'OKR_OBJECTIVE', label: 'OKR Objective' },
+    { value: 'OKR_KR', label: 'OKR Key Result' },
     { value: 'STRATEGY', label: 'Strategy Objective' },
     { value: 'INSIGHT', label: 'Insight' }
 ];
@@ -79,6 +82,9 @@ const currentSourceOptions = computed(() => {
     }
     if (selectedSourceType.value === 'OKR_OBJECTIVE') {
         return okrObjectiveList.value.map((item: any) => ({ oid: item.oid, label: item.objectiveCode + ' - ' + item.objectiveName }));
+    }
+    if (selectedSourceType.value === 'OKR_KR') {
+        return okrKeyResultList.value.map((item: any) => ({ oid: item.oid, label: item.krCode + ' - ' + item.krName }));
     }
     if (selectedSourceType.value === 'STRATEGY') {
         return strategyObjectiveList.value.map((item: any) => ({ oid: item.oid, label: item.objectiveCode + ' - ' + item.objectiveName }));
@@ -107,6 +113,10 @@ const sourceName = (sourceType: string, sourceOid: string) => {
         const item = okrObjectiveList.value.find((row: any) => row.oid === sourceOid);
         return item ? item.objectiveCode + ' - ' + item.objectiveName : sourceOid;
     }
+    if (sourceType === 'OKR_KR') {
+        const item = okrKeyResultList.value.find((row: any) => row.oid === sourceOid);
+        return item ? item.krCode + ' - ' + item.krName : sourceOid;
+    }
     if (sourceType === 'STRATEGY') {
         const item = strategyObjectiveList.value.find((row: any) => row.oid === sourceOid);
         return item ? item.objectiveCode + ' - ' + item.objectiveName : sourceOid;
@@ -129,11 +139,41 @@ const loadOptions = async () => {
             loadOptionList('/findMemberList', memberList),
             loadOptionList('/findKpiList', kpiList),
             loadOptionList('/findOkrObjectiveList', okrObjectiveList, false),
+            loadOptionList('/findOkrKeyResultList', okrKeyResultList, false),
             loadOptionList('/findStrategyObjectiveList', strategyObjectiveList, false)
         ]);
     } catch (e: any) {
         toast.warning(e?.message || e);
     }
+};
+
+const sourceExists = (sourceType: string, sourceOid: string) => {
+    if (sourceType === 'KPI') return kpiList.value.some((item: any) => item.oid === sourceOid);
+    if (sourceType === 'OKR_OBJECTIVE') return okrObjectiveList.value.some((item: any) => item.oid === sourceOid);
+    if (sourceType === 'OKR_KR') return okrKeyResultList.value.some((item: any) => item.oid === sourceOid);
+    if (sourceType === 'STRATEGY') return strategyObjectiveList.value.some((item: any) => item.oid === sourceOid);
+    return false;
+};
+
+const applySourceContext = () => {
+    const sourceType = typeof route.query.sourceType === 'string' ? route.query.sourceType : '';
+    const sourceOid = typeof route.query.sourceOid === 'string' ? route.query.sourceOid : '';
+    if (!sourceExists(sourceType, sourceOid)) {
+        if (sourceType || sourceOid) {
+            toast.warning('The report source does not exist or is not available.');
+        }
+        return;
+    }
+    if (sourceLinkList.value.some((item: any) => item.sourceType === sourceType && item.sourceOid === sourceOid)) {
+        return;
+    }
+    sourceLinkList.value.push({
+        sourceType,
+        sourceOid,
+        linkReason: 'Created from report: ' + sourceName(sourceType, sourceOid)
+    });
+    selectedSourceType.value = sourceType;
+    selectedSourceOid.value = sourceOid;
 };
 
 const addOwner = () => {
@@ -226,7 +266,10 @@ const btnSave = async () => {
     }
 };
 
-onMounted(loadOptions);
+onMounted(async () => {
+    await loadOptions();
+    applySourceContext();
+});
 </script>
 
 <template>
