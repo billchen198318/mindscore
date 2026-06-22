@@ -180,15 +180,15 @@ Recommended implementation order:
 
 ### Phase 14. Insight / LLM
 
-最後才做 insight，因為它依賴前面 deterministic 資料。
+最後才做 insight，因為它依賴前面 deterministic 資料。Phase 14 應先建立 LLM 基礎設施，再建立 signal / rule 與實際 insight 流程；規則引擎仍須先於任何 LLM-driven insight。
 
-1. Performance signal
-2. Interpretation rule
-3. Insight generate / list / detail
-4. Recommendation
-5. Action from insight
-6. LLM provider config, first-class support for `OPENAI` and `GEMINI`
-7. LLM run log
+1. LLM provider config, first-class support for `OPENAI` and `GEMINI`
+2. LLM run log
+3. Performance signal
+4. Interpretation rule
+5. Insight generate / list / detail
+6. Recommendation
+7. Action from insight
 
 Phase 14 LLM integration principles:
 

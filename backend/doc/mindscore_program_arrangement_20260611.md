@@ -288,11 +288,11 @@ This family covers signal generation, insight, recommendation and LLM config.
 
 | Program ID | Page Folder | Main Entity | Purpose | Priority |
 |---|---|---|---|---|
-| `MD_PROG010D0001` | `md_prog010d0001` | `MdPerformanceSignal` | Signal list / generation | Low |
-| `MD_PROG010D0002` | `md_prog010d0002` | `MdInterpretationRule` | Rule maintenance | Low |
-| `MD_PROG010D0003` | `md_prog010d0003` | `MdInsight` | Insight inbox | Low |
-| `MD_PROG010D0004` | `md_prog010d0004` | `MdInsightEvidence` / `MdInsightRecommendation` | Insight detail | Low |
-| `MD_PROG010D0005` | `md_prog010d0005` | `MdLlmProviderConfig` / `MdLlmRunLog` | LLM config and audit log | Low |
+| `MD_PROG010D0001` | `md_prog010d0001` | `MdLlmProviderConfig` / `MdLlmRunLog` | LLM config and audit log | Low |
+| `MD_PROG010D0002` | `md_prog010d0002` | `MdPerformanceSignal` | Signal list / generation | Low |
+| `MD_PROG010D0003` | `md_prog010d0003` | `MdInterpretationRule` | Rule maintenance | Low |
+| `MD_PROG010D0004` | `md_prog010d0004` | `MdInsight` | Insight inbox | Low |
+| `MD_PROG010D0005` | `md_prog010d0005` | `MdInsightEvidence` / `MdInsightRecommendation` | Insight detail | Low |
 
 Recommended backend controllers:
 
@@ -1118,44 +1118,44 @@ SetParam: MD_PROG003D0001S01Q
 
 ### 9.10 MD_PROG010D - Insight / LLM
 
-#### MD_PROG010D0001 - Performance Signal
-
-核心用途：
-
-- 標準化 KPI / OKR / BSC / PDCA 成為 signal
-
-#### MD_PROG010D0002 - Interpretation Rule
-
-核心用途：
-
-- 定義 deterministic 風險規則
-
-#### MD_PROG010D0003 - Insight
-
-核心用途：
-
-- Insight inbox
-- 顯示風險、異常、落後、逾期
-
-#### MD_PROG010D0004 - Insight Evidence / Recommendation
-
-核心用途：
-
-- 顯示證據與建議
-- 讓使用者知道為什麼系統產生此 insight
-
-#### MD_PROG010D0005 - LLM Provider Config / Run Log
+#### MD_PROG010D0001 - LLM Provider Config / Run Log
 
 核心用途：
 
 - LLM provider 設定
 - 追蹤 prompt / output / token / cost
 
+#### MD_PROG010D0002 - Performance Signal
+
+核心用途：
+
+- 標準化 KPI / OKR / BSC / PDCA 成為 signal
+
+#### MD_PROG010D0003 - Interpretation Rule
+
+核心用途：
+
+- 定義 deterministic 風險規則
+
+#### MD_PROG010D0004 - Insight
+
+核心用途：
+
+- Insight inbox
+- 顯示風險、異常、落後、逾期
+
+#### MD_PROG010D0005 - Insight Evidence / Recommendation
+
+核心用途：
+
+- 顯示證據與建議
+- 讓使用者知道為什麼系統產生此 insight
+
 關鍵調整點：
 
 - LLM 只能解釋與建議，不能成為官方 score 計算者
 - Insight 應可手動接受 / 忽略 / 關閉
-- 先做規則引擎，再做 LLM，避免一開始就依賴外部模型
+- 先完成 LLM Provider Config 與 Run Log 基礎設施；實際 insight 流程仍先做規則引擎，再接入 LLM，避免業務判斷依賴外部模型
 - LLM Provider Config 第一版需支援 `OPENAI` 與 `GEMINI`
 - Provider 設定需包含 provider type、API base URL、API key、default model、enabled flag、test connection
 - API key 只能由 backend 使用與保存，frontend 不可直接呼叫 OpenAI / Gemini API
