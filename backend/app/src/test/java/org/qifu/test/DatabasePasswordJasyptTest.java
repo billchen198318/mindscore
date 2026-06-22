@@ -31,8 +31,8 @@ public class DatabasePasswordJasyptTest {
 
     @Test
     public void testEncryptAndDecryptDatabasePassword() {
-        String rawPassword = "password";
-        String encryptorPassword = "mindscore-test-key";
+        String rawPassword = "P@ssw0rd";
+        String encryptorPassword = "mindscore-dev-jasypt-key";
 
         StandardPBEStringEncryptor encryptor = buildEncryptor(encryptorPassword);
         String cipherText = encryptor.encrypt(rawPassword);
