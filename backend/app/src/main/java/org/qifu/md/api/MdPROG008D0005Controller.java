@@ -233,7 +233,7 @@ public class MdPROG008D0005Controller extends CoreApiSupport {
         query.setStartDateTo(parseDate(field.get("startDateTo"), "startDateTo"));
         query.setEndDateFrom(parseDate(field.get("endDateFrom"), "endDateFrom"));
         query.setEndDateTo(parseDate(field.get("endDateTo"), "endDateTo"));
-        query.setOverdueOnly("Y".equalsIgnoreCase(field.get("overdueOnly")) || "true".equalsIgnoreCase(field.get("overdueOnly")));
+        query.setOverdueOnly(YES.equalsIgnoreCase(field.get("overdueOnly")) || "true".equalsIgnoreCase(field.get("overdueOnly")));
         return query;
     }
 

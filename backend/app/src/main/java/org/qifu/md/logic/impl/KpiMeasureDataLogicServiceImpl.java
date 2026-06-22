@@ -22,12 +22,14 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.qifu.base.exception.ServiceException;
 import org.qifu.base.message.BaseSystemMessage;
 import org.qifu.base.model.DefaultResult;
 import org.qifu.base.model.PleaseSelect;
 import org.qifu.base.model.ServiceMethodAuthority;
 import org.qifu.base.model.ServiceMethodType;
+import org.qifu.base.model.YesNoKeyProvide;
 import org.qifu.md.entity.MdKpiMeasureData;
 import org.qifu.md.entity.MdKpi;
 import org.qifu.md.entity.MdOrgMember;
@@ -295,11 +297,11 @@ public class KpiMeasureDataLogicServiceImpl implements IKpiMeasureDataLogicServi
         row.setAccount(StringUtils.trimToEmpty(row.getAccount()));
 
         MdKpi kpi = lookup.kpis.get(row.getKpiCode());
-        if (kpi == null || !"Y".equals(kpi.getEnabled())) {
+        if (kpi == null || !YesNoKeyProvide.YES.equals(kpi.getEnabled())) {
             row.getErrors().add("KPI code does not exist or is disabled.");
         } else {
             row.setKpiName(kpi.getKpiName());
-            if (!StringUtils.equals(kpi.getPeriodType(), row.getPeriodType())) {
+            if (!Strings.CS.equals(kpi.getPeriodType(), row.getPeriodType())) {
                 row.getErrors().add("period_type must match the KPI period type: " + kpi.getPeriodType() + ".");
             }
         }
@@ -311,7 +313,7 @@ public class KpiMeasureDataLogicServiceImpl implements IKpiMeasureDataLogicServi
         MdOrgUnit org = null;
         if (StringUtils.isNotBlank(row.getOrgCode())) {
             org = lookup.orgs.get(row.getOrgCode());
-            if (org == null || !"Y".equals(org.getEnabled())) {
+            if (org == null || !YesNoKeyProvide.YES.equals(org.getEnabled())) {
                 row.getErrors().add("Organization code does not exist or is disabled.");
             } else {
                 row.setOrgName(org.getOrgName());
@@ -431,9 +433,9 @@ public class KpiMeasureDataLogicServiceImpl implements IKpiMeasureDataLogicServi
     }
 
     private boolean hasEnabledMember(List<MdOrgMember> members, String account, String orgOid) {
-        return members.stream().anyMatch(member -> StringUtils.equals(member.getAccount(), account)
-                && "Y".equals(member.getEnabled())
-                && (StringUtils.isBlank(orgOid) || StringUtils.equals(member.getOrgOid(), orgOid)));
+        return members.stream().anyMatch(member -> Strings.CS.equals(member.getAccount(), account)
+                && YesNoKeyProvide.YES.equals(member.getEnabled())
+                && (StringUtils.isBlank(orgOid) || Strings.CS.equals(member.getOrgOid(), orgOid)));
     }
 
     private String importNaturalKey(MdKpiMeasureData entity) {
