@@ -283,8 +283,8 @@ CREATE TABLE `md_formula_recommend_rule` (
   `RULE_NAME` varchar(200) NOT NULL COMMENT '推薦規則名稱',
   `MANAGEMENT_MODE` varchar(32) NOT NULL COMMENT '管理模式 BIGGER/SMALLER/QUASI/MANUAL',
   `COMPARE_MODE` varchar(32) DEFAULT NULL COMMENT '比較模式 TARGET/MINIMUM/MAXIMUM/RANGE/CUSTOM',
-  `PERIOD_TYPE` varchar(32) DEFAULT NULL COMMENT '適用週期類型，空值代表不限',
-  `DATA_TYPE` varchar(32) DEFAULT NULL COMMENT '資料類型 NUMBER/PERCENT/CURRENCY/BOOLEAN/MANUAL，空值代表不限',
+  `PERIOD_TYPE` varchar(32) DEFAULT NULL COMMENT '適用週期類型，空字串代表不限',
+  `DATA_TYPE` varchar(32) DEFAULT NULL COMMENT '資料類型 NUMBER/PERCENT/CURRENCY/BOOLEAN/MANUAL，空字串代表不限',
   `RECOMMENDED_FORMULA_OID` char(36) NOT NULL COMMENT '推薦公式 OID',
   `PRIORITY_NO` int(11) NOT NULL DEFAULT 100 COMMENT '推薦優先順序，數字越小越優先',
   `IS_DEFAULT` varchar(1) NOT NULL DEFAULT 'N' COMMENT '是否預設規則 Y/N',
@@ -309,16 +309,16 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `md_formula_recommend_rule` WRITE;
 /*!40000 ALTER TABLE `md_formula_recommend_rule` DISABLE KEYS */;
 INSERT INTO `md_formula_recommend_rule` VALUES
-('038c5d51-6980-11f1-a592-005056c00001','REC_BIGGER_TARGET','Bigger Target Formula','BIGGER','TARGET',NULL,NULL,'038af272-6980-11f1-a592-005056c00001',100,'N','Y','Use bigger-is-better scoring for target-based KPI.','system','2026-06-16 20:36:22',NULL,NULL),
-('038c67e0-6980-11f1-a592-005056c00001','REC_BIGGER_MINIMUM','Bigger Minimum Formula','BIGGER','MINIMUM',NULL,NULL,'038af272-6980-11f1-a592-005056c00001',100,'N','Y','Use bigger-is-better scoring for minimum-threshold KPI.','system','2026-06-16 20:36:22',NULL,NULL),
-('038c718c-6980-11f1-a592-005056c00001','REC_SMALLER_TARGET','Smaller Target Formula','SMALLER','TARGET',NULL,NULL,'038b05c5-6980-11f1-a592-005056c00001',100,'N','Y','Use smaller-is-better scoring for target-based KPI.','system','2026-06-16 20:36:22',NULL,NULL),
-('038c7f16-6980-11f1-a592-005056c00001','REC_SMALLER_MAXIMUM','Smaller Maximum Formula','SMALLER','MAXIMUM',NULL,NULL,'038b05c5-6980-11f1-a592-005056c00001',100,'N','Y','Use smaller-is-better scoring for maximum-threshold KPI.','system','2026-06-16 20:36:22',NULL,NULL),
-('038c8d60-6980-11f1-a592-005056c00001','REC_QUASI_TARGET','Quasi Target Formula','QUASI','TARGET',NULL,NULL,'038b17bf-6980-11f1-a592-005056c00001',100,'N','Y','Use closest-to-target scoring for quasi KPI.','system','2026-06-16 20:36:22',NULL,NULL),
-('038c940a-6980-11f1-a592-005056c00001','REC_QUASI_RANGE','Quasi Range Formula','QUASI','RANGE',NULL,NULL,'038b0fea-6980-11f1-a592-005056c00001',100,'N','Y','Use in-range scoring for quasi range KPI.','system','2026-06-16 20:36:22',NULL,NULL),
-('038c9d7d-6980-11f1-a592-005056c00001','REC_MANUAL_CUSTOM','Manual Custom Formula','MANUAL','CUSTOM',NULL,NULL,'038b2039-6980-11f1-a592-005056c00001',100,'N','Y','Use actual value as manual score.','system','2026-06-16 20:36:22',NULL,NULL),
-('038ca80b-6980-11f1-a592-005056c00001','REC_MANUAL_TARGET','Manual Target Formula','MANUAL','TARGET',NULL,NULL,'038b2039-6980-11f1-a592-005056c00001',100,'N','Y','Use actual value as manual score.','system','2026-06-16 20:36:22',NULL,NULL),
-('038cae6c-6980-11f1-a592-005056c00001','REC_BOOLEAN_BIGGER_TARGET','Boolean Bigger Target Formula','BIGGER','TARGET',NULL,'BOOLEAN','038b26bf-6980-11f1-a592-005056c00001',110,'N','Y','Use pass/fail scoring for boolean KPI.','system','2026-06-16 20:36:22',NULL,NULL),
-('038cb47f-6980-11f1-a592-005056c00001','REC_BOOLEAN_MANUAL_CUSTOM','Boolean Manual Custom Formula','MANUAL','CUSTOM',NULL,'BOOLEAN','038b26bf-6980-11f1-a592-005056c00001',110,'N','Y','Use pass/fail scoring for boolean KPI.','system','2026-06-16 20:36:22',NULL,NULL);
+('038c5d51-6980-11f1-a592-005056c00001','REC_BIGGER_TARGET','Bigger Target Formula','BIGGER','TARGET','','','038af272-6980-11f1-a592-005056c00001',100,'N','Y','Use bigger-is-better scoring for target-based KPI.','system','2026-06-16 20:36:22',NULL,NULL),
+('038c67e0-6980-11f1-a592-005056c00001','REC_BIGGER_MINIMUM','Bigger Minimum Formula','BIGGER','MINIMUM','','','038af272-6980-11f1-a592-005056c00001',100,'N','Y','Use bigger-is-better scoring for minimum-threshold KPI.','system','2026-06-16 20:36:22',NULL,NULL),
+('038c718c-6980-11f1-a592-005056c00001','REC_SMALLER_TARGET','Smaller Target Formula','SMALLER','TARGET','','','038b05c5-6980-11f1-a592-005056c00001',100,'N','Y','Use smaller-is-better scoring for target-based KPI.','system','2026-06-16 20:36:22',NULL,NULL),
+('038c7f16-6980-11f1-a592-005056c00001','REC_SMALLER_MAXIMUM','Smaller Maximum Formula','SMALLER','MAXIMUM','','','038b05c5-6980-11f1-a592-005056c00001',100,'N','Y','Use smaller-is-better scoring for maximum-threshold KPI.','system','2026-06-16 20:36:22',NULL,NULL),
+('038c8d60-6980-11f1-a592-005056c00001','REC_QUASI_TARGET','Quasi Target Formula','QUASI','TARGET','','','038b17bf-6980-11f1-a592-005056c00001',100,'N','Y','Use closest-to-target scoring for quasi KPI.','system','2026-06-16 20:36:22',NULL,NULL),
+('038c940a-6980-11f1-a592-005056c00001','REC_QUASI_RANGE','Quasi Range Formula','QUASI','RANGE','','','038b0fea-6980-11f1-a592-005056c00001',100,'N','Y','Use in-range scoring for quasi range KPI.','system','2026-06-16 20:36:22',NULL,NULL),
+('038c9d7d-6980-11f1-a592-005056c00001','REC_MANUAL_CUSTOM','Manual Custom Formula','MANUAL','CUSTOM','','','038b2039-6980-11f1-a592-005056c00001',100,'N','Y','Use actual value as manual score.','system','2026-06-16 20:36:22',NULL,NULL),
+('038ca80b-6980-11f1-a592-005056c00001','REC_MANUAL_TARGET','Manual Target Formula','MANUAL','TARGET','','','038b2039-6980-11f1-a592-005056c00001',100,'N','Y','Use actual value as manual score.','system','2026-06-16 20:36:22',NULL,NULL),
+('038cae6c-6980-11f1-a592-005056c00001','REC_BOOLEAN_BIGGER_TARGET','Boolean Bigger Target Formula','BIGGER','TARGET','','BOOLEAN','038b26bf-6980-11f1-a592-005056c00001',110,'N','Y','Use pass/fail scoring for boolean KPI.','system','2026-06-16 20:36:22',NULL,NULL),
+('038cb47f-6980-11f1-a592-005056c00001','REC_BOOLEAN_MANUAL_CUSTOM','Boolean Manual Custom Formula','MANUAL','CUSTOM','','BOOLEAN','038b26bf-6980-11f1-a592-005056c00001',110,'N','Y','Use pass/fail scoring for boolean KPI.','system','2026-06-16 20:36:22',NULL,NULL);
 /*!40000 ALTER TABLE `md_formula_recommend_rule` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;

@@ -23,6 +23,7 @@ import {
     periodTypeOptions,
     dataTypeOptions,
     withAllOption,
+    withAnyOption,
     optionName,
     yesNoName
 } from '@/types/MindScoreOptions';
@@ -41,6 +42,8 @@ const managementModeQueryOptions = withAllOption(managementModeOptions);
 const compareModeQueryOptions = withAllOption(compareModeOptions);
 const periodTypeQueryOptions = withAllOption(periodTypeOptions);
 const dataTypeQueryOptions = withAllOption(dataTypeOptions);
+const periodTypeDisplayOptions = withAnyOption(periodTypeOptions);
+const dataTypeDisplayOptions = withAnyOption(dataTypeOptions);
 const formulaName = (oid: string) => formulaMap.value[oid] || oid;
 
 const tbRefresh = () => btnClear();
@@ -158,8 +161,8 @@ const btnQuery = async () => {
                 ...item,
                 managementModeName : optionName(managementModeOptions, item.managementMode),
                 compareModeName : optionName(compareModeOptions, item.compareMode),
-                periodTypeName : optionName(periodTypeOptions, item.periodType),
-                dataTypeName : optionName(dataTypeOptions, item.dataType),
+                periodTypeName : optionName(periodTypeDisplayOptions, item.periodType),
+                dataTypeName : optionName(dataTypeDisplayOptions, item.dataType),
                 recommendedFormulaName : formulaName(item.recommendedFormulaOid),
                 isDefaultName : yesNoName(item.isDefault),
                 enabledName : yesNoName(item.enabled)
