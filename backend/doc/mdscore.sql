@@ -1,9 +1,9 @@
 /*M!999999\- enable the sandbox mode */ 
--- MariaDB dump 10.19-11.7.1-MariaDB, for Win64 (AMD64)
+-- MariaDB dump 10.19-12.2.2-MariaDB, for Win64 (AMD64)
 --
 -- Host: localhost    Database: mdscore
 -- ------------------------------------------------------
--- Server version	11.7.1-MariaDB
+-- Server version	12.2.2-MariaDB
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -22,7 +22,7 @@
 
 DROP TABLE IF EXISTS `md_action_item`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `md_action_item` (
   `OID` char(36) NOT NULL COMMENT '主鍵 OID',
   `PLAN_OID` char(36) NOT NULL COMMENT 'Action Plan OID',
@@ -51,10 +51,13 @@ CREATE TABLE `md_action_item` (
 -- Dumping data for table `md_action_item`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `md_action_item` WRITE;
 /*!40000 ALTER TABLE `md_action_item` DISABLE KEYS */;
 /*!40000 ALTER TABLE `md_action_item` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `md_action_owner`
@@ -62,7 +65,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `md_action_owner`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `md_action_owner` (
   `OID` char(36) NOT NULL COMMENT '主鍵 OID',
   `ACTION_TYPE` varchar(32) NOT NULL COMMENT 'Action 類型 PLAN/ITEM',
@@ -86,10 +89,13 @@ CREATE TABLE `md_action_owner` (
 -- Dumping data for table `md_action_owner`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `md_action_owner` WRITE;
 /*!40000 ALTER TABLE `md_action_owner` DISABLE KEYS */;
 /*!40000 ALTER TABLE `md_action_owner` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `md_action_plan`
@@ -97,7 +103,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `md_action_plan`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `md_action_plan` (
   `OID` char(36) NOT NULL COMMENT '主鍵 OID',
   `PLAN_CODE` varchar(64) NOT NULL COMMENT 'Action Plan 代碼',
@@ -120,10 +126,13 @@ CREATE TABLE `md_action_plan` (
 -- Dumping data for table `md_action_plan`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `md_action_plan` WRITE;
 /*!40000 ALTER TABLE `md_action_plan` DISABLE KEYS */;
 /*!40000 ALTER TABLE `md_action_plan` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `md_action_source_link`
@@ -131,7 +140,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `md_action_source_link`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `md_action_source_link` (
   `OID` char(36) NOT NULL COMMENT '主鍵 OID',
   `ACTION_TYPE` varchar(32) NOT NULL COMMENT 'Action 類型 PLAN/ITEM',
@@ -154,10 +163,13 @@ CREATE TABLE `md_action_source_link` (
 -- Dumping data for table `md_action_source_link`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `md_action_source_link` WRITE;
 /*!40000 ALTER TABLE `md_action_source_link` DISABLE KEYS */;
 /*!40000 ALTER TABLE `md_action_source_link` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `md_aggregation_method`
@@ -165,7 +177,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `md_aggregation_method`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `md_aggregation_method` (
   `OID` char(36) NOT NULL COMMENT '主鍵 OID',
   `AGGR_CODE` varchar(64) NOT NULL COMMENT '彙總方法代碼',
@@ -187,6 +199,7 @@ CREATE TABLE `md_aggregation_method` (
 -- Dumping data for table `md_aggregation_method`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `md_aggregation_method` WRITE;
 /*!40000 ALTER TABLE `md_aggregation_method` DISABLE KEYS */;
 INSERT INTO `md_aggregation_method` VALUES
@@ -204,6 +217,8 @@ INSERT INTO `md_aggregation_method` VALUES
 ('038c05ba-6980-11f1-a592-005056c00001','PASS_RATE','Pass Rate','BUILTIN',NULL,'Percentage of measure rows that pass KPI compare rule.','Y','system','2026-06-16 20:36:22',NULL,NULL);
 /*!40000 ALTER TABLE `md_aggregation_method` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `md_formula`
@@ -211,7 +226,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `md_formula`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `md_formula` (
   `OID` char(36) NOT NULL COMMENT '主鍵 OID',
   `FORMULA_CODE` varchar(64) NOT NULL COMMENT '公式代碼',
@@ -240,6 +255,7 @@ CREATE TABLE `md_formula` (
 -- Dumping data for table `md_formula`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `md_formula` WRITE;
 /*!40000 ALTER TABLE `md_formula` DISABLE KEYS */;
 INSERT INTO `md_formula` VALUES
@@ -251,6 +267,8 @@ INSERT INTO `md_formula` VALUES
 ('038b26bf-6980-11f1-a592-005056c00001','BOOLEAN_PASS_FAIL','Boolean Pass Fail','BUILTIN','GROOVY','$P{actual} == null ? 0 : ($P{actual} > 0 ? 100 : 0)','DECIMAL',1,'Y','Y','For yes/no KPIs. Non-zero actual means pass and scores 100; zero scores 0.','actual=1 => 100; actual=0 => 0','Y','system','2026-06-16 20:36:22',NULL,NULL);
 /*!40000 ALTER TABLE `md_formula` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `md_formula_recommend_rule`
@@ -258,7 +276,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `md_formula_recommend_rule`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `md_formula_recommend_rule` (
   `OID` char(36) NOT NULL COMMENT '主鍵 OID',
   `RULE_CODE` varchar(64) NOT NULL COMMENT '推薦規則代碼',
@@ -287,6 +305,7 @@ CREATE TABLE `md_formula_recommend_rule` (
 -- Dumping data for table `md_formula_recommend_rule`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `md_formula_recommend_rule` WRITE;
 /*!40000 ALTER TABLE `md_formula_recommend_rule` DISABLE KEYS */;
 INSERT INTO `md_formula_recommend_rule` VALUES
@@ -302,6 +321,8 @@ INSERT INTO `md_formula_recommend_rule` VALUES
 ('038cb47f-6980-11f1-a592-005056c00001','REC_BOOLEAN_MANUAL_CUSTOM','Boolean Manual Custom Formula','MANUAL','CUSTOM',NULL,'BOOLEAN','038b26bf-6980-11f1-a592-005056c00001',110,'N','Y','Use pass/fail scoring for boolean KPI.','system','2026-06-16 20:36:22',NULL,NULL);
 /*!40000 ALTER TABLE `md_formula_recommend_rule` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `md_kpi`
@@ -309,7 +330,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `md_kpi`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `md_kpi` (
   `OID` char(36) NOT NULL COMMENT '主鍵 OID',
   `KPI_CODE` varchar(64) NOT NULL COMMENT 'KPI 代碼',
@@ -350,10 +371,13 @@ CREATE TABLE `md_kpi` (
 -- Dumping data for table `md_kpi`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `md_kpi` WRITE;
 /*!40000 ALTER TABLE `md_kpi` DISABLE KEYS */;
 /*!40000 ALTER TABLE `md_kpi` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `md_kpi_measure_data`
@@ -361,7 +385,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `md_kpi_measure_data`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `md_kpi_measure_data` (
   `OID` char(36) NOT NULL COMMENT '主鍵 OID',
   `KPI_OID` char(36) NOT NULL COMMENT 'KPI OID',
@@ -394,10 +418,13 @@ CREATE TABLE `md_kpi_measure_data` (
 -- Dumping data for table `md_kpi_measure_data`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `md_kpi_measure_data` WRITE;
 /*!40000 ALTER TABLE `md_kpi_measure_data` DISABLE KEYS */;
 /*!40000 ALTER TABLE `md_kpi_measure_data` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `md_kpi_owner`
@@ -405,7 +432,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `md_kpi_owner`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `md_kpi_owner` (
   `OID` char(36) NOT NULL COMMENT '主鍵 OID',
   `KPI_OID` char(36) NOT NULL COMMENT 'KPI OID',
@@ -428,10 +455,13 @@ CREATE TABLE `md_kpi_owner` (
 -- Dumping data for table `md_kpi_owner`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `md_kpi_owner` WRITE;
 /*!40000 ALTER TABLE `md_kpi_owner` DISABLE KEYS */;
 /*!40000 ALTER TABLE `md_kpi_owner` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `md_kpi_score_color`
@@ -439,7 +469,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `md_kpi_score_color`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `md_kpi_score_color` (
   `OID` char(36) NOT NULL COMMENT 'Color rule OID',
   `SCOPE_TYPE` varchar(32) NOT NULL DEFAULT 'GLOBAL' COMMENT 'Color scope GLOBAL/KPI',
@@ -473,12 +503,15 @@ CREATE TABLE `md_kpi_score_color` (
 -- Dumping data for table `md_kpi_score_color`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `md_kpi_score_color` WRITE;
 /*!40000 ALTER TABLE `md_kpi_score_color` DISABLE KEYS */;
 INSERT INTO `md_kpi_score_color` VALUES
 ('4851432a-687a-11f1-8693-3bbb3e091bdb','GLOBAL','GLOBAL',NULL,'CUSTOM','A01','KPI Color 01',80.0000,100.0000,'GOOD','#f7ff85','#198754',100,'Y','test','admin','2026-06-15 13:23:03','admin','2026-06-15 13:26:55');
 /*!40000 ALTER TABLE `md_kpi_score_color` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `md_kpi_score_snapshot`
@@ -486,7 +519,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `md_kpi_score_snapshot`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `md_kpi_score_snapshot` (
   `OID` char(36) NOT NULL COMMENT '主鍵 OID',
   `KPI_OID` char(36) NOT NULL COMMENT 'KPI OID',
@@ -520,10 +553,13 @@ CREATE TABLE `md_kpi_score_snapshot` (
 -- Dumping data for table `md_kpi_score_snapshot`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `md_kpi_score_snapshot` WRITE;
 /*!40000 ALTER TABLE `md_kpi_score_snapshot` DISABLE KEYS */;
 /*!40000 ALTER TABLE `md_kpi_score_snapshot` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `md_llm_provider_config`
@@ -531,7 +567,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `md_llm_provider_config`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `md_llm_provider_config` (
   `OID` char(36) NOT NULL COMMENT '主鍵 OID',
   `PROVIDER_CODE` varchar(64) NOT NULL COMMENT 'Provider 設定代碼',
@@ -539,7 +575,7 @@ CREATE TABLE `md_llm_provider_config` (
   `PROVIDER_TYPE` varchar(32) NOT NULL COMMENT 'OPENAI/GEMINI',
   `API_BASE_URL` varchar(500) DEFAULT NULL COMMENT 'API Base URL',
   `DEFAULT_MODEL` varchar(128) NOT NULL COMMENT '預設模型',
-  `API_KEY_REF` varchar(500) NOT NULL COMMENT '加密金鑰或 Secret Reference',
+  `API_KEY_ENCRYPTED` text NOT NULL COMMENT 'AES-GCM encrypted API key',
   `API_KEY_MASKED` varchar(128) DEFAULT NULL COMMENT '畫面顯示遮罩值',
   `ENABLED_FLAG` char(1) NOT NULL DEFAULT 'Y' COMMENT 'Y/N',
   `DEFAULT_FLAG` char(1) NOT NULL DEFAULT 'N' COMMENT '是否為預設 Provider',
@@ -562,10 +598,13 @@ CREATE TABLE `md_llm_provider_config` (
 -- Dumping data for table `md_llm_provider_config`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `md_llm_provider_config` WRITE;
 /*!40000 ALTER TABLE `md_llm_provider_config` DISABLE KEYS */;
 /*!40000 ALTER TABLE `md_llm_provider_config` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `md_llm_run_log`
@@ -573,7 +612,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `md_llm_run_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `md_llm_run_log` (
   `OID` char(36) NOT NULL COMMENT '主鍵 OID',
   `PROVIDER_OID` char(36) NOT NULL COMMENT 'Provider Config OID',
@@ -608,10 +647,15 @@ CREATE TABLE `md_llm_run_log` (
 -- Dumping data for table `md_llm_run_log`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `md_llm_run_log` WRITE;
 /*!40000 ALTER TABLE `md_llm_run_log` DISABLE KEYS */;
+INSERT INTO `md_llm_run_log` VALUES
+('894d2230-6eb7-11f1-9c56-27fbabceb5cb','7fc3ba2b-6eb7-11f1-9c56-2756481e9ac8','OPENAI','GPT-5.5','TEST',NULL,NULL,'6e28b7a9-b0d9-4a36-809a-bb0b4ea26571','SUCCESS','2026-06-23 11:56:37','2026-06-23 11:56:38',836,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'admin','2026-06-23 11:56:38');
 /*!40000 ALTER TABLE `md_llm_run_log` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `md_okr_checkin`
@@ -619,7 +663,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `md_okr_checkin`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `md_okr_checkin` (
   `OID` char(36) NOT NULL COMMENT '主鍵 OID',
   `KR_OID` char(36) NOT NULL COMMENT 'KR OID',
@@ -642,10 +686,13 @@ CREATE TABLE `md_okr_checkin` (
 -- Dumping data for table `md_okr_checkin`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `md_okr_checkin` WRITE;
 /*!40000 ALTER TABLE `md_okr_checkin` DISABLE KEYS */;
 /*!40000 ALTER TABLE `md_okr_checkin` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `md_okr_cycle`
@@ -653,7 +700,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `md_okr_cycle`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `md_okr_cycle` (
   `OID` char(36) NOT NULL COMMENT '主鍵 OID',
   `CYCLE_CODE` varchar(64) NOT NULL COMMENT '週期代碼',
@@ -675,10 +722,13 @@ CREATE TABLE `md_okr_cycle` (
 -- Dumping data for table `md_okr_cycle`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `md_okr_cycle` WRITE;
 /*!40000 ALTER TABLE `md_okr_cycle` DISABLE KEYS */;
 /*!40000 ALTER TABLE `md_okr_cycle` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `md_okr_initiative`
@@ -686,7 +736,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `md_okr_initiative`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `md_okr_initiative` (
   `OID` char(36) NOT NULL COMMENT '主鍵 OID',
   `OBJECTIVE_OID` char(36) NOT NULL COMMENT 'Objective OID',
@@ -709,10 +759,13 @@ CREATE TABLE `md_okr_initiative` (
 -- Dumping data for table `md_okr_initiative`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `md_okr_initiative` WRITE;
 /*!40000 ALTER TABLE `md_okr_initiative` DISABLE KEYS */;
 /*!40000 ALTER TABLE `md_okr_initiative` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `md_okr_key_result`
@@ -720,7 +773,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `md_okr_key_result`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `md_okr_key_result` (
   `OID` char(36) NOT NULL COMMENT '主鍵 OID',
   `OBJECTIVE_OID` char(36) NOT NULL COMMENT 'Objective OID',
@@ -749,10 +802,13 @@ CREATE TABLE `md_okr_key_result` (
 -- Dumping data for table `md_okr_key_result`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `md_okr_key_result` WRITE;
 /*!40000 ALTER TABLE `md_okr_key_result` DISABLE KEYS */;
 /*!40000 ALTER TABLE `md_okr_key_result` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `md_okr_objective`
@@ -760,7 +816,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `md_okr_objective`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `md_okr_objective` (
   `OID` char(36) NOT NULL COMMENT '主鍵 OID',
   `CYCLE_OID` char(36) NOT NULL COMMENT 'OKR 週期 OID',
@@ -786,10 +842,13 @@ CREATE TABLE `md_okr_objective` (
 -- Dumping data for table `md_okr_objective`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `md_okr_objective` WRITE;
 /*!40000 ALTER TABLE `md_okr_objective` DISABLE KEYS */;
 /*!40000 ALTER TABLE `md_okr_objective` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `md_okr_objective_owner`
@@ -797,7 +856,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `md_okr_objective_owner`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `md_okr_objective_owner` (
   `OID` char(36) NOT NULL COMMENT '主鍵 OID',
   `OBJECTIVE_OID` char(36) NOT NULL COMMENT 'Objective OID',
@@ -820,10 +879,13 @@ CREATE TABLE `md_okr_objective_owner` (
 -- Dumping data for table `md_okr_objective_owner`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `md_okr_objective_owner` WRITE;
 /*!40000 ALTER TABLE `md_okr_objective_owner` DISABLE KEYS */;
 /*!40000 ALTER TABLE `md_okr_objective_owner` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `md_okr_snapshot`
@@ -831,7 +893,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `md_okr_snapshot`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `md_okr_snapshot` (
   `OID` char(36) NOT NULL COMMENT '主鍵 OID',
   `OBJECTIVE_OID` char(36) NOT NULL COMMENT 'Objective OID',
@@ -855,10 +917,13 @@ CREATE TABLE `md_okr_snapshot` (
 -- Dumping data for table `md_okr_snapshot`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `md_okr_snapshot` WRITE;
 /*!40000 ALTER TABLE `md_okr_snapshot` DISABLE KEYS */;
 /*!40000 ALTER TABLE `md_okr_snapshot` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `md_org_member`
@@ -866,7 +931,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `md_org_member`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `md_org_member` (
   `OID` char(36) NOT NULL COMMENT '主鍵 OID',
   `ORG_OID` char(36) NOT NULL COMMENT '組織 OID',
@@ -891,12 +956,15 @@ CREATE TABLE `md_org_member` (
 -- Dumping data for table `md_org_member`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `md_org_member` WRITE;
 /*!40000 ALTER TABLE `md_org_member` DISABLE KEYS */;
 INSERT INTO `md_org_member` VALUES
 ('8f63d1f4-6601-11f1-ae4f-b14e72636d69','fb8df964-65fe-11f1-bc28-b315ecf56715','peter','小明2','A000102012','Xinnien_Chen@foreshot.com.tw','專員2','N','Y','admin','2026-06-12 09:53:51',NULL,NULL);
 /*!40000 ALTER TABLE `md_org_member` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `md_org_unit`
@@ -904,7 +972,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `md_org_unit`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `md_org_unit` (
   `OID` char(36) NOT NULL COMMENT '主鍵 OID',
   `ORG_CODE` varchar(64) NOT NULL COMMENT '組織代碼',
@@ -928,6 +996,7 @@ CREATE TABLE `md_org_unit` (
 -- Dumping data for table `md_org_unit`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `md_org_unit` WRITE;
 /*!40000 ALTER TABLE `md_org_unit` DISABLE KEYS */;
 INSERT INTO `md_org_unit` VALUES
@@ -935,6 +1004,8 @@ INSERT INTO `md_org_unit` VALUES
 ('fdaa97d6-65fe-11f1-bc28-f142032c710a','B001','測試單位B',NULL,1,0,'Y','','admin','2026-06-12 09:35:27','admin','2026-06-12 09:54:47');
 /*!40000 ALTER TABLE `md_org_unit` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `md_strategy_objective`
@@ -942,7 +1013,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `md_strategy_objective`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `md_strategy_objective` (
   `OID` char(36) NOT NULL COMMENT '主鍵 OID',
   `THEME_OID` char(36) NOT NULL COMMENT '策略主題 OID',
@@ -965,10 +1036,13 @@ CREATE TABLE `md_strategy_objective` (
 -- Dumping data for table `md_strategy_objective`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `md_strategy_objective` WRITE;
 /*!40000 ALTER TABLE `md_strategy_objective` DISABLE KEYS */;
 /*!40000 ALTER TABLE `md_strategy_objective` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `md_strategy_objective_link`
@@ -976,7 +1050,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `md_strategy_objective_link`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `md_strategy_objective_link` (
   `OID` char(36) NOT NULL COMMENT '主鍵 OID',
   `STRATEGY_OBJECTIVE_OID` char(36) NOT NULL COMMENT '策略目標 OID',
@@ -999,10 +1073,13 @@ CREATE TABLE `md_strategy_objective_link` (
 -- Dumping data for table `md_strategy_objective_link`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `md_strategy_objective_link` WRITE;
 /*!40000 ALTER TABLE `md_strategy_objective_link` DISABLE KEYS */;
 /*!40000 ALTER TABLE `md_strategy_objective_link` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `md_strategy_snapshot`
@@ -1010,7 +1087,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `md_strategy_snapshot`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `md_strategy_snapshot` (
   `OID` char(36) NOT NULL COMMENT '主鍵 OID',
   `WORKSPACE_OID` char(36) NOT NULL COMMENT '策略工作區 OID',
@@ -1035,10 +1112,13 @@ CREATE TABLE `md_strategy_snapshot` (
 -- Dumping data for table `md_strategy_snapshot`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `md_strategy_snapshot` WRITE;
 /*!40000 ALTER TABLE `md_strategy_snapshot` DISABLE KEYS */;
 /*!40000 ALTER TABLE `md_strategy_snapshot` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `md_strategy_theme`
@@ -1046,7 +1126,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `md_strategy_theme`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `md_strategy_theme` (
   `OID` char(36) NOT NULL COMMENT '主鍵 OID',
   `WORKSPACE_OID` char(36) NOT NULL COMMENT '策略工作區 OID',
@@ -1069,10 +1149,13 @@ CREATE TABLE `md_strategy_theme` (
 -- Dumping data for table `md_strategy_theme`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `md_strategy_theme` WRITE;
 /*!40000 ALTER TABLE `md_strategy_theme` DISABLE KEYS */;
 /*!40000 ALTER TABLE `md_strategy_theme` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `md_strategy_workspace`
@@ -1080,7 +1163,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `md_strategy_workspace`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `md_strategy_workspace` (
   `OID` char(36) NOT NULL COMMENT '主鍵 OID',
   `WORKSPACE_CODE` varchar(64) NOT NULL COMMENT '策略工作區代碼',
@@ -1102,10 +1185,13 @@ CREATE TABLE `md_strategy_workspace` (
 -- Dumping data for table `md_strategy_workspace`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `md_strategy_workspace` WRITE;
 /*!40000 ALTER TABLE `md_strategy_workspace` DISABLE KEYS */;
 /*!40000 ALTER TABLE `md_strategy_workspace` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `tb_account`
@@ -1113,7 +1199,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `tb_account`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_account` (
   `OID` char(36) NOT NULL,
   `ACCOUNT` varchar(24) NOT NULL,
@@ -1132,6 +1218,7 @@ CREATE TABLE `tb_account` (
 -- Dumping data for table `tb_account`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `tb_account` WRITE;
 /*!40000 ALTER TABLE `tb_account` DISABLE KEYS */;
 INSERT INTO `tb_account` VALUES
@@ -1142,6 +1229,8 @@ INSERT INTO `tb_account` VALUES
 ('9c239d19-3646-41db-b394-d34c5bf34671','tiffany','$2y$12$Q4x02Q0WKHWXAQ.NoGCs8ObX4sac890xeRnaNUxNnz/VEiHWazIp.','Y','admin','2015-09-11 10:15:29',NULL,NULL);
 /*!40000 ALTER TABLE `tb_account` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `tb_role`
@@ -1149,7 +1238,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `tb_role`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_role` (
   `OID` char(36) NOT NULL,
   `ROLE` varchar(50) NOT NULL,
@@ -1167,6 +1256,7 @@ CREATE TABLE `tb_role` (
 -- Dumping data for table `tb_role`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `tb_role` WRITE;
 /*!40000 ALTER TABLE `tb_role` DISABLE KEYS */;
 INSERT INTO `tb_role` VALUES
@@ -1176,6 +1266,8 @@ INSERT INTO `tb_role` VALUES
 ('c7c69396-e5e6-48ca-b09c-9445b69e2ad5','*','all role','admin','2014-10-09 15:02:54',NULL,NULL);
 /*!40000 ALTER TABLE `tb_role` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `tb_role_permission`
@@ -1183,7 +1275,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `tb_role_permission`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_role_permission` (
   `OID` char(36) NOT NULL,
   `ROLE` varchar(50) NOT NULL,
@@ -1203,10 +1295,13 @@ CREATE TABLE `tb_role_permission` (
 -- Dumping data for table `tb_role_permission`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `tb_role_permission` WRITE;
 /*!40000 ALTER TABLE `tb_role_permission` DISABLE KEYS */;
 /*!40000 ALTER TABLE `tb_role_permission` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `tb_sys`
@@ -1214,7 +1309,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `tb_sys`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_sys` (
   `OID` char(36) NOT NULL,
   `SYS_ID` varchar(10) NOT NULL,
@@ -1236,12 +1331,15 @@ CREATE TABLE `tb_sys` (
 -- Dumping data for table `tb_sys`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `tb_sys` WRITE;
 /*!40000 ALTER TABLE `tb_sys` DISABLE KEYS */;
 INSERT INTO `tb_sys` VALUES
 ('c6643182-85a5-4f91-9e73-10567ebd0dd5','CORE','Core-system','127.0.0.1:8080','core-web','Y','SYSTEM','admin','2017-04-10 20:42:00','admin','2026-06-01 15:35:15');
 /*!40000 ALTER TABLE `tb_sys` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `tb_sys_bean_help`
@@ -1249,7 +1347,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `tb_sys_bean_help`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_sys_bean_help` (
   `OID` char(36) NOT NULL,
   `BEAN_ID` varchar(255) NOT NULL,
@@ -1270,10 +1368,13 @@ CREATE TABLE `tb_sys_bean_help` (
 -- Dumping data for table `tb_sys_bean_help`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `tb_sys_bean_help` WRITE;
 /*!40000 ALTER TABLE `tb_sys_bean_help` DISABLE KEYS */;
 /*!40000 ALTER TABLE `tb_sys_bean_help` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `tb_sys_bean_help_expr`
@@ -1281,7 +1382,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `tb_sys_bean_help_expr`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_sys_bean_help_expr` (
   `OID` char(36) NOT NULL,
   `HELP_OID` char(36) NOT NULL,
@@ -1302,10 +1403,13 @@ CREATE TABLE `tb_sys_bean_help_expr` (
 -- Dumping data for table `tb_sys_bean_help_expr`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `tb_sys_bean_help_expr` WRITE;
 /*!40000 ALTER TABLE `tb_sys_bean_help_expr` DISABLE KEYS */;
 /*!40000 ALTER TABLE `tb_sys_bean_help_expr` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `tb_sys_bean_help_expr_map`
@@ -1313,7 +1417,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `tb_sys_bean_help_expr_map`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_sys_bean_help_expr_map` (
   `OID` char(36) NOT NULL,
   `HELP_EXPR_OID` char(36) NOT NULL,
@@ -1335,10 +1439,13 @@ CREATE TABLE `tb_sys_bean_help_expr_map` (
 -- Dumping data for table `tb_sys_bean_help_expr_map`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `tb_sys_bean_help_expr_map` WRITE;
 /*!40000 ALTER TABLE `tb_sys_bean_help_expr_map` DISABLE KEYS */;
 /*!40000 ALTER TABLE `tb_sys_bean_help_expr_map` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `tb_sys_code`
@@ -1346,7 +1453,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `tb_sys_code`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_sys_code` (
   `OID` char(36) NOT NULL,
   `CODE` varchar(25) NOT NULL,
@@ -1370,6 +1477,7 @@ CREATE TABLE `tb_sys_code` (
 -- Dumping data for table `tb_sys_code`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `tb_sys_code` WRITE;
 /*!40000 ALTER TABLE `tb_sys_code` DISABLE KEYS */;
 INSERT INTO `tb_sys_code` VALUES
@@ -1380,6 +1488,8 @@ INSERT INTO `tb_sys_code` VALUES
 ('caf00ba5-fe63-4dc4-a1a3-32527f6629b2','CMM_CONF001','CMM','Common role for default user!','COMMON01',NULL,NULL,NULL,NULL,'admin','2017-05-09 12:29:00',NULL,NULL);
 /*!40000 ALTER TABLE `tb_sys_code` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `tb_sys_event_log`
@@ -1387,7 +1497,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `tb_sys_event_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_sys_event_log` (
   `OID` char(36) NOT NULL,
   `USER` varchar(24) NOT NULL,
@@ -1408,10 +1518,13 @@ CREATE TABLE `tb_sys_event_log` (
 -- Dumping data for table `tb_sys_event_log`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `tb_sys_event_log` WRITE;
 /*!40000 ALTER TABLE `tb_sys_event_log` DISABLE KEYS */;
 /*!40000 ALTER TABLE `tb_sys_event_log` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `tb_sys_expr_job`
@@ -1419,7 +1532,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `tb_sys_expr_job`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_sys_expr_job` (
   `OID` char(36) NOT NULL,
   `SYSTEM` varchar(10) NOT NULL,
@@ -1449,10 +1562,13 @@ CREATE TABLE `tb_sys_expr_job` (
 -- Dumping data for table `tb_sys_expr_job`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `tb_sys_expr_job` WRITE;
 /*!40000 ALTER TABLE `tb_sys_expr_job` DISABLE KEYS */;
 /*!40000 ALTER TABLE `tb_sys_expr_job` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `tb_sys_expr_job_log`
@@ -1460,7 +1576,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `tb_sys_expr_job_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_sys_expr_job_log` (
   `OID` char(36) NOT NULL,
   `ID` varchar(20) NOT NULL,
@@ -1482,10 +1598,13 @@ CREATE TABLE `tb_sys_expr_job_log` (
 -- Dumping data for table `tb_sys_expr_job_log`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `tb_sys_expr_job_log` WRITE;
 /*!40000 ALTER TABLE `tb_sys_expr_job_log` DISABLE KEYS */;
 /*!40000 ALTER TABLE `tb_sys_expr_job_log` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `tb_sys_expression`
@@ -1493,7 +1612,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `tb_sys_expression`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_sys_expression` (
   `OID` char(36) NOT NULL,
   `EXPR_ID` varchar(20) NOT NULL,
@@ -1514,10 +1633,13 @@ CREATE TABLE `tb_sys_expression` (
 -- Dumping data for table `tb_sys_expression`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `tb_sys_expression` WRITE;
 /*!40000 ALTER TABLE `tb_sys_expression` DISABLE KEYS */;
 /*!40000 ALTER TABLE `tb_sys_expression` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `tb_sys_icon`
@@ -1525,7 +1647,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `tb_sys_icon`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_sys_icon` (
   `OID` char(36) NOT NULL,
   `ICON_ID` varchar(20) NOT NULL,
@@ -1543,10 +1665,13 @@ CREATE TABLE `tb_sys_icon` (
 -- Dumping data for table `tb_sys_icon`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `tb_sys_icon` WRITE;
 /*!40000 ALTER TABLE `tb_sys_icon` DISABLE KEYS */;
 /*!40000 ALTER TABLE `tb_sys_icon` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `tb_sys_jreport`
@@ -1554,7 +1679,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `tb_sys_jreport`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_sys_jreport` (
   `OID` char(36) NOT NULL,
   `REPORT_ID` varchar(50) NOT NULL,
@@ -1575,10 +1700,13 @@ CREATE TABLE `tb_sys_jreport` (
 -- Dumping data for table `tb_sys_jreport`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `tb_sys_jreport` WRITE;
 /*!40000 ALTER TABLE `tb_sys_jreport` DISABLE KEYS */;
 /*!40000 ALTER TABLE `tb_sys_jreport` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `tb_sys_jreport_param`
@@ -1586,7 +1714,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `tb_sys_jreport_param`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_sys_jreport_param` (
   `OID` char(36) NOT NULL,
   `REPORT_ID` varchar(50) NOT NULL,
@@ -1605,10 +1733,13 @@ CREATE TABLE `tb_sys_jreport_param` (
 -- Dumping data for table `tb_sys_jreport_param`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `tb_sys_jreport_param` WRITE;
 /*!40000 ALTER TABLE `tb_sys_jreport_param` DISABLE KEYS */;
 /*!40000 ALTER TABLE `tb_sys_jreport_param` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `tb_sys_login_log`
@@ -1616,7 +1747,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `tb_sys_login_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_sys_login_log` (
   `OID` char(36) NOT NULL,
   `USER` varchar(24) NOT NULL,
@@ -1635,10 +1766,13 @@ CREATE TABLE `tb_sys_login_log` (
 -- Dumping data for table `tb_sys_login_log`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `tb_sys_login_log` WRITE;
 /*!40000 ALTER TABLE `tb_sys_login_log` DISABLE KEYS */;
 /*!40000 ALTER TABLE `tb_sys_login_log` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `tb_sys_mail_helper`
@@ -1646,7 +1780,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `tb_sys_mail_helper`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_sys_mail_helper` (
   `OID` char(36) NOT NULL,
   `MAIL_ID` varchar(17) NOT NULL,
@@ -1674,10 +1808,13 @@ CREATE TABLE `tb_sys_mail_helper` (
 -- Dumping data for table `tb_sys_mail_helper`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `tb_sys_mail_helper` WRITE;
 /*!40000 ALTER TABLE `tb_sys_mail_helper` DISABLE KEYS */;
 /*!40000 ALTER TABLE `tb_sys_mail_helper` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `tb_sys_menu`
@@ -1685,7 +1822,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `tb_sys_menu`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_sys_menu` (
   `OID` char(36) NOT NULL,
   `PROG_ID` varchar(50) NOT NULL,
@@ -1704,6 +1841,7 @@ CREATE TABLE `tb_sys_menu` (
 -- Dumping data for table `tb_sys_menu`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `tb_sys_menu` WRITE;
 /*!40000 ALTER TABLE `tb_sys_menu` DISABLE KEYS */;
 INSERT INTO `tb_sys_menu` VALUES
@@ -1761,6 +1899,8 @@ INSERT INTO `tb_sys_menu` VALUES
 ('f07b9309-4612-11ee-9a04-9f3e4fe17b25','CORE_PROG004D0002Q','5e055f61-bfc5-402c-93b4-f241dc17b00b','Y','admin','2023-08-29 10:22:45',NULL,NULL);
 /*!40000 ALTER TABLE `tb_sys_menu` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `tb_sys_menu_role`
@@ -1768,7 +1908,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `tb_sys_menu_role`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_sys_menu_role` (
   `OID` char(36) NOT NULL,
   `PROG_ID` varchar(50) NOT NULL,
@@ -1786,10 +1926,13 @@ CREATE TABLE `tb_sys_menu_role` (
 -- Dumping data for table `tb_sys_menu_role`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `tb_sys_menu_role` WRITE;
 /*!40000 ALTER TABLE `tb_sys_menu_role` DISABLE KEYS */;
 /*!40000 ALTER TABLE `tb_sys_menu_role` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `tb_sys_prog`
@@ -1797,7 +1940,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `tb_sys_prog`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_sys_prog` (
   `OID` char(36) NOT NULL,
   `PROG_ID` varchar(50) NOT NULL,
@@ -1825,6 +1968,7 @@ CREATE TABLE `tb_sys_prog` (
 -- Dumping data for table `tb_sys_prog`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `tb_sys_prog` WRITE;
 /*!40000 ALTER TABLE `tb_sys_prog` DISABLE KEYS */;
 INSERT INTO `tb_sys_prog` VALUES
@@ -1930,6 +2074,8 @@ INSERT INTO `tb_sys_prog` VALUES
 ('f9ed13df-6557-11f1-8ea0-ebb67d5fab5b','MD_PROG001D0001A','AA01 - 組織單位 (建立)','#/md_prog001d0001/create','N','N',0,0,'CORE','ITEM','SYSTEM','house','admin','2026-06-11 13:39:55',NULL,NULL);
 /*!40000 ALTER TABLE `tb_sys_prog` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `tb_sys_qfield_log`
@@ -1937,7 +2083,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `tb_sys_qfield_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_sys_qfield_log` (
   `OID` char(36) NOT NULL,
   `SYSTEM` varchar(10) NOT NULL,
@@ -1960,10 +2106,13 @@ CREATE TABLE `tb_sys_qfield_log` (
 -- Dumping data for table `tb_sys_qfield_log`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `tb_sys_qfield_log` WRITE;
 /*!40000 ALTER TABLE `tb_sys_qfield_log` DISABLE KEYS */;
 /*!40000 ALTER TABLE `tb_sys_qfield_log` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `tb_sys_template`
@@ -1971,7 +2120,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `tb_sys_template`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_sys_template` (
   `OID` char(36) NOT NULL,
   `TEMPLATE_ID` varchar(10) NOT NULL,
@@ -1991,10 +2140,13 @@ CREATE TABLE `tb_sys_template` (
 -- Dumping data for table `tb_sys_template`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `tb_sys_template` WRITE;
 /*!40000 ALTER TABLE `tb_sys_template` DISABLE KEYS */;
 /*!40000 ALTER TABLE `tb_sys_template` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `tb_sys_template_param`
@@ -2002,7 +2154,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `tb_sys_template_param`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_sys_template_param` (
   `OID` char(36) NOT NULL,
   `TEMPLATE_ID` varchar(10) NOT NULL,
@@ -2022,10 +2174,13 @@ CREATE TABLE `tb_sys_template_param` (
 -- Dumping data for table `tb_sys_template_param`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `tb_sys_template_param` WRITE;
 /*!40000 ALTER TABLE `tb_sys_template_param` DISABLE KEYS */;
 /*!40000 ALTER TABLE `tb_sys_template_param` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `tb_sys_token`
@@ -2033,7 +2188,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `tb_sys_token`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_sys_token` (
   `OID` char(36) NOT NULL,
   `USER_ID` varchar(24) NOT NULL,
@@ -2051,10 +2206,13 @@ CREATE TABLE `tb_sys_token` (
 -- Dumping data for table `tb_sys_token`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `tb_sys_token` WRITE;
 /*!40000 ALTER TABLE `tb_sys_token` DISABLE KEYS */;
 /*!40000 ALTER TABLE `tb_sys_token` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `tb_sys_upload`
@@ -2062,7 +2220,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `tb_sys_upload`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_sys_upload` (
   `OID` char(36) NOT NULL,
   `SYSTEM` varchar(10) NOT NULL,
@@ -2085,10 +2243,13 @@ CREATE TABLE `tb_sys_upload` (
 -- Dumping data for table `tb_sys_upload`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `tb_sys_upload` WRITE;
 /*!40000 ALTER TABLE `tb_sys_upload` DISABLE KEYS */;
 /*!40000 ALTER TABLE `tb_sys_upload` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `tb_sys_usess`
@@ -2096,7 +2257,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `tb_sys_usess`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_sys_usess` (
   `OID` char(36) NOT NULL,
   `SESSION_ID` varchar(64) NOT NULL,
@@ -2116,10 +2277,13 @@ CREATE TABLE `tb_sys_usess` (
 -- Dumping data for table `tb_sys_usess`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `tb_sys_usess` WRITE;
 /*!40000 ALTER TABLE `tb_sys_usess` DISABLE KEYS */;
 /*!40000 ALTER TABLE `tb_sys_usess` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
 -- Table structure for table `tb_user_role`
@@ -2127,7 +2291,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `tb_user_role`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_user_role` (
   `OID` char(36) NOT NULL,
   `ROLE` varchar(50) NOT NULL,
@@ -2146,6 +2310,7 @@ CREATE TABLE `tb_user_role` (
 -- Dumping data for table `tb_user_role`
 --
 
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `tb_user_role` WRITE;
 /*!40000 ALTER TABLE `tb_user_role` DISABLE KEYS */;
 INSERT INTO `tb_user_role` VALUES
@@ -2156,6 +2321,8 @@ INSERT INTO `tb_user_role` VALUES
 ('bd7bf78c-d84b-4524-8273-273f883d30b5','COMMON01','tester','','admin','2017-05-10 11:01:50',NULL,NULL);
 /*!40000 ALTER TABLE `tb_user_role` ENABLE KEYS */;
 UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -2166,4 +2333,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2026-06-22 21:25:08
+-- Dump completed on 2026-06-23 11:58:52

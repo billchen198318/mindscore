@@ -263,6 +263,11 @@ public class LlmProviderConfigLogicServiceImpl implements ILlmProviderConfigLogi
         if (StringUtils.isBlank(encryptionKey)) {
             throw new ServiceException("MINDSCORE_LLM_ENCRYPTION_KEY is not configured");
         }
+        try {
+            EncryptorUtils.validateGcmKey(encryptionKey);
+        } catch (IllegalArgumentException ex) {
+            throw new ServiceException("MINDSCORE_LLM_ENCRYPTION_KEY must be a Base64-encoded AES key containing 16, 24, or 32 bytes");
+        }
     }
 
     private String maskApiKey(String apiKey) {
