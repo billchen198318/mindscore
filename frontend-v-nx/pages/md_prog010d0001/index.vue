@@ -32,6 +32,7 @@ const postPage = async (endpoint: string, field: any) => {
 
 const queryProviders = async () => {
     showLoading();
+    providers.value = [];
     try {
         providers.value = await postPage('/findProviderPage', {
             providerCodeLike: providerQuery.value.providerCode,
@@ -66,6 +67,11 @@ const deleteProvider = async (oid: string) => {
     try {
         const response = await getAxiosInstance().post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/delete', { oid });
         if (response.data?.success !== import.meta.env.VITE_SUCCESS_FLAG) throw new Error(response.data?.message || 'Delete failed');
+        if (response.data?.value !== true) throw new Error(response.data?.message || 'Delete failed');
+        providers.value = providers.value.filter((item) => item.oid !== oid);
+        if (logQuery.value.providerOid === oid) {
+            logQuery.value.providerOid = '';
+        }
         toast.success('Provider deleted');
         await queryProviders();
     } catch (e: any) { toast.warning(escapeQifuHtmlMsg(e?.message || String(e))); }
