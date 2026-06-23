@@ -77,6 +77,15 @@ const initQueryGridConfig = () => {
 				'type'    : 'delete',
 				'memo'    : 'Delete current item.',
 				'class'	  : 'btn btn-danger btn-sm'
+			},
+			{
+				'method'  : (val: any) => {
+					confirmFire('寄送密碼重設信?', sendPasswordResetMail, val);
+				},
+				'icon'    : 'envelope',
+				'type'    : 'password-reset',
+				'memo'    : 'Send password reset mail.',
+				'class'	  : 'btn btn-warning btn-sm'
 			}     
 		],
 		[
@@ -147,6 +156,27 @@ const delItem = async (oid: string) => {
 	} catch (e: any) {
 		hideLoading();    
 		btnQuery();
+		alert(e);
+	}
+};
+
+const sendPasswordResetMail = async (oid: string) => {
+	showLoading();
+	try {
+		const axiosInstance = getAxiosInstance();
+		const response = await axiosInstance.post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/sendPasswordResetMail', { "oid": oid });
+		hideLoading();
+		if (response.data) {
+			if (import.meta.env.VITE_SUCCESS_FLAG == response.data.success) {
+				toast.success(response.data.message);
+			} else {
+				toast.warning(response.data.message);
+			}
+		} else {
+			toast.error('error, null');
+		}
+	} catch (e: any) {
+		hideLoading();
 		alert(e);
 	}
 };

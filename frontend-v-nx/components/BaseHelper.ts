@@ -232,6 +232,7 @@ export function getAxiosInstance() {
                          url.indexOf('/auth/logout') > -1 || 
                          url.indexOf('/auth/validLogined') > -1 || 
                          url.indexOf('/auth/refreshNewToken') > -1 ||
+                         url.indexOf('/auth/passwordReset/') > -1 ||
                          isLoginPage;
 
       switch (status) {

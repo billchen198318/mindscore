@@ -905,6 +905,42 @@ INSERT INTO `md_org_member` VALUES
 UNLOCK TABLES;
 
 --
+-- Table structure for table `md_password_reset_token`
+--
+
+DROP TABLE IF EXISTS `md_password_reset_token`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `md_password_reset_token` (
+  `OID` char(36) NOT NULL,
+  `ACCOUNT` varchar(24) NOT NULL COMMENT 'qifu4 帳號',
+  `TOKEN_HASH` varchar(64) NOT NULL COMMENT 'SHA-256 token hash',
+  `EXPIRES_TIME` datetime NOT NULL,
+  `USED_FLAG` varchar(1) NOT NULL DEFAULT 'N',
+  `USED_TIME` datetime DEFAULT NULL,
+  `REVOKED_FLAG` varchar(1) NOT NULL DEFAULT 'N',
+  `REVOKED_TIME` datetime DEFAULT NULL,
+  `CUSERID` varchar(24) DEFAULT NULL,
+  `CDATE` datetime DEFAULT NULL,
+  `UUSERID` varchar(24) DEFAULT NULL,
+  `UDATE` datetime DEFAULT NULL,
+  PRIMARY KEY (`OID`),
+  UNIQUE KEY `UK_MD_PASSWORD_RESET_TOKEN` (`TOKEN_HASH`),
+  KEY `IDX_MD_PASSWORD_RESET_TOKEN_ACCOUNT` (`ACCOUNT`),
+  KEY `IDX_MD_PASSWORD_RESET_TOKEN_STATUS` (`USED_FLAG`,`REVOKED_FLAG`,`EXPIRES_TIME`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `md_password_reset_token`
+--
+
+LOCK TABLES `md_password_reset_token` WRITE;
+/*!40000 ALTER TABLE `md_password_reset_token` DISABLE KEYS */;
+/*!40000 ALTER TABLE `md_password_reset_token` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `md_org_unit`
 --
 

@@ -66,6 +66,7 @@ export const useApi = async (url: string, opts: any = {}) => {
                        url.includes('/auth/logout') || 
                        url.includes('/auth/validLogined') || 
                        url.includes('/auth/refreshNewToken') ||
+                       url.includes('/auth/passwordReset/') ||
                        isLoginPage
 
     // If 401 and not excluded and hasn't tried refreshing for this specific error instance

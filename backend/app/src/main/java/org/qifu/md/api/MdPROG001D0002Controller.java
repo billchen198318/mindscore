@@ -127,6 +127,20 @@ public class MdPROG001D0002Controller extends CoreApiSupport {
         return ResponseEntity.ok().body(result);
     }
 
+    @ControllerMethodAuthority(programId = "MD_PROG001D0002U", check = true)
+    @Operation(summary = "MD_PROG001D0002 - sendPasswordResetMail", description = "Send password reset mail")
+    @PostMapping(value = "/sendPasswordResetMail", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<DefaultControllerJsonResultObj<Boolean>> sendPasswordResetMail(@RequestBody MdOrgMember entity) {
+        DefaultControllerJsonResultObj<Boolean> result = this.initDefaultJsonResult();
+        try {
+            DefaultResult<Boolean> mailResult = this.mdOrgMemberLogicService.sendPasswordResetMail(entity);
+            this.setDefaultResponseJsonResult(mailResult, result);
+        } catch (ServiceException | ControllerException e) {
+            this.exceptionResult(result, e);
+        }
+        return ResponseEntity.ok().body(result);
+    }
+
     private void handlerCheck(DefaultControllerJsonResultObj<MdOrgMember> result, MdOrgMember entity) throws ControllerException, ServiceException {
         CheckControllerFieldHandler<MdOrgMember> chk = this.getCheckControllerFieldHandler(result);
         chk.testField("orgOid", PleaseSelect.noSelect(entity.getOrgOid()), "請選擇組織")

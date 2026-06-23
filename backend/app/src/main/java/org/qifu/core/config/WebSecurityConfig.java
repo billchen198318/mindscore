@@ -173,6 +173,7 @@ public class WebSecurityConfig {
     					matcher(CoreAppConstants.API_AUTH_SIGNIN),
     					matcher(CoreAppConstants.API_AUTH_LOGOUT),
     					matcher(CoreAppConstants.API_AUTH_VALID_LOGINED),
+    					matcher("/api/auth/passwordReset/**"),
     					matcher(CoreAppConstants.WEBSERVICE_PATH)
     			) // 需排除 refreshNewToken , 因 refreshNewToken 需要 CSRF 處理
     		)
@@ -184,6 +185,7 @@ public class WebSecurityConfig {
     					matcher(CoreAppConstants.API_AUTH_SIGNIN),
     					matcher(CoreAppConstants.API_AUTH_LOGOUT),
     					matcher(CoreAppConstants.API_AUTH_VALID_LOGINED),
+    					matcher("/api/auth/passwordReset/**"),
     					matcher(CoreAppConstants.API_AUTH_REFRESH_TOKEN)).permitAll();
     			for (String par : CoreAppConstants.getWebConfiginterceptorExcludePathPatterns()) {
     				auth.requestMatchers(matcher(par)).permitAll();
