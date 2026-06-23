@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.qifu.base.exception.ServiceException;
 import org.qifu.base.model.DefaultResult;
+import org.qifu.base.model.ServiceAuthority;
 import org.qifu.base.model.YesNo;
 import org.qifu.md.entity.MdActionItem;
 import org.qifu.md.entity.MdActionOwner;
@@ -37,6 +38,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@ServiceAuthority(check = true)
 @Transactional(propagation = Propagation.REQUIRED, timeout = 300, readOnly = true)
 public class ActionReportLogicServiceImpl implements IActionReportLogicService {
 

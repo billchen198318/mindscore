@@ -13,6 +13,7 @@ import org.qifu.base.exception.ServiceException;
 import org.qifu.base.message.BaseSystemMessage;
 import org.qifu.base.model.DefaultResult;
 import org.qifu.base.model.PleaseSelect;
+import org.qifu.base.model.ServiceAuthority;
 import org.qifu.base.model.ServiceMethodAuthority;
 import org.qifu.base.model.ServiceMethodType;
 import org.qifu.base.model.YesNoKeyProvide;
@@ -38,6 +39,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@ServiceAuthority(check = true)
 @Transactional(propagation = Propagation.REQUIRED, timeout = 300, readOnly = true)
 public class KpiScoreCalculationLogicServiceImpl implements IKpiScoreCalculationLogicService {
 

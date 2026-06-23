@@ -1,5 +1,6 @@
 package org.qifu.md.logic.impl;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -15,6 +16,9 @@ import org.qifu.base.exception.ServiceException;
 import org.qifu.base.model.DefaultResult;
 import org.qifu.base.model.PageOf;
 import org.qifu.base.model.QueryResult;
+import org.qifu.base.model.ServiceAuthority;
+import org.qifu.base.model.ServiceMethodAuthority;
+import org.qifu.base.model.ServiceMethodType;
 import org.qifu.md.entity.MdLlmProviderConfig;
 import org.qifu.md.entity.MdLlmRunLog;
 import org.qifu.md.logic.ILlmProviderConfigLogicService;
@@ -26,9 +30,12 @@ import org.qifu.md.service.IMdLlmRunLogService;
 import org.qifu.util.EncryptorUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@ServiceAuthority(check = true)
+@Transactional(propagation = Propagation.REQUIRED, timeout = 300, readOnly = true)
 public class LlmProviderConfigLogicServiceImpl implements ILlmProviderConfigLogicService {
     private static final String OPENAI = "OPENAI";
     private static final String GEMINI = "GEMINI";
@@ -72,7 +79,11 @@ public class LlmProviderConfigLogicServiceImpl implements ILlmProviderConfigLogi
     }
 
     @Override
-    @Transactional
+    @ServiceMethodAuthority(type = ServiceMethodType.INSERT)
+    @Transactional(
+            propagation = Propagation.REQUIRED,
+            readOnly = false,
+            rollbackFor = {RuntimeException.class, IOException.class, Exception.class})
     public LlmProviderConfigView create(LlmProviderConfigRequest request) throws ServiceException {
         validate(request, true);
         MdLlmProviderConfig entity = new MdLlmProviderConfig();
@@ -83,7 +94,11 @@ public class LlmProviderConfigLogicServiceImpl implements ILlmProviderConfigLogi
     }
 
     @Override
-    @Transactional
+    @ServiceMethodAuthority(type = ServiceMethodType.UPDATE)
+    @Transactional(
+            propagation = Propagation.REQUIRED,
+            readOnly = false,
+            rollbackFor = {RuntimeException.class, IOException.class, Exception.class})
     public LlmProviderConfigView update(LlmProviderConfigRequest request) throws ServiceException {
         validate(request, false);
         MdLlmProviderConfig entity = loadEntity(request.oid());
@@ -99,14 +114,22 @@ public class LlmProviderConfigLogicServiceImpl implements ILlmProviderConfigLogi
     }
 
     @Override
-    @Transactional
+    @ServiceMethodAuthority(type = ServiceMethodType.DELETE)
+    @Transactional(
+            propagation = Propagation.REQUIRED,
+            readOnly = false,
+            rollbackFor = {RuntimeException.class, IOException.class, Exception.class})
     public boolean delete(String oid) throws ServiceException {
         MdLlmProviderConfig entity = loadEntity(oid);
         return Boolean.TRUE.equals(providerService.delete(entity).getValue());
     }
 
     @Override
-    @Transactional
+    @ServiceMethodAuthority(type = {ServiceMethodType.UPDATE, ServiceMethodType.INSERT})
+    @Transactional(
+            propagation = Propagation.REQUIRED,
+            readOnly = false,
+            rollbackFor = {RuntimeException.class, IOException.class, Exception.class})
     public LlmConnectionTestResult testConnection(String oid) throws ServiceException {
         MdLlmProviderConfig provider = loadEntity(oid);
         requireEncryptionKey();

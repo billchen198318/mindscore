@@ -3,6 +3,7 @@ package org.qifu.md.logic.impl;
 import java.io.IOException;
 import java.util.Date;
 import org.qifu.base.exception.ServiceException;
+import org.qifu.base.model.ServiceAuthority;
 import org.qifu.base.model.ServiceMethodAuthority;
 import org.qifu.base.model.ServiceMethodType;
 import org.qifu.base.model.YesNo;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@ServiceAuthority(check = true)
 @Transactional(propagation=Propagation.REQUIRED, timeout=300, readOnly=false)
 public class MdOrgMemberLogicServiceImpl implements IMdOrgMemberLogicService {
 

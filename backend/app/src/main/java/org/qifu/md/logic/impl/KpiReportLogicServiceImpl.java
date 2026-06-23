@@ -11,6 +11,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.qifu.base.exception.ServiceException;
 import org.qifu.base.model.DefaultResult;
+import org.qifu.base.model.ServiceAuthority;
 import org.qifu.base.model.YesNoKeyProvide;
 import org.qifu.md.entity.MdAggregationMethod;
 import org.qifu.md.entity.MdFormula;
@@ -36,6 +37,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@ServiceAuthority(check = true)
 @Transactional(propagation = Propagation.REQUIRED, timeout = 300, readOnly = true)
 public class KpiReportLogicServiceImpl implements IKpiReportLogicService {
 
