@@ -71,6 +71,8 @@ public class WebSecurityConfig {
 	
 	private static final String JASPERREPORT_MATCHER = "/commonOpenJasperReport";
 	
+	private static final String RESET_PASSWD_MATCHER = "/api/auth/passwordReset/**";
+	
     private final BaseUserDetailsService baseUserDetailsService;
     
     private final JwtAuthEntryPoint unauthorizedHandler;    
@@ -173,7 +175,7 @@ public class WebSecurityConfig {
     					matcher(CoreAppConstants.API_AUTH_SIGNIN),
     					matcher(CoreAppConstants.API_AUTH_LOGOUT),
     					matcher(CoreAppConstants.API_AUTH_VALID_LOGINED),
-    					matcher("/api/auth/passwordReset/**"),
+    					matcher(RESET_PASSWD_MATCHER),
     					matcher(CoreAppConstants.WEBSERVICE_PATH)
     			) // 需排除 refreshNewToken , 因 refreshNewToken 需要 CSRF 處理
     		)
@@ -185,7 +187,7 @@ public class WebSecurityConfig {
     					matcher(CoreAppConstants.API_AUTH_SIGNIN),
     					matcher(CoreAppConstants.API_AUTH_LOGOUT),
     					matcher(CoreAppConstants.API_AUTH_VALID_LOGINED),
-    					matcher("/api/auth/passwordReset/**"),
+    					matcher(RESET_PASSWD_MATCHER),
     					matcher(CoreAppConstants.API_AUTH_REFRESH_TOKEN)).permitAll();
     			for (String par : CoreAppConstants.getWebConfiginterceptorExcludePathPatterns()) {
     				auth.requestMatchers(matcher(par)).permitAll();

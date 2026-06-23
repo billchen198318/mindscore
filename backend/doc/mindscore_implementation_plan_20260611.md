@@ -31,6 +31,7 @@ Date: 2026-06-11
 2. Employee / Org Member
 3. Organization tree / member relation query
 4. 基本查詢與維護 API
+5. Member password setup/reset flow: create `md_password_reset_token`, queue setup/reset mail in `tb_sys_mail_helper`, and add the administrator forgot-password action in `md_prog001d0002`.
 
 ### Phase 2. 計算規則建立
 

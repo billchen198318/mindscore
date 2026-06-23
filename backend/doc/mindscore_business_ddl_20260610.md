@@ -23,6 +23,7 @@ Naming rules:
 |---|---|
 | `md_org_unit` | 組織單位，用於 KPI / OKR / Action 歸屬與組織圖 |
 | `md_org_member` | 組織成員，連結 qifu4 account 與組織 |
+| `md_password_reset_token` | Password setup/reset token for org member account initialization |
 | `md_formula` | KPI 計算公式 / 內建公式模板 / 自訂公式 |
 | `md_formula_recommend_rule` | Management mode 對應推薦公式規則 |
 | `md_aggregation_method` | KPI 多筆資料彙總方式 |
@@ -131,6 +132,51 @@ CREATE TABLE `md_org_member` (
 | `EMPLOYEE_ID` | 員工編號 |
 | `EMAIL` | 電子郵件 |
 | `IS_MANAGER` | 組織圖與 owner 篩選使用 |
+
+### 3.3 `md_password_reset_token`
+
+Stores one-time password setup/reset links for MindScore organization members.
+The raw token is sent only by email. The database stores `TOKEN_HASH` so the
+URL token is not persisted in plain text. A token is valid only when it is not
+used, not revoked, and `EXPIRES_TIME` is later than the current time.
+
+```sql
+CREATE TABLE `md_password_reset_token` (
+  `OID` CHAR(36) NOT NULL COMMENT 'Primary key OID',
+  `ACCOUNT` VARCHAR(24) NOT NULL COMMENT 'qifu4 account',
+  `TOKEN_HASH` VARCHAR(64) NOT NULL COMMENT 'SHA-256 token hash',
+  `EXPIRES_TIME` DATETIME NOT NULL COMMENT 'Token expiration time',
+  `USED_FLAG` VARCHAR(1) NOT NULL DEFAULT 'N' COMMENT 'Y/N',
+  `USED_TIME` DATETIME DEFAULT NULL COMMENT 'Used time',
+  `REVOKED_FLAG` VARCHAR(1) NOT NULL DEFAULT 'N' COMMENT 'Y/N',
+  `REVOKED_TIME` DATETIME DEFAULT NULL COMMENT 'Revoked time',
+  `CUSERID` VARCHAR(24) DEFAULT NULL COMMENT 'Created by',
+  `CDATE` DATETIME DEFAULT NULL COMMENT 'Created at',
+  `UUSERID` VARCHAR(24) DEFAULT NULL COMMENT 'Updated by',
+  `UDATE` DATETIME DEFAULT NULL COMMENT 'Updated at',
+  PRIMARY KEY (`OID`),
+  UNIQUE KEY `UK_MD_PASSWORD_RESET_TOKEN` (`TOKEN_HASH`),
+  KEY `IDX_MD_PASSWORD_RESET_TOKEN_ACCOUNT` (`ACCOUNT`),
+  KEY `IDX_MD_PASSWORD_RESET_TOKEN_STATUS` (`USED_FLAG`, `REVOKED_FLAG`, `EXPIRES_TIME`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci
+  COMMENT='MindScore Password Reset Token';
+```
+
+| Field | Description |
+|---|---|
+| `ACCOUNT` | qifu4 `tb_account.ACCOUNT` that owns the reset token |
+| `TOKEN_HASH` | SHA-256 hash of the URL token; the raw token must not be stored |
+| `EXPIRES_TIME` | Token validity boundary; current implementation uses about 1 hour |
+| `USED_FLAG` / `USED_TIME` | Set to `Y` and timestamped after password setup/reset succeeds |
+| `REVOKED_FLAG` / `REVOKED_TIME` | Set to `Y` when a newer reset token is issued for the same account |
+
+Operational rules:
+
+- Creating a member generates a password setup token and queues a mail record in `tb_sys_mail_helper`.
+- Clicking "forgot password" in `md_prog001d0002` generates a new token and queues a mail record in `tb_sys_mail_helper`.
+- Issuing a new token revokes prior active tokens for the same account.
+- Completing password setup/reset marks the token as used instead of deleting it.
+- Reusing an expired, used, revoked, or unknown token must show the invalid-link message and require an administrator to send a new link.
 
 ## 4. Formula And Aggregation Tables
 

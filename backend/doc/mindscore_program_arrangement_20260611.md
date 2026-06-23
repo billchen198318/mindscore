@@ -484,6 +484,15 @@ SetParam: MD_PROG003D0001S01Q
 - `DISPLAY_NAME` 建議可從 qifu4 account 帶入後允許覆寫
 - 同一個 `ORG_OID + ACCOUNT` 必須唯一
 
+Additional member password setup/reset requirements:
+
+- Creating a member should create the qifu4 account and queue a password setup mail through `tb_sys_mail_helper`.
+- The setup/reset URL must include a one-time token stored by hash in `md_password_reset_token`.
+- Token validity is about 1 hour; successful password setup/reset marks the token as used instead of deleting it.
+- Sending a new setup/reset mail revokes prior active tokens for the same account.
+- `md_prog001d0002/index.vue` should provide an administrator forgot-password/send-reset-mail action.
+- `/password-reset?token=...` is the public frontend page opened from the email URL.
+
 ### 9.2 MD_PROG002D - Formula / Aggregation
 
 #### MD_PROG002D0001 - Formula
