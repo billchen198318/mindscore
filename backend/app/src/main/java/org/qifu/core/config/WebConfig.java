@@ -35,6 +35,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 	
+	public static final String RESET_PASSWD_PATH = "/api/auth/passwordReset/**";
+	
 	private static final String[] API_PATH = new String[] { "/api/*", "/api/**" };
 	
 	private static final String EVENT_LOG_PATH = "/api/PROG004D0001/**";
@@ -66,7 +68,9 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(controllerAuthorityCheckInterceptor())
         	.addPathPatterns(API_PATH)
-        	.excludePathPatterns( CoreAppConstants.AUTH_PATH ).excludePathPatterns( EVENT_LOG_PATH );
+        	.excludePathPatterns( CoreAppConstants.AUTH_PATH )
+        	.excludePathPatterns( RESET_PASSWD_PATH )
+        	.excludePathPatterns( EVENT_LOG_PATH );
     }
     
     @Override

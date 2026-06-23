@@ -92,9 +92,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="login-body">
+  <div class="login-body password-reset-page">
     <section class="login-content">
-      <div class="login-box">
+      <div class="login-box password-reset-box">
         <div class="login-form">
           <h3 class="login-head">
             <i class="bi bi-key"></i>
@@ -114,7 +114,7 @@ onMounted(() => {
               <label for="confirmPassword" class="form-label">確認密碼</label>
               <input id="confirmPassword" type="password" class="form-control" v-model="confirmPassword" autocomplete="new-password" @keyup.enter="submitPassword">
             </div>
-            <button type="button" class="btn btn-primary col-12" @click="submitPassword">
+            <button type="button" class="btn btn-primary w-100 password-reset-action" @click="submitPassword">
               <i class="bi bi-check2-circle"></i>
               送出
             </button>
@@ -122,10 +122,49 @@ onMounted(() => {
 
           <div v-else>
             <div :class="['alert', completed ? 'alert-success' : 'alert-warning']">{{ message }}</div>
-            <NuxtLink class="btn btn-outline-primary col-12" to="/login">回登入頁</NuxtLink>
+            <NuxtLink class="btn btn-outline-primary w-100 password-reset-action" to="/login">回登入頁</NuxtLink>
           </div>
         </div>
       </div>
     </section>
   </div>
 </template>
+
+<style scoped>
+.password-reset-page .login-content {
+  padding: 16px;
+}
+
+.password-reset-box {
+  width: min(420px, 100%);
+  min-width: 0;
+  min-height: 0;
+}
+
+.password-reset-box .login-form {
+  position: static;
+  width: 100%;
+  padding: 32px;
+}
+
+.password-reset-box .alert {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.password-reset-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+  white-space: normal;
+}
+
+@media (max-width: 420px) {
+  .password-reset-box .login-form {
+    padding: 24px;
+  }
+}
+</style>

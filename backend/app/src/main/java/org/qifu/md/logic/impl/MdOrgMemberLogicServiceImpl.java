@@ -2,6 +2,7 @@ package org.qifu.md.logic.impl;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.qifu.base.Constants;
 import org.qifu.base.exception.ServiceException;
 import org.qifu.base.message.BaseSystemMessage;
 import org.qifu.base.model.DefaultResult;
@@ -25,6 +27,7 @@ import org.qifu.core.entity.TbUserRole;
 import org.qifu.core.service.IAccountService;
 import org.qifu.core.service.ISysMailHelperService;
 import org.qifu.core.service.IUserRoleService;
+import org.qifu.core.util.SystemSettingConfigureUtils;
 import org.qifu.md.entity.MdOrgMember;
 import org.qifu.md.entity.MdPasswordResetToken;
 import org.qifu.md.logic.IMdOrgMemberLogicService;
@@ -45,7 +48,7 @@ import org.springframework.transaction.annotation.Transactional;
 @ServiceAuthority(check = true)
 @Transactional(propagation = Propagation.REQUIRED, timeout = 300, readOnly = false)
 public class MdOrgMemberLogicServiceImpl implements IMdOrgMemberLogicService {
-    private static final long PASSWORD_RESET_TOKEN_TTL_MILLIS = 60L * 60L * 1000L;
+    private static final long PASSWORD_RESET_TOKEN_TTL_MILLIS = 35L * 60L * 1000L;
     private static final int PASSWORD_RESET_TOKEN_BYTES = 32;
 
     private final IMdOrgMemberService<MdOrgMember, String> mdOrgMemberService;
@@ -254,8 +257,8 @@ public class MdOrgMemberLogicServiceImpl implements IMdOrgMemberLogicService {
         String today = new java.text.SimpleDateFormat("yyyyMMdd").format(new Date());
         mail.setMailId(this.sysMailHelperService.findForMaxMailIdComplete(today));
         mail.setSubject("MindScore password setup");
-        mail.setText(buildPasswordResetMailText(member, tokenValue).getBytes(StandardCharsets.UTF_8));
-        mail.setMailFrom(this.mailFrom);
+        mail.setText(buildPasswordResetMailText(member, tokenValue).getBytes(Charset.forName(Constants.BASE_ENCODING)));
+        mail.setMailFrom(StringUtils.defaultIfBlank(SystemSettingConfigureUtils.getMailDefaultFromValue(), this.mailFrom));
         mail.setMailTo(member.getEmail());
         mail.setSuccessFlag(YesNoKeyProvide.NO);
         mail.setRetainFlag(YesNoKeyProvide.NO);
