@@ -38,12 +38,16 @@ const runStatusHtml = (value: string) => {
 };
 const durationText = (value: any) => value == null ? '-' : `${value} ms`;
 const valueOrDash = (value: any) => value == null || value === '' ? '-' : value;
+const isSearchNoData = (message: any) => String(message || '').toLowerCase().includes('search no data');
 
 const postPage = async (endpoint: string, field: any, showRow = 100) => {
     const response = await getAxiosInstance().post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + endpoint, {
         field, pageOf: { select: 1, showRow }
     });
     if (response.data?.success !== import.meta.env.VITE_SUCCESS_FLAG) {
+        if (isSearchNoData(response.data?.message)) {
+            return [];
+        }
         throw new Error(response.data?.message || 'Query failed');
     }
     return response.data.value || [];
@@ -75,6 +79,9 @@ const queryProviders = async () => {
         });
         if (response.data?.success !== import.meta.env.VITE_SUCCESS_FLAG) {
             clearGridConfig();
+            if (isSearchNoData(response.data?.message)) {
+                return;
+            }
             throw new Error(response.data?.message || 'Query failed');
         }
         dsList.value = response.data.value || [];
@@ -99,6 +106,9 @@ const queryLogs = async () => {
         });
         if (response.data?.success !== import.meta.env.VITE_SUCCESS_FLAG) {
             clearLogGridConfig();
+            if (isSearchNoData(response.data?.message)) {
+                return;
+            }
             throw new Error(response.data?.message || 'Query failed');
         }
         logList.value = response.data.value || [];
