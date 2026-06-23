@@ -224,5 +224,50 @@
     delete from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_org_member
     where OID = #{oid,jdbcType=CHAR}
   </delete>  
+
+  <select id="findBusinessReferenceNamesByAccount" parameterType="java.util.HashMap" resultType="java.lang.String">
+    select 'md_kpi_owner'
+    where exists (
+      select 1 from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_kpi_owner
+      where ACCOUNT = #{account,jdbcType=VARCHAR}
+      limit 1
+    )
+    union all
+    select 'md_kpi_measure_data'
+    where exists (
+      select 1 from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_kpi_measure_data
+      where ACCOUNT = #{account,jdbcType=VARCHAR}
+      limit 1
+    )
+    union all
+    select 'md_kpi_score_snapshot'
+    where exists (
+      select 1 from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_kpi_score_snapshot
+      where ACCOUNT = #{account,jdbcType=VARCHAR}
+      limit 1
+    )
+    union all
+    select 'md_okr_objective_owner'
+    where exists (
+      select 1 from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_okr_objective_owner
+      where ACCOUNT = #{account,jdbcType=VARCHAR}
+      limit 1
+    )
+    union all
+    select 'md_action_owner'
+    where exists (
+      select 1 from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_action_owner
+      where ACCOUNT = #{account,jdbcType=VARCHAR}
+      limit 1
+    )
+    union all
+    select 'md_org_member'
+    where exists (
+      select 1 from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_org_member
+      where ACCOUNT = #{account,jdbcType=VARCHAR}
+        and OID != #{oid,jdbcType=CHAR}
+      limit 1
+    )
+  </select>
   
 </mapper>

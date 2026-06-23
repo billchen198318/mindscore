@@ -1,6 +1,7 @@
 package org.qifu.md.api;
 
 import java.util.List;
+import java.util.Map;
 import org.qifu.base.exception.ControllerException;
 import org.qifu.base.exception.ServiceException;
 import org.qifu.base.model.CheckControllerFieldHandler;
@@ -48,14 +49,16 @@ public class MdPROG001D0002Controller extends CoreApiSupport {
     public ResponseEntity<QueryResult<List<MdOrgMember>>> findPage(@RequestBody SearchBody searchBody) {
         QueryResult<List<MdOrgMember>> result = this.initResult();
         try {
+            Map<String, Object> paramMap = this.queryParameter(searchBody)
+                    .fullEquals("orgOid")
+                    .fullLink("accountLike")
+                    .fullLink("displayNameLike")
+                    .fullLink("employeeIdLike")
+                    .fullLink("emailLike")
+                    .value();
+            paramMap.put("enabled", YesNo.YES);
             QueryResult<List<MdOrgMember>> queryResult = this.mdOrgMemberService.findPage(
-                    this.queryParameter(searchBody)
-                    	.fullEquals("orgOid")
-                    	.fullLink("accountLike")
-                    	.fullLink("displayNameLike")
-                    	.fullLink("employeeIdLike")
-                    	.fullLink("emailLike")
-                    	.value(),
+                    paramMap,
                     searchBody.getPageOf().orderBy("ORG_OID").sortTypeAsc());
             this.setQueryResponseJsonResult(queryResult, result, searchBody.getPageOf());
         } catch (ServiceException | ControllerException e) {
@@ -116,11 +119,8 @@ public class MdPROG001D0002Controller extends CoreApiSupport {
     public ResponseEntity<DefaultControllerJsonResultObj<Boolean>> doDelete(@RequestBody MdOrgMember entity) {
         DefaultControllerJsonResultObj<Boolean> result = this.initDefaultJsonResult();
         try {
-        	throw new ServiceException("太多角表改了,之後再補");        	
-        	/*
-            DefaultResult<Boolean> delResult = this.mdOrgMemberService.delete(entity);
+            DefaultResult<Boolean> delResult = this.mdOrgMemberLogicService.deleteMemberWithAccount(entity);
             this.setDefaultResponseJsonResult(delResult, result);
-            */
         } catch (ServiceException | ControllerException e) {
             this.exceptionResult(result, e);
         }
