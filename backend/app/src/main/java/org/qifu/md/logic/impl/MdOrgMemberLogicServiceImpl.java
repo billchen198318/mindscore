@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.qifu.base.Constants;
 import org.qifu.base.exception.ServiceException;
 import org.qifu.base.message.BaseSystemMessage;
@@ -158,7 +159,7 @@ public class MdOrgMemberLogicServiceImpl implements IMdOrgMemberLogicService {
         if (request == null || StringUtils.isBlank(request.getPassword()) || StringUtils.isBlank(request.getConfirmPassword())) {
             throw new ServiceException(BaseSystemMessage.parameterBlank());
         }
-        if (!StringUtils.equals(request.getPassword(), request.getConfirmPassword())) {
+        if (!Strings.CS.equals(request.getPassword(), request.getConfirmPassword())) {
             throw new ServiceException("Password and confirm password do not match.");
         }
         if (request.getPassword().length() < 8) {
@@ -297,7 +298,7 @@ public class MdOrgMemberLogicServiceImpl implements IMdOrgMemberLogicService {
     }
 
     private String buildPasswordResetMailText(MdOrgMember member, String tokenValue) {
-        String resetUrl = StringUtils.removeEnd(this.passwordResetFrontendBaseUrl, "/")
+        String resetUrl = Strings.CS.removeEnd(this.passwordResetFrontendBaseUrl, "/")
                 + "/password-reset?token="
                 + URLEncoder.encode(tokenValue, StandardCharsets.UTF_8);
         String displayName = StringUtils.defaultIfBlank(member.getDisplayName(), member.getAccount());
