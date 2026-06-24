@@ -81,6 +81,7 @@ const defaultForm = () => ({
 const formParam = ref<any>(defaultForm());
 
 const selectedKpi = () => kpiList.value.find((item: any) => item.oid === formParam.value.kpiOid) || null;
+const selectedKpiAllowsAllPeriods = () => selectedKpi()?.periodType === 'ALL';
 const kpiName = (oid: string) => {
     const item = kpiList.value.find((kpi: any) => kpi.oid === oid);
     return item ? item.kpiCode + ' - ' + item.kpiName : oid;
@@ -341,7 +342,7 @@ const btnClear = () => {
     const kpi = kpiList.value[0];
     if (kpi) {
         formParam.value.kpiOid = kpi.oid;
-        formParam.value.periodType = kpi.periodType || 'MONTH';
+        formParam.value.periodType = kpi.periodType === 'ALL' ? 'MONTH' : (kpi.periodType || 'MONTH');
     }
     syncPeriodKey();
 };
@@ -554,7 +555,11 @@ const delItem = async (oid: string) => {
 watch(() => formParam.value.kpiOid, () => {
     const kpi = selectedKpi();
     if (kpi) {
-        formParam.value.periodType = kpi.periodType || formParam.value.periodType;
+        if (kpi.periodType !== 'ALL') {
+            formParam.value.periodType = kpi.periodType || formParam.value.periodType;
+        } else if (!periodTypeOptions.some(item => item.value === formParam.value.periodType)) {
+            formParam.value.periodType = 'MONTH';
+        }
         formParam.value.targetValue = formParam.value.targetValue ?? kpi.targetValue;
         formParam.value.minValue = formParam.value.minValue ?? kpi.minValue;
         formParam.value.maxValue = formParam.value.maxValue ?? kpi.maxValue;
@@ -630,7 +635,7 @@ onMounted(async () => {
       </div>
       <div class="col-md-2">
         <label for="periodType" class="form-label">Period Type</label>
-        <select :class="['form-select', checkInvalid('periodType', checkFields) ? 'is-invalid' : '']" id="periodType" v-model="formParam.periodType">
+        <select :class="['form-select', checkInvalid('periodType', checkFields) ? 'is-invalid' : '']" id="periodType" v-model="formParam.periodType" :disabled="!selectedKpiAllowsAllPeriods()">
           <option v-for="item in periodTypeOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
         </select>
         <div v-if="checkInvalid('periodType', checkFields)" class="invalid-feedback">{{ invalidFeedback('periodType', checkFields) }}</div>

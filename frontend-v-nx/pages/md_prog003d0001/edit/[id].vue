@@ -18,7 +18,7 @@ import {
 import {
     managementModeOptions,
     compareModeOptions,
-    periodTypeOptions,
+    kpiPeriodTypeOptions,
     dataTypeOptions,
     scoreCapModeOptions,
     formulaSelectionModeOptions,
@@ -56,7 +56,7 @@ const formParam = ref<any>({
     description : '',
     unitName : '',
     dataType : 'NUMBER',
-    periodType : 'MONTH',
+    periodType : 'ALL',
     managementMode : 'BIGGER',
     compareMode : 'TARGET',
     minValue : null,
@@ -394,7 +394,7 @@ watch(
       <div class="col-md-3">
         <label for="periodType" class="form-label">週期</label>
         <select :class="['form-select', checkInvalid('periodType', checkFields) ? 'is-invalid' : '']" id="periodType" v-model="formParam.periodType">
-          <option v-for="item in periodTypeOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+          <option v-for="item in kpiPeriodTypeOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
         </select>
         <div v-if="checkInvalid('periodType', checkFields)" class="invalid-feedback">{{ invalidFeedback('periodType', checkFields) }}</div>
       </div>

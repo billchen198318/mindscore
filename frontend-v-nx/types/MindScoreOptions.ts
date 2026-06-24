@@ -27,6 +27,11 @@ export const periodTypeOptions: OptionItem[] = [
     { value: 'YEAR', label: '年' }
 ];
 
+export const kpiPeriodTypeOptions: OptionItem[] = [
+    { value: 'ALL', label: '所有週期' },
+    ...periodTypeOptions
+];
+
 export const dataTypeOptions: OptionItem[] = [
     { value: 'NUMBER', label: '數值' },
     { value: 'PERCENT', label: '百分比' },

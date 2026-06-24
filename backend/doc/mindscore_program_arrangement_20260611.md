@@ -639,6 +639,7 @@ Additional member password setup/reset requirements:
 
 - `MANAGEMENT_MODE` 改變時要同步影響 `COMPARE_MODE`、`QUASI_RANGE`、推薦公式
 - `FORMULA_SELECTION_MODE` 要能區分 auto / manual override / custom
+- `PERIOD_TYPE` 預設為 `ALL`。`ALL` 表示 KPI 可接受 DAY/WEEK/MONTH/QUARTER/HALFYEAR/YEAR 任一量測週期；指定實際週期時，量測資料必須使用相同週期。
 - KPI 刪除前需檢查 measure data / score snapshot / report reference
 
 ### 9.4 MD_PROG004D - KPI Measure / Score
@@ -676,6 +677,8 @@ Additional member password setup/reset requirements:
 關鍵調整點：
 
 - `PERIOD_KEY` 必須依 `PERIOD_TYPE` 自動生成
+- KPI 主檔為 `ALL` 時，輸入者可選擇實際 `PERIOD_TYPE`；KPI 主檔指定週期時，畫面鎖定該週期，後端也必須驗證一致。
+- Measure data 與 score snapshot 不得使用 `ALL`。`ALL` 只屬於 KPI 主檔的允許週期設定。
 - `DATA_FOR_TYPE` 要支援 GLOBAL / ACCOUNT / ORG
 - 若資料已被計分使用，建議透過 `LOCKED` 控制是否可改
 

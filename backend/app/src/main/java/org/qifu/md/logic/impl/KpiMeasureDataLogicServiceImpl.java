@@ -66,6 +66,7 @@ public class KpiMeasureDataLogicServiceImpl implements IKpiMeasureDataLogicServi
     public static final String PERIOD_QUARTER = "QUARTER";
     public static final String PERIOD_HALFYEAR = "HALFYEAR";
     public static final String PERIOD_YEAR = "YEAR";
+    public static final String KPI_PERIOD_ALL = "ALL";
 
     private static final int MAX_IMPORT_ROWS = 1000;
     private static final List<String> IMPORT_HEADERS = List.of(
@@ -303,7 +304,8 @@ public class KpiMeasureDataLogicServiceImpl implements IKpiMeasureDataLogicServi
             row.getErrors().add("KPI code does not exist or is disabled.");
         } else {
             row.setKpiName(kpi.getKpiName());
-            if (!Strings.CS.equals(kpi.getPeriodType(), row.getPeriodType())) {
+            if (!KPI_PERIOD_ALL.equals(kpi.getPeriodType())
+                    && !Strings.CS.equals(kpi.getPeriodType(), row.getPeriodType())) {
                 row.getErrors().add("period_type must match the KPI period type: " + kpi.getPeriodType() + ".");
             }
         }
@@ -470,6 +472,7 @@ public class KpiMeasureDataLogicServiceImpl implements IKpiMeasureDataLogicServi
 
     private MdKpiMeasureData normalizeForSave(MdKpiMeasureData entity) throws ServiceException {
         MdKpiMeasureData normalized = normalizeKey(entity);
+        validateKpiPeriodType(normalized);
         normalized.setOid(entity.getOid());
         normalized.setMeasureDate(toMeasureDate(normalized.getPeriodType(), normalized.getPeriodKey()));
         normalized.setTargetValue(entity.getTargetValue());
@@ -483,6 +486,21 @@ public class KpiMeasureDataLogicServiceImpl implements IKpiMeasureDataLogicServi
         return normalized;
     }
 
+    private void validateKpiPeriodType(MdKpiMeasureData entity) throws ServiceException {
+        if (!isValidPeriodKey(entity.getPeriodType(), entity.getPeriodKey())) {
+            throw new ServiceException("Invalid period key for period type: " + entity.getPeriodType() + ".");
+        }
+        MdKpi key = new MdKpi();
+        key.setOid(entity.getKpiOid());
+        MdKpi kpi = this.mdKpiService.selectByEntityPrimaryKey(key).getValueEmptyThrowMessage();
+        if (!YesNoKeyProvide.YES.equals(kpi.getEnabled())) {
+            throw new ServiceException("KPI is disabled.");
+        }
+        if (!KPI_PERIOD_ALL.equals(kpi.getPeriodType())
+                && !Strings.CS.equals(kpi.getPeriodType(), entity.getPeriodType())) {
+            throw new ServiceException("Period type must match the KPI period type: " + kpi.getPeriodType() + ".");
+        }
+    }
     private java.util.Date toMeasureDate(String periodType, String periodKey) throws ServiceException {
         try {
             LocalDate date;

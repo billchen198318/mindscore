@@ -4,6 +4,9 @@ MindScore 是一套整合 KPI、OKR、Strategy / BSC、Action / PDCA 與管理�
 
 系統以可信任的結構化資料與確定性計算為核心，先建立組織、指標、目標、策略與行動的管理流程，再逐步延伸到 Insight / LLM 輔助分析與建議。
 
+<img src="https://raw.githubusercontent.com/billchen198318/mindscore/main/backend/doc/0003.png">
+<br>
+
 ## 系統定位
 
 MindScore 用來協助組織回答幾個關鍵問題：

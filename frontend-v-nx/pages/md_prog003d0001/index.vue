@@ -21,7 +21,7 @@ import { useSwalLoading } from '@/composables/useSwalLoading';
 import {
     managementModeOptions,
     compareModeOptions,
-    periodTypeOptions,
+    kpiPeriodTypeOptions,
     dataTypeOptions,
     formulaSelectionModeOptions,
     withAllOption,
@@ -42,7 +42,7 @@ const formulaMap = ref<Record<string, string>>({});
 const aggrMap = ref<Record<string, string>>({});
 
 const dataTypeQueryOptions = withAllOption(dataTypeOptions);
-const periodTypeQueryOptions = withAllOption(periodTypeOptions);
+const periodTypeQueryOptions = withAllOption(kpiPeriodTypeOptions);
 const managementModeQueryOptions = withAllOption(managementModeOptions);
 const compareModeQueryOptions = withAllOption(compareModeOptions);
 const formulaSelectionModeQueryOptions = withAllOption(formulaSelectionModeOptions);
@@ -178,7 +178,7 @@ const btnQuery = async () => {
             dsList.value = response.data.value.map((item: any) => ({
                 ...item,
                 dataTypeName : optionName(dataTypeOptions, item.dataType),
-                periodTypeName : optionName(periodTypeOptions, item.periodType),
+                periodTypeName : optionName(kpiPeriodTypeOptions, item.periodType),
                 managementModeName : optionName(managementModeOptions, item.managementMode),
                 compareModeName : optionName(compareModeOptions, item.compareMode),
                 formulaSelectionModeName : optionName(formulaSelectionModeOptions, item.formulaSelectionMode),
