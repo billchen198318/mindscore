@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.qifu.md.mapper.MdPerformanceSignalMapper">
+  <resultMap id="BaseResultMap" type="org.qifu.md.entity.MdPerformanceSignal">
+    <id column="OID" property="oid" />
+    <result column="SIGNAL_TYPE" property="signalType" />
+    <result column="SOURCE_TYPE" property="sourceType" />
+    <result column="SOURCE_OID" property="sourceOid" />
+    <result column="SOURCE_CODE" property="sourceCode" />
+    <result column="SOURCE_NAME" property="sourceName" />
+    <result column="PERIOD_TYPE" property="periodType" />
+    <result column="PERIOD_KEY" property="periodKey" />
+    <result column="START_DATE" property="startDate" />
+    <result column="END_DATE" property="endDate" />
+    <result column="OWNER_ACCOUNT" property="ownerAccount" />
+    <result column="ORG_OID" property="orgOid" />
+    <result column="SCORE_VALUE" property="scoreValue" />
+    <result column="TARGET_VALUE" property="targetValue" />
+    <result column="ACTUAL_VALUE" property="actualValue" />
+    <result column="VARIANCE_VALUE" property="varianceValue" />
+    <result column="VARIANCE_RATE" property="varianceRate" />
+    <result column="TREND_CODE" property="trendCode" />
+    <result column="STATUS_CODE" property="statusCode" />
+    <result column="RISK_LEVEL" property="riskLevel" />
+    <result column="SIGNAL_STATUS" property="signalStatus" />
+    <result column="RELATED_OBJECTIVE_OID" property="relatedObjectiveOid" />
+    <result column="RELATED_ACTION_OID" property="relatedActionOid" />
+    <result column="SNAPSHOT_OID" property="snapshotOid" />
+    <result column="EVIDENCE_JSON" property="evidenceJson" />
+    <result column="EXPLANATION_INPUT" property="explanationInput" />
+    <result column="GENERATOR_VERSION" property="generatorVersion" />
+    <result column="GENERATED_AT" property="generatedAt" />
+    <result column="RESOLVED_AT" property="resolvedAt" />
+    <result column="CUSERID" property="cuserid" />
+    <result column="CDATE" property="cdate" />
+    <result column="UUSERID" property="uuserid" />
+    <result column="UDATE" property="udate" />
+  </resultMap>
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select * from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_performance_signal where OID=#{oid}
+  </select>
+
+  <sql id="conditions">
+    <if test="oid != null and oid != ''">AND OID=#{oid}</if>
+    <if test="signalType != null and signalType != ''">AND SIGNAL_TYPE=#{signalType}</if>
+    <if test="sourceType != null and sourceType != ''">AND SOURCE_TYPE=#{sourceType}</if>
+    <if test="sourceOid != null and sourceOid != ''">AND SOURCE_OID=#{sourceOid}</if>
+    <if test="sourceCodeLike != null and sourceCodeLike != ''">AND SOURCE_CODE LIKE #{sourceCodeLike}</if>
+    <if test="sourceNameLike != null and sourceNameLike != ''">AND SOURCE_NAME LIKE #{sourceNameLike}</if>
+    <if test="periodType != null and periodType != ''">AND PERIOD_TYPE=#{periodType}</if>
+    <if test="periodKey != null and periodKey != ''">AND PERIOD_KEY=#{periodKey}</if>
+    <if test="ownerAccount != null and ownerAccount != ''">AND OWNER_ACCOUNT=#{ownerAccount}</if>
+    <if test="orgOid != null and orgOid != ''">AND ORG_OID=#{orgOid}</if>
+    <if test="statusCode != null and statusCode != ''">AND STATUS_CODE=#{statusCode}</if>
+    <if test="riskLevel != null and riskLevel != ''">AND RISK_LEVEL=#{riskLevel}</if>
+    <if test="signalStatus != null and signalStatus != ''">AND SIGNAL_STATUS=#{signalStatus}</if>
+    <if test="snapshotOid != null and snapshotOid != ''">AND SNAPSHOT_OID=#{snapshotOid}</if>
+  </sql>
+
+  <select id="selectListByParams" parameterType="java.util.HashMap" resultMap="BaseResultMap">
+    select * from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_performance_signal where 1=1
+    <include refid="conditions"/>
+    <if test="orderBy != null and orderBy != ''">ORDER BY ${orderBy} ${sortType}</if>
+  </select>
+
+  <select id="findPage" parameterType="java.util.HashMap" resultMap="BaseResultMap">
+    <include refid="org.qifu.core.mapper.DB1Config.sql1"/>
+    select * from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_performance_signal where 1=1
+    <include refid="conditions"/>
+    <include refid="org.qifu.core.mapper.DB1Config.sql2"/>
+  </select>
+
+  <select id="count" parameterType="java.util.HashMap" resultType="java.lang.Long">
+    select count(*) from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_performance_signal where 1=1
+    <include refid="conditions"/>
+  </select>
+
+  <insert id="insert" parameterType="org.qifu.md.entity.MdPerformanceSignal">
+    insert into <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_performance_signal
+    (OID,SIGNAL_TYPE,SOURCE_TYPE,SOURCE_OID,SOURCE_CODE,SOURCE_NAME,PERIOD_TYPE,PERIOD_KEY,START_DATE,END_DATE,
+     OWNER_ACCOUNT,ORG_OID,SCORE_VALUE,TARGET_VALUE,ACTUAL_VALUE,VARIANCE_VALUE,VARIANCE_RATE,TREND_CODE,
+     STATUS_CODE,RISK_LEVEL,SIGNAL_STATUS,RELATED_OBJECTIVE_OID,RELATED_ACTION_OID,SNAPSHOT_OID,EVIDENCE_JSON,
+     EXPLANATION_INPUT,GENERATOR_VERSION,GENERATED_AT,RESOLVED_AT,CUSERID,CDATE,UUSERID,UDATE)
+    values
+    (#{oid},#{signalType},#{sourceType},#{sourceOid},#{sourceCode},#{sourceName},#{periodType},#{periodKey},#{startDate},#{endDate},
+     #{ownerAccount},#{orgOid},#{scoreValue},#{targetValue},#{actualValue},#{varianceValue},#{varianceRate},#{trendCode},
+     #{statusCode},#{riskLevel},#{signalStatus},#{relatedObjectiveOid},#{relatedActionOid},#{snapshotOid},#{evidenceJson},
+     #{explanationInput},#{generatorVersion},#{generatedAt},#{resolvedAt},#{cuserid},#{cdate},#{uuserid},#{udate})
+  </insert>
+
+  <update id="update" parameterType="org.qifu.md.entity.MdPerformanceSignal">
+    update <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_performance_signal set
+      SIGNAL_TYPE=#{signalType}, SOURCE_TYPE=#{sourceType}, SOURCE_OID=#{sourceOid}, SOURCE_CODE=#{sourceCode},
+      SOURCE_NAME=#{sourceName}, PERIOD_TYPE=#{periodType}, PERIOD_KEY=#{periodKey}, START_DATE=#{startDate}, END_DATE=#{endDate},
+      OWNER_ACCOUNT=#{ownerAccount}, ORG_OID=#{orgOid}, SCORE_VALUE=#{scoreValue}, TARGET_VALUE=#{targetValue},
+      ACTUAL_VALUE=#{actualValue}, VARIANCE_VALUE=#{varianceValue}, VARIANCE_RATE=#{varianceRate}, TREND_CODE=#{trendCode},
+      STATUS_CODE=#{statusCode}, RISK_LEVEL=#{riskLevel}, SIGNAL_STATUS=#{signalStatus},
+      RELATED_OBJECTIVE_OID=#{relatedObjectiveOid}, RELATED_ACTION_OID=#{relatedActionOid}, SNAPSHOT_OID=#{snapshotOid},
+      EVIDENCE_JSON=#{evidenceJson}, EXPLANATION_INPUT=#{explanationInput}, GENERATOR_VERSION=#{generatorVersion},
+      GENERATED_AT=#{generatedAt}, RESOLVED_AT=#{resolvedAt}, UUSERID=#{uuserid}, UDATE=#{udate}
+    where OID=#{oid}
+  </update>
+
+  <delete id="delete" parameterType="org.qifu.md.entity.MdPerformanceSignal">
+    delete from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_performance_signal where OID=#{oid}
+  </delete>
+</mapper>

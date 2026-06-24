@@ -47,7 +47,7 @@ Naming rules:
 | `md_action_item` | Action item，可對應 Plan / Do / Check / Act |
 | `md_action_owner` | Action owner |
 | `md_action_source_link` | Action 與 KPI / OKR / Strategy / Insight 的來源關聯 |
-
+| `md_performance_signal` | 標準化 KPI / OKR / Strategy / Action 的績效異常與風險 Signal |
 | `md_llm_provider_config` | OpenAI / Gemini provider, model and encrypted API key configuration |
 | `md_llm_run_log` | LLM connection test and invocation audit log |
 
@@ -67,6 +67,10 @@ Recommended code values:
 | `ACTION_STAGE` | `PLAN`, `DO`, `CHECK`, `ACT` | Action 階段 |
 | `SOURCE_TYPE` | `KPI`, `OKR_OBJECTIVE`, `OKR_KR`, `STRATEGY`, `ACTION`, `INSIGHT` | 來源物件類型 |
 | `STATUS` | `DRAFT`, `ACTIVE`, `CLOSED`, `ARCHIVED` | 通用狀態 |
+| `SIGNAL_TYPE` | `SCORE_STATUS`, `TARGET_VARIANCE`, `TREND_DOWN`, `STALE`, `OVERDUE` | Signal 類型 |
+| `RISK_LEVEL` | `LOW`, `MEDIUM`, `HIGH`, `CRITICAL` | Signal 風險等級 |
+| `SIGNAL_STATUS` | `OPEN`, `RESOLVED` | Signal 生命週期狀態 |
+| `TREND_CODE` | `UP`, `STABLE`, `DOWN`, `UNKNOWN` | 趨勢方向 |
 
 ## 3. Organization Tables
 
@@ -842,7 +846,75 @@ Do not add a report snapshot table before the operational query/report requireme
 
 ## 9. Insight / LLM Tables
 
-### 9.1 `md_llm_provider_config`
+### 9.1 `md_performance_signal`
+
+Stores deterministic, normalized performance signals generated from official KPI,
+OKR, Strategy and Action results. Signal generation must use backend domain data
+and snapshots; LLM must not decide the official status or risk level.
+
+The unique key keeps one current signal for the same source, signal type and period.
+When an abnormal condition returns to normal, update `SIGNAL_STATUS` to `RESOLVED`
+and set `RESOLVED_AT` instead of deleting the historical signal.
+
+```sql
+CREATE TABLE `md_performance_signal` (
+  `OID` CHAR(36) NOT NULL COMMENT '主鍵 OID',
+  `SIGNAL_TYPE` VARCHAR(32) NOT NULL COMMENT 'SCORE_STATUS/TARGET_VARIANCE/TREND_DOWN/STALE/OVERDUE 等',
+  `SOURCE_TYPE` VARCHAR(32) NOT NULL COMMENT 'KPI/OKR/STRATEGY/ACTION',
+  `SOURCE_OID` CHAR(36) NOT NULL COMMENT '來源業務資料 OID',
+  `SOURCE_CODE` VARCHAR(64) DEFAULT NULL COMMENT '來源代碼',
+  `SOURCE_NAME` VARCHAR(200) DEFAULT NULL COMMENT '來源名稱',
+  `PERIOD_TYPE` VARCHAR(32) NOT NULL COMMENT 'DAY/WEEK/MONTH/QUARTER/HALFYEAR/YEAR',
+  `PERIOD_KEY` VARCHAR(32) NOT NULL COMMENT '期間鍵',
+  `START_DATE` DATE NOT NULL COMMENT '期間開始日',
+  `END_DATE` DATE NOT NULL COMMENT '期間結束日',
+  `OWNER_ACCOUNT` VARCHAR(24) DEFAULT NULL COMMENT '負責人帳號',
+  `ORG_OID` CHAR(36) DEFAULT NULL COMMENT '組織 OID',
+  `SCORE_VALUE` DECIMAL(18,4) DEFAULT NULL COMMENT '標準化分數或進度',
+  `TARGET_VALUE` DECIMAL(24,6) DEFAULT NULL COMMENT '目標值',
+  `ACTUAL_VALUE` DECIMAL(24,6) DEFAULT NULL COMMENT '實際值',
+  `VARIANCE_VALUE` DECIMAL(24,6) DEFAULT NULL COMMENT '差異值',
+  `VARIANCE_RATE` DECIMAL(18,4) DEFAULT NULL COMMENT '差異率',
+  `TREND_CODE` VARCHAR(32) DEFAULT NULL COMMENT 'UP/STABLE/DOWN/UNKNOWN',
+  `STATUS_CODE` VARCHAR(32) NOT NULL COMMENT '來源狀態或標準化狀態',
+  `RISK_LEVEL` VARCHAR(32) NOT NULL DEFAULT 'LOW' COMMENT 'LOW/MEDIUM/HIGH/CRITICAL',
+  `SIGNAL_STATUS` VARCHAR(32) NOT NULL DEFAULT 'OPEN' COMMENT 'OPEN/RESOLVED',
+  `RELATED_OBJECTIVE_OID` CHAR(36) DEFAULT NULL COMMENT '關聯 Objective OID',
+  `RELATED_ACTION_OID` CHAR(36) DEFAULT NULL COMMENT '關聯 Action Plan/Item OID',
+  `SNAPSHOT_OID` CHAR(36) DEFAULT NULL COMMENT '來源 Snapshot OID',
+  `EVIDENCE_JSON` MEDIUMTEXT DEFAULT NULL COMMENT '標準化證據 JSON',
+  `EXPLANATION_INPUT` MEDIUMTEXT DEFAULT NULL COMMENT '供規則或 LLM 解釋的輸入文字',
+  `GENERATOR_VERSION` VARCHAR(32) DEFAULT NULL COMMENT 'Signal generator 版本',
+  `GENERATED_AT` DATETIME NOT NULL COMMENT '產生時間',
+  `RESOLVED_AT` DATETIME DEFAULT NULL COMMENT '解除時間',
+  `CUSERID` VARCHAR(24) NOT NULL COMMENT '建立者',
+  `CDATE` DATETIME NOT NULL COMMENT '建立時間',
+  `UUSERID` VARCHAR(24) DEFAULT NULL COMMENT '更新者',
+  `UDATE` DATETIME DEFAULT NULL COMMENT '更新時間',
+  PRIMARY KEY (`OID`),
+  UNIQUE KEY `UK_MD_PERFORMANCE_SIGNAL` (`SOURCE_TYPE`, `SOURCE_OID`, `SIGNAL_TYPE`, `PERIOD_TYPE`, `PERIOD_KEY`),
+  KEY `IDX_MD_SIGNAL_SOURCE` (`SOURCE_TYPE`, `SOURCE_OID`),
+  KEY `IDX_MD_SIGNAL_PERIOD` (`PERIOD_TYPE`, `PERIOD_KEY`),
+  KEY `IDX_MD_SIGNAL_RISK` (`RISK_LEVEL`, `SIGNAL_STATUS`, `STATUS_CODE`),
+  KEY `IDX_MD_SIGNAL_OWNER` (`OWNER_ACCOUNT`),
+  KEY `IDX_MD_SIGNAL_ORG` (`ORG_OID`),
+  KEY `IDX_MD_SIGNAL_SNAPSHOT` (`SNAPSHOT_OID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci
+  COMMENT='MindScore 標準化績效 Signal';
+```
+
+Recommended generation sources:
+
+- KPI: `md_kpi_score_snapshot`
+- OKR: `md_okr_snapshot`
+- Strategy: `md_strategy_snapshot`
+- Action: `md_action_item` and Action / PDCA report status
+
+`EVIDENCE_JSON` should retain objective facts used by the deterministic rule engine
+and later LLM explanation, such as score, target, actual, prior score, calculation
+status and snapshot time. It must not contain API keys or unrestricted sensitive data.
+
+### 9.2 `md_llm_provider_config`
 
 Stores backend-managed OpenAI and Gemini provider settings. `API_KEY_ENCRYPTED`
 contains an AES-GCM encrypted value; the encryption key is supplied through
@@ -877,7 +949,7 @@ CREATE TABLE `md_llm_provider_config` (
   COMMENT='MindScore LLM Provider Config';
 ```
 
-### 9.2 `md_llm_run_log`
+### 9.3 `md_llm_run_log`
 
 Stores connection tests and later LLM invocation metadata. The initial version
 does not store full prompt or output content, reducing exposure of KPI, OKR,

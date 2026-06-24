@@ -979,6 +979,66 @@ INSERT INTO `md_org_unit` VALUES
 UNLOCK TABLES;
 
 --
+-- Table structure for table `md_performance_signal`
+--
+
+DROP TABLE IF EXISTS `md_performance_signal`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `md_performance_signal` (
+  `OID` char(36) NOT NULL COMMENT '主鍵 OID',
+  `SIGNAL_TYPE` varchar(32) NOT NULL COMMENT 'SCORE_STATUS/TARGET_VARIANCE/TREND_DOWN/STALE/OVERDUE 等',
+  `SOURCE_TYPE` varchar(32) NOT NULL COMMENT 'KPI/OKR/STRATEGY/ACTION',
+  `SOURCE_OID` char(36) NOT NULL COMMENT '來源業務資料 OID',
+  `SOURCE_CODE` varchar(64) DEFAULT NULL COMMENT '來源代碼',
+  `SOURCE_NAME` varchar(200) DEFAULT NULL COMMENT '來源名稱',
+  `PERIOD_TYPE` varchar(32) NOT NULL COMMENT 'DAY/WEEK/MONTH/QUARTER/HALFYEAR/YEAR',
+  `PERIOD_KEY` varchar(32) NOT NULL COMMENT '期間鍵',
+  `START_DATE` date NOT NULL COMMENT '期間開始日',
+  `END_DATE` date NOT NULL COMMENT '期間結束日',
+  `OWNER_ACCOUNT` varchar(24) DEFAULT NULL COMMENT '負責人帳號',
+  `ORG_OID` char(36) DEFAULT NULL COMMENT '組織 OID',
+  `SCORE_VALUE` decimal(18,4) DEFAULT NULL COMMENT '標準化分數或進度',
+  `TARGET_VALUE` decimal(24,6) DEFAULT NULL COMMENT '目標值',
+  `ACTUAL_VALUE` decimal(24,6) DEFAULT NULL COMMENT '實際值',
+  `VARIANCE_VALUE` decimal(24,6) DEFAULT NULL COMMENT '差異值',
+  `VARIANCE_RATE` decimal(18,4) DEFAULT NULL COMMENT '差異率',
+  `TREND_CODE` varchar(32) DEFAULT NULL COMMENT 'UP/STABLE/DOWN/UNKNOWN',
+  `STATUS_CODE` varchar(32) NOT NULL COMMENT '來源狀態或標準化狀態',
+  `RISK_LEVEL` varchar(32) NOT NULL DEFAULT 'LOW' COMMENT 'LOW/MEDIUM/HIGH/CRITICAL',
+  `SIGNAL_STATUS` varchar(32) NOT NULL DEFAULT 'OPEN' COMMENT 'OPEN/RESOLVED',
+  `RELATED_OBJECTIVE_OID` char(36) DEFAULT NULL COMMENT '關聯 Objective OID',
+  `RELATED_ACTION_OID` char(36) DEFAULT NULL COMMENT '關聯 Action Plan/Item OID',
+  `SNAPSHOT_OID` char(36) DEFAULT NULL COMMENT '來源 Snapshot OID',
+  `EVIDENCE_JSON` mediumtext DEFAULT NULL COMMENT '標準化證據 JSON',
+  `EXPLANATION_INPUT` mediumtext DEFAULT NULL COMMENT '供規則或 LLM 解釋的輸入文字',
+  `GENERATOR_VERSION` varchar(32) DEFAULT NULL COMMENT 'Signal generator 版本',
+  `GENERATED_AT` datetime NOT NULL COMMENT '產生時間',
+  `RESOLVED_AT` datetime DEFAULT NULL COMMENT '解除時間',
+  `CUSERID` varchar(24) NOT NULL COMMENT '建立者',
+  `CDATE` datetime NOT NULL COMMENT '建立時間',
+  `UUSERID` varchar(24) DEFAULT NULL COMMENT '更新者',
+  `UDATE` datetime DEFAULT NULL COMMENT '更新時間',
+  PRIMARY KEY (`OID`),
+  UNIQUE KEY `UK_MD_PERFORMANCE_SIGNAL` (`SOURCE_TYPE`,`SOURCE_OID`,`SIGNAL_TYPE`,`PERIOD_TYPE`,`PERIOD_KEY`),
+  KEY `IDX_MD_SIGNAL_SOURCE` (`SOURCE_TYPE`,`SOURCE_OID`),
+  KEY `IDX_MD_SIGNAL_PERIOD` (`PERIOD_TYPE`,`PERIOD_KEY`),
+  KEY `IDX_MD_SIGNAL_RISK` (`RISK_LEVEL`,`SIGNAL_STATUS`,`STATUS_CODE`),
+  KEY `IDX_MD_SIGNAL_OWNER` (`OWNER_ACCOUNT`),
+  KEY `IDX_MD_SIGNAL_ORG` (`ORG_OID`),
+  KEY `IDX_MD_SIGNAL_SNAPSHOT` (`SNAPSHOT_OID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci COMMENT='MindScore 標準化績效 Signal';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `md_performance_signal`
+--
+
+LOCK TABLES `md_performance_signal` WRITE;
+/*!40000 ALTER TABLE `md_performance_signal` DISABLE KEYS */;
+/*!40000 ALTER TABLE `md_performance_signal` ENABLE KEYS */;
+UNLOCK TABLES;
+--
 -- Table structure for table `md_strategy_objective`
 --
 
