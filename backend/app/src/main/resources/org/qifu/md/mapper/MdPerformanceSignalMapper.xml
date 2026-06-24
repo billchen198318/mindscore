@@ -1,108 +1,242 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.qifu.md.mapper.MdPerformanceSignalMapper">
+
   <resultMap id="BaseResultMap" type="org.qifu.md.entity.MdPerformanceSignal">
-    <id column="OID" property="oid" />
-    <result column="SIGNAL_TYPE" property="signalType" />
-    <result column="SOURCE_TYPE" property="sourceType" />
-    <result column="SOURCE_OID" property="sourceOid" />
-    <result column="SOURCE_CODE" property="sourceCode" />
-    <result column="SOURCE_NAME" property="sourceName" />
-    <result column="PERIOD_TYPE" property="periodType" />
-    <result column="PERIOD_KEY" property="periodKey" />
-    <result column="START_DATE" property="startDate" />
-    <result column="END_DATE" property="endDate" />
-    <result column="OWNER_ACCOUNT" property="ownerAccount" />
-    <result column="ORG_OID" property="orgOid" />
-    <result column="SCORE_VALUE" property="scoreValue" />
-    <result column="TARGET_VALUE" property="targetValue" />
-    <result column="ACTUAL_VALUE" property="actualValue" />
-    <result column="VARIANCE_VALUE" property="varianceValue" />
-    <result column="VARIANCE_RATE" property="varianceRate" />
-    <result column="TREND_CODE" property="trendCode" />
-    <result column="STATUS_CODE" property="statusCode" />
-    <result column="RISK_LEVEL" property="riskLevel" />
-    <result column="SIGNAL_STATUS" property="signalStatus" />
-    <result column="RELATED_OBJECTIVE_OID" property="relatedObjectiveOid" />
-    <result column="RELATED_ACTION_OID" property="relatedActionOid" />
-    <result column="SNAPSHOT_OID" property="snapshotOid" />
-    <result column="EVIDENCE_JSON" property="evidenceJson" />
-    <result column="EXPLANATION_INPUT" property="explanationInput" />
-    <result column="GENERATOR_VERSION" property="generatorVersion" />
-    <result column="GENERATED_AT" property="generatedAt" />
-    <result column="RESOLVED_AT" property="resolvedAt" />
-    <result column="CUSERID" property="cuserid" />
-    <result column="CDATE" property="cdate" />
-    <result column="UUSERID" property="uuserid" />
-    <result column="UDATE" property="udate" />
+    <id column="OID" jdbcType="CHAR" property="oid" />
+    <result column="SIGNAL_TYPE" jdbcType="VARCHAR" property="signalType" />
+    <result column="SOURCE_TYPE" jdbcType="VARCHAR" property="sourceType" />
+    <result column="SOURCE_OID" jdbcType="CHAR" property="sourceOid" />
+    <result column="SOURCE_CODE" jdbcType="VARCHAR" property="sourceCode" />
+    <result column="SOURCE_NAME" jdbcType="VARCHAR" property="sourceName" />
+    <result column="PERIOD_TYPE" jdbcType="VARCHAR" property="periodType" />
+    <result column="PERIOD_KEY" jdbcType="VARCHAR" property="periodKey" />
+    <result column="START_DATE" jdbcType="DATE" property="startDate" />
+    <result column="END_DATE" jdbcType="DATE" property="endDate" />
+    <result column="OWNER_ACCOUNT" jdbcType="VARCHAR" property="ownerAccount" />
+    <result column="ORG_OID" jdbcType="CHAR" property="orgOid" />
+    <result column="SCORE_VALUE" jdbcType="DECIMAL" property="scoreValue" />
+    <result column="TARGET_VALUE" jdbcType="DECIMAL" property="targetValue" />
+    <result column="ACTUAL_VALUE" jdbcType="DECIMAL" property="actualValue" />
+    <result column="VARIANCE_VALUE" jdbcType="DECIMAL" property="varianceValue" />
+    <result column="VARIANCE_RATE" jdbcType="DECIMAL" property="varianceRate" />
+    <result column="TREND_CODE" jdbcType="VARCHAR" property="trendCode" />
+    <result column="STATUS_CODE" jdbcType="VARCHAR" property="statusCode" />
+    <result column="RISK_LEVEL" jdbcType="VARCHAR" property="riskLevel" />
+    <result column="SIGNAL_STATUS" jdbcType="VARCHAR" property="signalStatus" />
+    <result column="RELATED_OBJECTIVE_OID" jdbcType="CHAR" property="relatedObjectiveOid" />
+    <result column="RELATED_ACTION_OID" jdbcType="CHAR" property="relatedActionOid" />
+    <result column="SNAPSHOT_OID" jdbcType="CHAR" property="snapshotOid" />
+    <result column="EVIDENCE_JSON" jdbcType="LONGVARCHAR" property="evidenceJson" />
+    <result column="EXPLANATION_INPUT" jdbcType="LONGVARCHAR" property="explanationInput" />
+    <result column="GENERATOR_VERSION" jdbcType="VARCHAR" property="generatorVersion" />
+    <result column="GENERATED_AT" jdbcType="TIMESTAMP" property="generatedAt" />
+    <result column="RESOLVED_AT" jdbcType="TIMESTAMP" property="resolvedAt" />
+    <result column="CUSERID" jdbcType="VARCHAR" property="cuserid" />
+    <result column="CDATE" jdbcType="TIMESTAMP" property="cdate" />
+    <result column="UUSERID" jdbcType="VARCHAR" property="uuserid" />
+    <result column="UDATE" jdbcType="TIMESTAMP" property="udate" />
   </resultMap>
 
   <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
-    select * from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_performance_signal where OID=#{oid}
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_performance_signal
+    where OID = #{oid,jdbcType=CHAR}
   </select>
 
-  <sql id="conditions">
-    <if test="oid != null and oid != ''">AND OID=#{oid}</if>
-    <if test="signalType != null and signalType != ''">AND SIGNAL_TYPE=#{signalType}</if>
-    <if test="sourceType != null and sourceType != ''">AND SOURCE_TYPE=#{sourceType}</if>
-    <if test="sourceOid != null and sourceOid != ''">AND SOURCE_OID=#{sourceOid}</if>
-    <if test="sourceCodeLike != null and sourceCodeLike != ''">AND SOURCE_CODE LIKE #{sourceCodeLike}</if>
-    <if test="sourceNameLike != null and sourceNameLike != ''">AND SOURCE_NAME LIKE #{sourceNameLike}</if>
-    <if test="periodType != null and periodType != ''">AND PERIOD_TYPE=#{periodType}</if>
-    <if test="periodKey != null and periodKey != ''">AND PERIOD_KEY=#{periodKey}</if>
-    <if test="ownerAccount != null and ownerAccount != ''">AND OWNER_ACCOUNT=#{ownerAccount}</if>
-    <if test="orgOid != null and orgOid != ''">AND ORG_OID=#{orgOid}</if>
-    <if test="statusCode != null and statusCode != ''">AND STATUS_CODE=#{statusCode}</if>
-    <if test="riskLevel != null and riskLevel != ''">AND RISK_LEVEL=#{riskLevel}</if>
-    <if test="signalStatus != null and signalStatus != ''">AND SIGNAL_STATUS=#{signalStatus}</if>
-    <if test="snapshotOid != null and snapshotOid != ''">AND SNAPSHOT_OID=#{snapshotOid}</if>
+  <sql id="baseConditions">
+    <if test="oid != null and oid != ''.toString()">
+      AND OID = #{oid,jdbcType=CHAR}
+    </if>
+    <if test="signalType != null and signalType != ''.toString()">
+      AND SIGNAL_TYPE = #{signalType,jdbcType=VARCHAR}
+    </if>
+    <if test="sourceType != null and sourceType != ''.toString()">
+      AND SOURCE_TYPE = #{sourceType,jdbcType=VARCHAR}
+    </if>
+    <if test="sourceOid != null and sourceOid != ''.toString()">
+      AND SOURCE_OID = #{sourceOid,jdbcType=CHAR}
+    </if>
+    <if test="sourceCodeLike != null and sourceCodeLike != ''.toString()">
+      AND SOURCE_CODE LIKE #{sourceCodeLike,jdbcType=VARCHAR}
+    </if>
+    <if test="sourceNameLike != null and sourceNameLike != ''.toString()">
+      AND SOURCE_NAME LIKE #{sourceNameLike,jdbcType=VARCHAR}
+    </if>
+    <if test="periodType != null and periodType != ''.toString()">
+      AND PERIOD_TYPE = #{periodType,jdbcType=VARCHAR}
+    </if>
+    <if test="periodKey != null and periodKey != ''.toString()">
+      AND PERIOD_KEY = #{periodKey,jdbcType=VARCHAR}
+    </if>
+    <if test="ownerAccount != null and ownerAccount != ''.toString()">
+      AND OWNER_ACCOUNT = #{ownerAccount,jdbcType=VARCHAR}
+    </if>
+    <if test="orgOid != null and orgOid != ''.toString()">
+      AND ORG_OID = #{orgOid,jdbcType=CHAR}
+    </if>
+    <if test="statusCode != null and statusCode != ''.toString()">
+      AND STATUS_CODE = #{statusCode,jdbcType=VARCHAR}
+    </if>
+    <if test="riskLevel != null and riskLevel != ''.toString()">
+      AND RISK_LEVEL = #{riskLevel,jdbcType=VARCHAR}
+    </if>
+    <if test="signalStatus != null and signalStatus != ''.toString()">
+      AND SIGNAL_STATUS = #{signalStatus,jdbcType=VARCHAR}
+    </if>
+    <if test="snapshotOid != null and snapshotOid != ''.toString()">
+      AND SNAPSHOT_OID = #{snapshotOid,jdbcType=CHAR}
+    </if>
   </sql>
 
   <select id="selectListByParams" parameterType="java.util.HashMap" resultMap="BaseResultMap">
-    select * from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_performance_signal where 1=1
-    <include refid="conditions"/>
-    <if test="orderBy != null and orderBy != ''">ORDER BY ${orderBy} ${sortType}</if>
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_performance_signal
+    where 1=1
+    <include refid="baseConditions" />
+    <if test="orderBy != null and orderBy != ''.toString() and sortType != null and sortType != ''.toString()">
+      ORDER BY ${orderBy} ${sortType}
+    </if>
   </select>
 
   <select id="findPage" parameterType="java.util.HashMap" resultMap="BaseResultMap">
     <include refid="org.qifu.core.mapper.DB1Config.sql1"/>
-    select * from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_performance_signal where 1=1
-    <include refid="conditions"/>
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_performance_signal
+    where 1=1
+    <include refid="baseConditions" />
     <include refid="org.qifu.core.mapper.DB1Config.sql2"/>
   </select>
 
   <select id="count" parameterType="java.util.HashMap" resultType="java.lang.Long">
-    select count(*) from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_performance_signal where 1=1
-    <include refid="conditions"/>
+    select count(*)
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_performance_signal
+    where 1=1
+    <include refid="baseConditions" />
   </select>
 
   <insert id="insert" parameterType="org.qifu.md.entity.MdPerformanceSignal">
     insert into <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_performance_signal
-    (OID,SIGNAL_TYPE,SOURCE_TYPE,SOURCE_OID,SOURCE_CODE,SOURCE_NAME,PERIOD_TYPE,PERIOD_KEY,START_DATE,END_DATE,
-     OWNER_ACCOUNT,ORG_OID,SCORE_VALUE,TARGET_VALUE,ACTUAL_VALUE,VARIANCE_VALUE,VARIANCE_RATE,TREND_CODE,
-     STATUS_CODE,RISK_LEVEL,SIGNAL_STATUS,RELATED_OBJECTIVE_OID,RELATED_ACTION_OID,SNAPSHOT_OID,EVIDENCE_JSON,
-     EXPLANATION_INPUT,GENERATOR_VERSION,GENERATED_AT,RESOLVED_AT,CUSERID,CDATE,UUSERID,UDATE)
-    values
-    (#{oid},#{signalType},#{sourceType},#{sourceOid},#{sourceCode},#{sourceName},#{periodType},#{periodKey},#{startDate},#{endDate},
-     #{ownerAccount},#{orgOid},#{scoreValue},#{targetValue},#{actualValue},#{varianceValue},#{varianceRate},#{trendCode},
-     #{statusCode},#{riskLevel},#{signalStatus},#{relatedObjectiveOid},#{relatedActionOid},#{snapshotOid},#{evidenceJson},
-     #{explanationInput},#{generatorVersion},#{generatedAt},#{resolvedAt},#{cuserid},#{cdate},#{uuserid},#{udate})
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="oid != null">OID,</if>
+      <if test="signalType != null">SIGNAL_TYPE,</if>
+      <if test="sourceType != null">SOURCE_TYPE,</if>
+      <if test="sourceOid != null">SOURCE_OID,</if>
+      <if test="sourceCode != null">SOURCE_CODE,</if>
+      <if test="sourceName != null">SOURCE_NAME,</if>
+      <if test="periodType != null">PERIOD_TYPE,</if>
+      <if test="periodKey != null">PERIOD_KEY,</if>
+      <if test="startDate != null">START_DATE,</if>
+      <if test="endDate != null">END_DATE,</if>
+      <if test="ownerAccount != null">OWNER_ACCOUNT,</if>
+      <if test="orgOid != null">ORG_OID,</if>
+      <if test="scoreValue != null">SCORE_VALUE,</if>
+      <if test="targetValue != null">TARGET_VALUE,</if>
+      <if test="actualValue != null">ACTUAL_VALUE,</if>
+      <if test="varianceValue != null">VARIANCE_VALUE,</if>
+      <if test="varianceRate != null">VARIANCE_RATE,</if>
+      <if test="trendCode != null">TREND_CODE,</if>
+      <if test="statusCode != null">STATUS_CODE,</if>
+      <if test="riskLevel != null">RISK_LEVEL,</if>
+      <if test="signalStatus != null">SIGNAL_STATUS,</if>
+      <if test="relatedObjectiveOid != null">RELATED_OBJECTIVE_OID,</if>
+      <if test="relatedActionOid != null">RELATED_ACTION_OID,</if>
+      <if test="snapshotOid != null">SNAPSHOT_OID,</if>
+      <if test="evidenceJson != null">EVIDENCE_JSON,</if>
+      <if test="explanationInput != null">EXPLANATION_INPUT,</if>
+      <if test="generatorVersion != null">GENERATOR_VERSION,</if>
+      <if test="generatedAt != null">GENERATED_AT,</if>
+      <if test="resolvedAt != null">RESOLVED_AT,</if>
+      <if test="cuserid != null">CUSERID,</if>
+      <if test="cdate != null">CDATE,</if>
+      <if test="uuserid != null">UUSERID,</if>
+      <if test="udate != null">UDATE,</if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="oid != null">#{oid,jdbcType=CHAR},</if>
+      <if test="signalType != null">#{signalType,jdbcType=VARCHAR},</if>
+      <if test="sourceType != null">#{sourceType,jdbcType=VARCHAR},</if>
+      <if test="sourceOid != null">#{sourceOid,jdbcType=CHAR},</if>
+      <if test="sourceCode != null">#{sourceCode,jdbcType=VARCHAR},</if>
+      <if test="sourceName != null">#{sourceName,jdbcType=VARCHAR},</if>
+      <if test="periodType != null">#{periodType,jdbcType=VARCHAR},</if>
+      <if test="periodKey != null">#{periodKey,jdbcType=VARCHAR},</if>
+      <if test="startDate != null">#{startDate,jdbcType=DATE},</if>
+      <if test="endDate != null">#{endDate,jdbcType=DATE},</if>
+      <if test="ownerAccount != null">#{ownerAccount,jdbcType=VARCHAR},</if>
+      <if test="orgOid != null">#{orgOid,jdbcType=CHAR},</if>
+      <if test="scoreValue != null">#{scoreValue,jdbcType=DECIMAL},</if>
+      <if test="targetValue != null">#{targetValue,jdbcType=DECIMAL},</if>
+      <if test="actualValue != null">#{actualValue,jdbcType=DECIMAL},</if>
+      <if test="varianceValue != null">#{varianceValue,jdbcType=DECIMAL},</if>
+      <if test="varianceRate != null">#{varianceRate,jdbcType=DECIMAL},</if>
+      <if test="trendCode != null">#{trendCode,jdbcType=VARCHAR},</if>
+      <if test="statusCode != null">#{statusCode,jdbcType=VARCHAR},</if>
+      <if test="riskLevel != null">#{riskLevel,jdbcType=VARCHAR},</if>
+      <if test="signalStatus != null">#{signalStatus,jdbcType=VARCHAR},</if>
+      <if test="relatedObjectiveOid != null">#{relatedObjectiveOid,jdbcType=CHAR},</if>
+      <if test="relatedActionOid != null">#{relatedActionOid,jdbcType=CHAR},</if>
+      <if test="snapshotOid != null">#{snapshotOid,jdbcType=CHAR},</if>
+      <if test="evidenceJson != null">#{evidenceJson,jdbcType=LONGVARCHAR},</if>
+      <if test="explanationInput != null">#{explanationInput,jdbcType=LONGVARCHAR},</if>
+      <if test="generatorVersion != null">#{generatorVersion,jdbcType=VARCHAR},</if>
+      <if test="generatedAt != null">#{generatedAt,jdbcType=TIMESTAMP},</if>
+      <if test="resolvedAt != null">#{resolvedAt,jdbcType=TIMESTAMP},</if>
+      <if test="cuserid != null">#{cuserid,jdbcType=VARCHAR},</if>
+      <if test="cdate != null">#{cdate,jdbcType=TIMESTAMP},</if>
+      <if test="uuserid != null">#{uuserid,jdbcType=VARCHAR},</if>
+      <if test="udate != null">#{udate,jdbcType=TIMESTAMP},</if>
+    </trim>
   </insert>
 
   <update id="update" parameterType="org.qifu.md.entity.MdPerformanceSignal">
-    update <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_performance_signal set
-      SIGNAL_TYPE=#{signalType}, SOURCE_TYPE=#{sourceType}, SOURCE_OID=#{sourceOid}, SOURCE_CODE=#{sourceCode},
-      SOURCE_NAME=#{sourceName}, PERIOD_TYPE=#{periodType}, PERIOD_KEY=#{periodKey}, START_DATE=#{startDate}, END_DATE=#{endDate},
-      OWNER_ACCOUNT=#{ownerAccount}, ORG_OID=#{orgOid}, SCORE_VALUE=#{scoreValue}, TARGET_VALUE=#{targetValue},
-      ACTUAL_VALUE=#{actualValue}, VARIANCE_VALUE=#{varianceValue}, VARIANCE_RATE=#{varianceRate}, TREND_CODE=#{trendCode},
-      STATUS_CODE=#{statusCode}, RISK_LEVEL=#{riskLevel}, SIGNAL_STATUS=#{signalStatus},
-      RELATED_OBJECTIVE_OID=#{relatedObjectiveOid}, RELATED_ACTION_OID=#{relatedActionOid}, SNAPSHOT_OID=#{snapshotOid},
-      EVIDENCE_JSON=#{evidenceJson}, EXPLANATION_INPUT=#{explanationInput}, GENERATOR_VERSION=#{generatorVersion},
-      GENERATED_AT=#{generatedAt}, RESOLVED_AT=#{resolvedAt}, UUSERID=#{uuserid}, UDATE=#{udate}
-    where OID=#{oid}
+    update <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_performance_signal
+    <set>
+      <if test="signalType != null">SIGNAL_TYPE = #{signalType,jdbcType=VARCHAR},</if>
+      <if test="sourceType != null">SOURCE_TYPE = #{sourceType,jdbcType=VARCHAR},</if>
+      <if test="sourceOid != null">SOURCE_OID = #{sourceOid,jdbcType=CHAR},</if>
+      <if test="sourceCode != null">SOURCE_CODE = #{sourceCode,jdbcType=VARCHAR},</if>
+      <if test="sourceName != null">SOURCE_NAME = #{sourceName,jdbcType=VARCHAR},</if>
+      <if test="periodType != null">PERIOD_TYPE = #{periodType,jdbcType=VARCHAR},</if>
+      <if test="periodKey != null">PERIOD_KEY = #{periodKey,jdbcType=VARCHAR},</if>
+      <if test="startDate != null">START_DATE = #{startDate,jdbcType=DATE},</if>
+      <if test="endDate != null">END_DATE = #{endDate,jdbcType=DATE},</if>
+      <if test="ownerAccount != null">OWNER_ACCOUNT = #{ownerAccount,jdbcType=VARCHAR},</if>
+      <if test="orgOid != null">ORG_OID = #{orgOid,jdbcType=CHAR},</if>
+      <if test="scoreValue != null">SCORE_VALUE = #{scoreValue,jdbcType=DECIMAL},</if>
+      <if test="targetValue != null">TARGET_VALUE = #{targetValue,jdbcType=DECIMAL},</if>
+      <if test="actualValue != null">ACTUAL_VALUE = #{actualValue,jdbcType=DECIMAL},</if>
+      <if test="varianceValue != null">VARIANCE_VALUE = #{varianceValue,jdbcType=DECIMAL},</if>
+      <if test="varianceRate != null">VARIANCE_RATE = #{varianceRate,jdbcType=DECIMAL},</if>
+      <if test="trendCode != null">TREND_CODE = #{trendCode,jdbcType=VARCHAR},</if>
+      <if test="statusCode != null">STATUS_CODE = #{statusCode,jdbcType=VARCHAR},</if>
+      <if test="riskLevel != null">RISK_LEVEL = #{riskLevel,jdbcType=VARCHAR},</if>
+      <if test="signalStatus != null">SIGNAL_STATUS = #{signalStatus,jdbcType=VARCHAR},</if>
+      <if test="resolvedAt != null">RESOLVED_AT = #{resolvedAt,jdbcType=TIMESTAMP},</if>
+      <if test="relatedObjectiveOid != null">RELATED_OBJECTIVE_OID = #{relatedObjectiveOid,jdbcType=CHAR},</if>
+      <if test="relatedActionOid != null">RELATED_ACTION_OID = #{relatedActionOid,jdbcType=CHAR},</if>
+      <if test="snapshotOid != null">SNAPSHOT_OID = #{snapshotOid,jdbcType=CHAR},</if>
+      <if test="evidenceJson != null">EVIDENCE_JSON = #{evidenceJson,jdbcType=LONGVARCHAR},</if>
+      <if test="explanationInput != null">EXPLANATION_INPUT = #{explanationInput,jdbcType=LONGVARCHAR},</if>
+      <if test="generatorVersion != null">GENERATOR_VERSION = #{generatorVersion,jdbcType=VARCHAR},</if>
+      <if test="generatedAt != null">GENERATED_AT = #{generatedAt,jdbcType=TIMESTAMP},</if>
+      <if test="uuserid != null">UUSERID = #{uuserid,jdbcType=VARCHAR},</if>
+      <if test="udate != null">UDATE = #{udate,jdbcType=TIMESTAMP},</if>
+    </set>
+    where OID = #{oid,jdbcType=CHAR}
   </update>
 
+  <update id="reopenSignal" parameterType="org.qifu.md.entity.MdPerformanceSignal">
+    update <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_performance_signal
+    set SIGNAL_STATUS = 'OPEN',
+        RESOLVED_AT = NULL
+        <if test="uuserid != null">, UUSERID = #{uuserid,jdbcType=VARCHAR}</if>
+        <if test="udate != null">, UDATE = #{udate,jdbcType=TIMESTAMP}</if>
+    where OID = #{oid,jdbcType=CHAR}
+  </update>
   <delete id="delete" parameterType="org.qifu.md.entity.MdPerformanceSignal">
-    delete from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_performance_signal where OID=#{oid}
+    delete from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_performance_signal
+    where OID = #{oid,jdbcType=CHAR}
   </delete>
+
 </mapper>

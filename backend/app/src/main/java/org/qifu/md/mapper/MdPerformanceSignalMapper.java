@@ -6,4 +6,5 @@ import org.qifu.md.entity.MdPerformanceSignal;
 
 @Mapper
 public interface MdPerformanceSignalMapper extends IBaseMapper<MdPerformanceSignal, String> {
+    int reopenSignal(MdPerformanceSignal entity);
 }
