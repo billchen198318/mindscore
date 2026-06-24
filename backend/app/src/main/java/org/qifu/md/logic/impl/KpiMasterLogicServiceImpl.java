@@ -53,7 +53,9 @@ public class KpiMasterLogicServiceImpl implements IKpiMasterLogicService {
         DefaultResult<MdKpi> kpiResult = this.mdKpiService.insert(kpi);
         MdKpi savedKpi = kpiResult.getValueEmptyThrowMessage();
         rebuildOwners(savedKpi.getOid(), request.getOwnerList());
-        return load(savedKpi);
+        DefaultResult<KpiMasterRequest> result = load(savedKpi);
+        result.setMessage(BaseSystemMessage.insertSuccess());
+        return result;
     }
 
     @Override
@@ -91,7 +93,9 @@ public class KpiMasterLogicServiceImpl implements IKpiMasterLogicService {
         }
         this.mdKpiService.update(kpi).getValueEmptyThrowMessage();
         rebuildOwners(kpi.getOid(), request.getOwnerList());
-        return load(kpi);
+        DefaultResult<KpiMasterRequest> result = load(kpi);
+        result.setMessage(BaseSystemMessage.updateSuccess());
+        return result;
     }
 
     @ServiceMethodAuthority(type = ServiceMethodType.DELETE)
