@@ -3,9 +3,7 @@ package org.qifu.md.logic.impl;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.time.temporal.WeekFields;
 import java.util.ArrayList;
@@ -18,6 +16,7 @@ import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.qifu.base.exception.ServiceException;
 import org.qifu.base.model.DefaultResult;
 import org.qifu.base.model.ServiceAuthority;
@@ -278,7 +277,7 @@ public class PerformanceSignalLogicServiceImpl implements IPerformanceSignalLogi
         List<MdKpiScoreSnapshot> list = snapshotService.selectListByParams(params, "PERIOD_KEY", "ASC").getValue();
         MdKpiScoreSnapshot previous = null;
         for (MdKpiScoreSnapshot item : safeList(list)) {
-            if (StringUtils.equals(item.getOid(), current.getOid())) return previous;
+            if (Strings.CS.equals(item.getOid(), current.getOid())) return previous;
             if (StringUtils.defaultString(item.getPeriodKey()).compareTo(StringUtils.defaultString(current.getPeriodKey())) < 0) previous = item;
         }
         return previous;
