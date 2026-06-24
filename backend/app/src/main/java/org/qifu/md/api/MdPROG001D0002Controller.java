@@ -15,6 +15,7 @@ import org.qifu.base.model.YesNo;
 import org.qifu.core.util.CoreApiSupport;
 import org.qifu.md.entity.MdOrgMember;
 import org.qifu.md.logic.IMdOrgMemberLogicService;
+import org.qifu.md.model.DirectPasswordChangeRequest;
 import org.qifu.md.service.IMdOrgMemberService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -141,6 +142,21 @@ public class MdPROG001D0002Controller extends CoreApiSupport {
         return ResponseEntity.ok().body(result);
     }
 
+    @ControllerMethodAuthority(programId = "MD_PROG001D0002U", check = true)
+    @Operation(summary = "MD_PROG001D0002 - changePassword", description = "Change member password directly")
+    @PostMapping(value = "/changePassword", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<DefaultControllerJsonResultObj<Boolean>> changePassword(
+            @RequestBody DirectPasswordChangeRequest request) {
+        DefaultControllerJsonResultObj<Boolean> result = this.initDefaultJsonResult();
+        try {
+            DefaultResult<Boolean> updateResult = this.mdOrgMemberLogicService.changePasswordDirectly(request);
+            this.setDefaultResponseJsonResult(updateResult, result);
+        } catch (ServiceException | ControllerException e) {
+            this.exceptionResult(result, e);
+        }
+        return ResponseEntity.ok().body(result);
+    }
+    
     private void handlerCheck(DefaultControllerJsonResultObj<MdOrgMember> result, MdOrgMember entity) throws ControllerException, ServiceException {
         CheckControllerFieldHandler<MdOrgMember> chk = this.getCheckControllerFieldHandler(result);
         chk.testField("orgOid", PleaseSelect.noSelect(entity.getOrgOid()), "請選擇組織")

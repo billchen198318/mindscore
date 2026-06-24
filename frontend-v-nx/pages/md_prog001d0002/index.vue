@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
@@ -21,12 +21,18 @@ import { useSwalLoading } from '@/composables/useSwalLoading';
 definePageMeta({ middleware: ['auth'] });
 
 const router = useRouter();
+const nuxtApp = useNuxtApp();
 const queryPageStore = useMdProg001d0002Store();
 const { showLoading, hideLoading, confirmFire } = useSwalLoading();
 
 const pageProgramId = ref(PageConstants.QueryId);
 const dsList = ref<any[]>([]);
 const qFieldShow = ref(true);
+const passwordChangeOid = ref('');
+const passwordChangeAccount = ref('');
+const newPassword = ref('');
+const confirmPassword = ref('');
+let passwordModal: any = null;
 
 const tbRefresh = () => btnClear();
 const tbCreate = () => router.push(PageConstants.frontendNamespace + '/create');
@@ -86,6 +92,15 @@ const initQueryGridConfig = () => {
 				'type'    : 'password-reset',
 				'memo'    : 'Send password reset mail.',
 				'class'	  : 'btn btn-warning btn-sm'
+			},
+			{
+				'method'  : (val: any) => {
+					openPasswordDialog(val);
+				},
+				'icon'    : 'key',
+				'type'    : 'password-change',
+				'memo'    : 'Change password directly.',
+				'class'	  : 'btn btn-secondary btn-sm'
 			}     
 		],
 		[
@@ -181,6 +196,64 @@ const sendPasswordResetMail = async (oid: string) => {
 	}
 };
 
+const clearPasswordDialog = () => {
+	passwordChangeOid.value = '';
+	passwordChangeAccount.value = '';
+	newPassword.value = '';
+	confirmPassword.value = '';
+};
+
+const openPasswordDialog = (oid: string) => {
+	clearPasswordDialog();
+	const member = dsList.value.find(item => item.oid === oid);
+	if (!member) {
+		toast.warning('找不到成員資料');
+		return;
+	}
+	passwordChangeOid.value = oid;
+	passwordChangeAccount.value = member.account;
+	passwordModal?.show();
+};
+
+const changePassword = async () => {
+	if (!newPassword.value || !confirmPassword.value) {
+		toast.warning('請輸入新密碼及確認密碼');
+		return;
+	}
+	if (newPassword.value.length < 8) {
+		toast.warning('密碼長度至少需要 8 個字元');
+		return;
+	}
+	if (newPassword.value !== confirmPassword.value) {
+		toast.warning('密碼確認不一致');
+		return;
+	}
+	showLoading();
+	try {
+		const axiosInstance = getAxiosInstance();
+		const response = await axiosInstance.post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/changePassword', {
+			oid: passwordChangeOid.value,
+			password: newPassword.value,
+			confirmPassword: confirmPassword.value
+		});
+		hideLoading();
+		if (!response.data) {
+			toast.error('error, null');
+			return;
+		}
+		if (import.meta.env.VITE_SUCCESS_FLAG !== response.data.success) {
+			toast.warning(response.data.message);
+			return;
+		}
+		passwordModal?.hide();
+		clearPasswordDialog();
+		toast.success(response.data.message);
+	} catch (e: any) {
+		hideLoading();
+		alert(e);
+	}
+};
+
 onMounted(() => {
 	const newGridConfig = initQueryGridConfig();
 	if (queryPageStore.gridConfig.column) {
@@ -191,6 +264,17 @@ onMounted(() => {
 	if (queryPageStore.gridConfig.total > 0) {
 		btnQuery();
 	}
+
+	const modalElement = document.getElementById('passwordChangeModal');
+	if (modalElement && nuxtApp.$bootstrap) {
+		passwordModal = new nuxtApp.$bootstrap.Modal(modalElement);
+		modalElement.addEventListener('hidden.bs.modal', clearPasswordDialog);
+	}
+});
+
+onBeforeUnmount(() => {
+	passwordModal?.dispose();
+	passwordModal = null;
 });
 </script>
 
@@ -253,5 +337,35 @@ onMounted(() => {
         />
         <Grid :progId="pageProgramId" :dataSource="dsList" :config="queryPageStore.gridConfig" />
     </div>
+</div>
+
+<div class="modal fade" id="passwordChangeModal" tabindex="-1" aria-labelledby="passwordChangeModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="passwordChangeModalLabel">直接變更密碼</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="passwordChangeAccount" class="form-label">帳號</label>
+          <input id="passwordChangeAccount" type="text" class="form-control" :value="passwordChangeAccount" disabled>
+        </div>
+        <div class="mb-3">
+          <label for="newPassword" class="form-label">新密碼</label>
+          <input id="newPassword" type="password" class="form-control" v-model="newPassword" autocomplete="new-password">
+          <div class="form-text">密碼長度至少 8 個字元。</div>
+        </div>
+        <div>
+          <label for="confirmPassword" class="form-label">確認密碼</label>
+          <input id="confirmPassword" type="password" class="form-control" v-model="confirmPassword" autocomplete="new-password" @keyup.enter="changePassword">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary" @click="changePassword">確定變更</button>
+      </div>
+    </div>
+  </div>
 </div>
 </template>

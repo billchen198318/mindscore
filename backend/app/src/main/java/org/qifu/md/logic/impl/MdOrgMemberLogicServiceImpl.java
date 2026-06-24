@@ -34,6 +34,7 @@ import org.qifu.md.entity.MdPasswordResetToken;
 import org.qifu.md.logic.IMdOrgMemberLogicService;
 import org.qifu.md.mapper.MdOrgMemberMapper;
 import org.qifu.md.mapper.MdPasswordResetTokenMapper;
+import org.qifu.md.model.DirectPasswordChangeRequest;
 import org.qifu.md.model.PasswordResetRequest;
 import org.qifu.md.model.PasswordResetTokenStatus;
 import org.qifu.md.service.IMdOrgMemberService;
@@ -133,6 +134,39 @@ public class MdOrgMemberLogicServiceImpl implements IMdOrgMemberLogicService {
         return result;
     }
 
+    @ServiceMethodAuthority(type = {ServiceMethodType.UPDATE})
+    @Transactional(
+            propagation = Propagation.REQUIRED,
+            readOnly = false,
+            rollbackFor = {RuntimeException.class, IOException.class, Exception.class})
+    @Override
+    public DefaultResult<Boolean> changePasswordDirectly(DirectPasswordChangeRequest request) throws ServiceException {
+        if (request == null || StringUtils.isBlank(request.getOid())
+                || StringUtils.isBlank(request.getPassword())
+                || StringUtils.isBlank(request.getConfirmPassword())) {
+            throw new ServiceException(BaseSystemMessage.parameterBlank());
+        }
+        validateNewPassword(request.getPassword(), request.getConfirmPassword());
+
+        MdOrgMember memberKey = new MdOrgMember();
+        memberKey.setOid(request.getOid());
+        MdOrgMember member = loadEnabledMember(memberKey);
+
+        TbAccount account = new TbAccount();
+        account.setAccount(member.getAccount());
+        account = this.accountService.selectByUniqueKey(account).getValueEmptyThrowMessage();
+        account.setPassword(this.passwordEncoder.encode(request.getPassword()));
+        this.accountService.update(account).getValueEmptyThrowMessage();
+
+        this.revokeActiveTokens(member.getAccount());
+
+        DefaultResult<Boolean> result = new DefaultResult<>();
+        result.setSuccess(YesNoKeyProvide.YES);
+        result.setValue(true);
+        result.setMessage(BaseSystemMessage.updateSuccess());
+        return result;
+    }
+    
     @Override
     public DefaultResult<PasswordResetTokenStatus> validatePasswordResetToken(PasswordResetRequest request) throws ServiceException {
         PasswordResetTokenStatus status = new PasswordResetTokenStatus();
@@ -160,12 +194,8 @@ public class MdOrgMemberLogicServiceImpl implements IMdOrgMemberLogicService {
         if (request == null || StringUtils.isBlank(request.getPassword()) || StringUtils.isBlank(request.getConfirmPassword())) {
             throw new ServiceException(BaseSystemMessage.parameterBlank());
         }
-        if (!Strings.CS.equals(request.getPassword(), request.getConfirmPassword())) {
-            throw new ServiceException("Password and confirm password do not match.");
-        }
-        if (request.getPassword().length() < 8) {
-            throw new ServiceException("Password length must be at least 8 characters.");
-        }
+        validateNewPassword(request.getPassword(), request.getConfirmPassword());
+
         MdPasswordResetToken token = findActiveToken(request.getToken());
         if (token == null) {
             throw new ServiceException("此更改密碼連結已失效，如需重新更改，請管理者點選忘記密碼按鈕。");
@@ -189,6 +219,15 @@ public class MdOrgMemberLogicServiceImpl implements IMdOrgMemberLogicService {
         return result;
     }
 
+    private void validateNewPassword(String password, String confirmPassword) throws ServiceException {
+        if (!Strings.CS.equals(password, confirmPassword)) {
+            throw new ServiceException("Password and confirm password do not match.");
+        }
+        if (password.length() < 8) {
+            throw new ServiceException("Password length must be at least 8 characters.");
+        }
+    }
+    
     @ServiceMethodAuthority(type = {ServiceMethodType.DELETE})
     @Transactional(
             propagation = Propagation.REQUIRED,
