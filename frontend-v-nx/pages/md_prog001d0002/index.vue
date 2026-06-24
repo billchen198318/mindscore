@@ -347,6 +347,9 @@ onBeforeUnmount(() => {
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
+        <div class="alert alert-warning" role="alert">
+          此功能僅提供 Administrator 協助成員直接調整密碼，操作前請確認成員身分及變更需求。
+        </div>
         <div class="mb-3">
           <label for="passwordChangeAccount" class="form-label">帳號</label>
           <input id="passwordChangeAccount" type="text" class="form-control" :value="passwordChangeAccount" disabled>
