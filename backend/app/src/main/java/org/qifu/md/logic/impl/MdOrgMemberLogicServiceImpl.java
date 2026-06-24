@@ -49,7 +49,8 @@ import org.springframework.transaction.annotation.Transactional;
 @ServiceAuthority(check = true)
 @Transactional(propagation = Propagation.REQUIRED, timeout = 300, readOnly = false)
 public class MdOrgMemberLogicServiceImpl implements IMdOrgMemberLogicService {
-    private static final long PASSWORD_RESET_TOKEN_TTL_MILLIS = 35L * 60L * 1000L;
+	private static final int MINS = 35;
+    private static final long PASSWORD_RESET_TOKEN_TTL_MILLIS = MINS * 60L * 1000L;
     private static final int PASSWORD_RESET_TOKEN_BYTES = 32;
 
     private final IMdOrgMemberService<MdOrgMember, String> mdOrgMemberService;
@@ -303,7 +304,7 @@ public class MdOrgMemberLogicServiceImpl implements IMdOrgMemberLogicService {
                 + URLEncoder.encode(tokenValue, StandardCharsets.UTF_8);
         String displayName = StringUtils.defaultIfBlank(member.getDisplayName(), member.getAccount());
         return "Hello " + displayName + ",\n\n"
-                + "Please use the following link to set your MindScore password within 1 hour:\n"
+                + "Please use the following link to set your MindScore password within " + MINS + " minute:\n"
                 + resetUrl + "\n\n"
                 + "If the link has expired, please contact the administrator to send a new password reset mail.";
     }
