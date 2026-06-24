@@ -35,7 +35,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 	
-	public static final String RESET_PASSWD_PATH = "/api/auth/passwordReset/**";
+	public static final String RESET_PASSWD_PATH = "/api/auth/passwordReset/**"; /** MindScore與Qifu4不一致部份 */
 	
 	private static final String[] API_PATH = new String[] { "/api/*", "/api/**" };
 	
@@ -69,7 +69,7 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(controllerAuthorityCheckInterceptor())
         	.addPathPatterns(API_PATH)
         	.excludePathPatterns( CoreAppConstants.AUTH_PATH )
-        	.excludePathPatterns( RESET_PASSWD_PATH )
+        	.excludePathPatterns( RESET_PASSWD_PATH ) /** MindScore與Qifu4不一致部份 */
         	.excludePathPatterns( EVENT_LOG_PATH );
     }
     
