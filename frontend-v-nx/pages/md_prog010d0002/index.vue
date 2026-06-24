@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
 
@@ -7,6 +7,7 @@ import Toolbar from '@/components/Toolbar.vue';
 import Grid from '@/components/Grid.vue';
 import GridPagination from '@/components/GridPagination.vue';
 import HiddenQueryFieldAlertInfo from '@/components/HiddenQueryFieldAlertInfo.vue';
+import PeriodPicker from '@/components/PeriodPicker.vue';
 import { getGridConfig, resetConfigByOld, setConfigPage, setConfigRow, setConfigTotal } from '@/components/GridHelper';
 import { escapeQifuHtmlMsg, getAxiosInstance } from '@/components/BaseHelper';
 import { useSwalLoading } from '@/composables/useSwalLoading';
@@ -37,6 +38,34 @@ const lifecycleHtml = (value: string) => `<span class="badge ${value === 'OPEN' 
 const numberText = (value: any) => value == null ? '-' : Number(value).toFixed(2);
 const dateText = (value: any) => value ? new Date(value).toLocaleString() : '-';
 const isSearchNoData = (message: any) => String(message || '').toLowerCase().includes('search no data');
+const pad2 = (value: number) => String(value).padStart(2, '0');
+const isoWeek = (date: Date) => {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    return { year: d.getUTCFullYear(), week: Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7) };
+};
+const defaultPeriodKey = (periodType: string) => {
+    const now = new Date();
+    if (periodType === 'DAY') return now.toISOString().slice(0, 10);
+    if (periodType === 'WEEK') {
+        const info = isoWeek(now);
+        return `${info.year}-W${pad2(info.week)}`;
+    }
+    if (periodType === 'MONTH') return now.toISOString().slice(0, 7);
+    if (periodType === 'QUARTER') return `${now.getFullYear()}-Q${Math.floor(now.getMonth() / 3) + 1}`;
+    if (periodType === 'HALFYEAR') return `${now.getFullYear()}-H${now.getMonth() < 6 ? '1' : '2'}`;
+    if (periodType === 'YEAR') return String(now.getFullYear());
+    return '';
+};
+const validatePeriodPair = (periodType: string, periodKey: string, allowBothBlank: boolean) => {
+    if (!periodType && !periodKey) return allowBothBlank;
+    if (!periodType || !periodKey) {
+        toast.warning('Period Type and Period must be provided together.');
+        return false;
+    }
+    return true;
+};
 
 const clearGridConfig = () => {
     setConfigRow(queryPageStore.gridConfig, import.meta.env.VITE_DEFAULT_ROW);
@@ -153,6 +182,13 @@ const btnClear = () => {
 const changeGridRow = (row: number) => { setConfigRow(queryPageStore.gridConfig, row); queryPageStore.gridConfig.page = 1; btnQuery(); };
 const changePage = (page: number) => { setConfigPage(queryPageStore.gridConfig, page); btnQuery(); };
 
+watch(() => queryPageStore.queryParam.periodType, (value) => {
+    queryPageStore.queryParam.periodKey = value ? defaultPeriodKey(value) : '';
+});
+
+watch(() => queryPageStore.generationParam.periodType, (value) => {
+    queryPageStore.generationParam.periodKey = value ? defaultPeriodKey(value) : '';
+});
 onMounted(() => {
     const config = initGridConfig();
     if (queryPageStore.gridConfig.column) resetConfigByOld(config, queryPageStore.gridConfig);
@@ -175,7 +211,7 @@ onMounted(() => {
         <div class="col-md-3"><input class="form-control" placeholder="KPI name" v-model="queryPageStore.queryParam.sourceName"></div>
         <div class="col-md-2"><select class="form-select" v-model="queryPageStore.queryParam.signalType"><option v-for="item in signalTypeOptions" :key="item.value" :value="item.value">{{ item.label }}</option></select></div>
         <div class="col-md-2"><select class="form-select" v-model="queryPageStore.queryParam.periodType"><option v-for="item in periodTypeOptions" :key="item.value" :value="item.value">{{ item.label }}</option></select></div>
-        <div class="col-md-2"><input class="form-control" placeholder="Period key" v-model="queryPageStore.queryParam.periodKey"></div>
+        <div class="col-md-3"><PeriodPicker label="Period" :periodType="queryPageStore.queryParam.periodType" v-model="queryPageStore.queryParam.periodKey" /></div>
         <div class="col-md-1"><select class="form-select" v-model="queryPageStore.queryParam.signalStatus"><option value="">All</option><option value="OPEN">Open</option><option value="RESOLVED">Resolved</option></select></div>
         <div class="col-md-2"><select class="form-select" v-model="queryPageStore.queryParam.riskLevel"><option value="">All risks</option><option value="LOW">Low</option><option value="MEDIUM">Medium</option><option value="HIGH">High</option><option value="CRITICAL">Critical</option></select></div>
         <div class="col-md-2"><input class="form-control" placeholder="Status code" v-model="queryPageStore.queryParam.statusCode"></div>
@@ -190,8 +226,8 @@ onMounted(() => {
       <div class="row g-3 align-items-center">
         <div class="col-md-4"><select class="form-select" v-model="queryPageStore.generationParam.kpiOid"><option value="">All KPIs</option><option v-for="item in kpiList" :key="item.oid" :value="item.oid">{{ item.kpiCode }} - {{ item.kpiName }}</option></select></div>
         <div class="col-md-2"><select class="form-select" v-model="queryPageStore.generationParam.periodType"><option v-for="item in periodTypeOptions" :key="item.value" :value="item.value">{{ item.label }}</option></select></div>
-        <div class="col-md-2"><input class="form-control" placeholder="Period key" v-model="queryPageStore.generationParam.periodKey"></div>
-        <div class="col-md-4"><button class="btn btn-primary" @click="confirmFire('Generate KPI signals from matching snapshots?', generateKpi, null)"><i class="bi bi-lightning-charge"></i> Generate</button></div>
+        <div class="col-md-3"><PeriodPicker label="Period" :periodType="queryPageStore.generationParam.periodType" v-model="queryPageStore.generationParam.periodKey" /></div>
+        <div class="col-md-3"><button class="btn btn-primary" @click="confirmFire('Generate KPI signals from matching snapshots?', generateKpi, null)"><i class="bi bi-lightning-charge"></i> Generate</button></div>
       </div>
       <div class="form-text mt-2">Generation reads existing official KPI score snapshots. It does not recalculate KPI scores.</div>
     </div>
