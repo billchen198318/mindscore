@@ -121,7 +121,9 @@ public class KpiMeasureDataLogicServiceImpl implements IKpiMeasureDataLogicServi
         }
         normalized.setOid(existing.getOid());
         this.mdKpiMeasureDataService.update(normalized).getValueEmptyThrowMessage();
-        return this.mdKpiMeasureDataService.selectByEntityPrimaryKey(normalized);
+        DefaultResult<MdKpiMeasureData> result = this.mdKpiMeasureDataService.selectByEntityPrimaryKey(normalized);
+        result.setMessage(BaseSystemMessage.updateSuccess());
+        return result;
     }
 
     @ServiceMethodAuthority(type = ServiceMethodType.DELETE)
