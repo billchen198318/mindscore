@@ -112,7 +112,12 @@ public class KpiMeasureDataLogicServiceImpl implements IKpiMeasureDataLogicServi
             return this.mdKpiMeasureDataService.insert(normalized);
         }
         if (LOCKED_YES.equals(existing.getLocked())) {
-            throw new ServiceException("KPI measure data is locked.");
+            if (!LOCKED_NO.equals(normalized.getLocked())) {
+                throw new ServiceException("KPI measure data is locked. Set Locked to No and save to unlock it first.");
+            }
+            existing.setLocked(LOCKED_NO);
+            this.mdKpiMeasureDataService.update(existing).getValueEmptyThrowMessage();
+            return this.mdKpiMeasureDataService.selectByEntityPrimaryKey(existing);
         }
         normalized.setOid(existing.getOid());
         this.mdKpiMeasureDataService.update(normalized).getValueEmptyThrowMessage();

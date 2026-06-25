@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, nextTick } from 'vue';
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
 
@@ -35,6 +35,8 @@ const checkFields = ref<any>({});
 const dsList = ref<any[]>([]);
 const qFieldShow = ref(true);
 const loadingByKey = ref(false);
+const applyingLoadedData = ref(false);
+const loadedNaturalKey = ref('');
 const kpiList = ref<any[]>([]);
 const orgList = ref<any[]>([]);
 const memberList = ref<any[]>([]);
@@ -42,6 +44,7 @@ const importFileInput = ref<HTMLInputElement | null>(null);
 const importFile = ref<File | null>(null);
 const importPreview = ref<any>(null);
 const showImportModal = ref(false);
+const persistedLocked = ref(false);
 const pleaseSelectId = import.meta.env.VITE_PLEASE_SELECT_ID;
 const today = new Date().toISOString().slice(0, 10);
 
@@ -79,6 +82,31 @@ const defaultForm = () => ({
 });
 
 const formParam = ref<any>(defaultForm());
+
+const naturalKeyOf = (item: any) => [
+    item?.kpiOid || '',
+    item?.periodType || '',
+    item?.periodKey || '',
+    item?.dataForType || '',
+    item?.dataForType === 'ACCOUNT' ? (item?.account || '') : '',
+    item?.dataForType === 'ORG' ? (item?.orgOid || '') : ''
+].join('|');
+
+const applyLoadedMeasureData = async (item: any) => {
+    applyingLoadedData.value = true;
+    loadedNaturalKey.value = naturalKeyOf(item);
+    persistedLocked.value = item?.locked === 'Y';
+    formParam.value = {
+        ...defaultForm(),
+        ...formParam.value,
+        ...item,
+        account : item?.account || pleaseSelectId,
+        orgOid : item?.orgOid || pleaseSelectId,
+        measureDate : item?.measureDate ? String(item.measureDate).slice(0, 10) : formParam.value.measureDate
+    };
+    await nextTick();
+    applyingLoadedData.value = false;
+};
 
 const selectedKpi = () => kpiList.value.find((item: any) => item.oid === formParam.value.kpiOid) || null;
 const selectedKpiAllowsAllPeriods = () => selectedKpi()?.periodType === 'ALL';
@@ -338,6 +366,8 @@ const confirmImport = async () => {
 
 const btnClear = () => {
     checkFields.value = {};
+    persistedLocked.value = false;
+    loadedNaturalKey.value = '';
     formParam.value = defaultForm();
     const kpi = kpiList.value[0];
     if (kpi) {
@@ -454,13 +484,7 @@ const loadRow = async (oid: string) => {
                 toast.warning(escapeQifuHtmlMsg(response.data.message));
                 return;
             }
-            formParam.value = {
-                ...defaultForm(),
-                ...response.data.value,
-                account : response.data.value.account || pleaseSelectId,
-                orgOid : response.data.value.orgOid || pleaseSelectId,
-                measureDate : response.data.value.measureDate ? String(response.data.value.measureDate).slice(0, 10) : today
-            };
+            await applyLoadedMeasureData(response.data.value);
         }
     } catch (e: any) {
         hideLoading();
@@ -469,7 +493,7 @@ const loadRow = async (oid: string) => {
 };
 
 const loadByKey = async () => {
-    if (loadingByKey.value) {
+    if (loadingByKey.value || applyingLoadedData.value) {
         return;
     }
     if (!formParam.value.kpiOid || formParam.value.kpiOid === pleaseSelectId || !formParam.value.periodKey) {
@@ -481,18 +505,18 @@ const loadByKey = async () => {
     if (formParam.value.dataForType === 'ACCOUNT' && (!formParam.value.account || formParam.value.account === pleaseSelectId)) {
         return;
     }
+    const requestedKey = naturalKeyOf(formParam.value);
+    if (requestedKey === loadedNaturalKey.value) {
+        return;
+    }
     try {
         loadingByKey.value = true;
         const axiosInstance = getAxiosInstance();
         const response = await axiosInstance.post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/loadByKey', normalizePayload());
         if (response.data && import.meta.env.VITE_SUCCESS_FLAG == response.data.success && response.data.value) {
-            formParam.value = {
-                ...formParam.value,
-                ...response.data.value,
-                account : response.data.value.account || pleaseSelectId,
-                orgOid : response.data.value.orgOid || pleaseSelectId,
-                measureDate : response.data.value.measureDate ? String(response.data.value.measureDate).slice(0, 10) : formParam.value.measureDate
-            };
+            await applyLoadedMeasureData(response.data.value);
+        } else {
+            loadedNaturalKey.value = requestedKey;
         }
     } catch (e: any) {
         toast.warning(e?.message || e);
@@ -502,6 +526,10 @@ const loadByKey = async () => {
 };
 
 const btnSave = async () => {
+    if (persistedLocked.value && formParam.value.locked !== 'N') {
+        toast.warning('This measure data is locked. Set Locked to No and save to unlock it first.');
+        return;
+    }
     checkFields.value = {};
     showLoading();
     try {
@@ -515,13 +543,7 @@ const btnSave = async () => {
                 return;
             }
             toast.success(response.data.message);
-            formParam.value = {
-                ...formParam.value,
-                ...response.data.value,
-                account : response.data.value.account || pleaseSelectId,
-                orgOid : response.data.value.orgOid || pleaseSelectId,
-                measureDate : response.data.value.measureDate ? String(response.data.value.measureDate).slice(0, 10) : formParam.value.measureDate
-            };
+            await applyLoadedMeasureData(response.data.value);
             btnQuery();
         } else {
             toast.error('error, null');
@@ -553,6 +575,9 @@ const delItem = async (oid: string) => {
 };
 
 watch(() => formParam.value.kpiOid, () => {
+    if (applyingLoadedData.value) {
+        return;
+    }
     const kpi = selectedKpi();
     if (kpi) {
         if (kpi.periodType !== 'ALL') {
@@ -566,10 +591,19 @@ watch(() => formParam.value.kpiOid, () => {
         syncPeriodKey();
     }
 });
-watch(() => formParam.value.periodType, () => syncPeriodKey());
-watch(() => formParam.value.periodKey, () => syncMeasureDate());
-watch(() => [formParam.value.kpiOid, formParam.value.periodType, formParam.value.periodKey, formParam.value.dataForType, formParam.value.account, formParam.value.orgOid], () => loadByKey());
+watch(() => formParam.value.periodType, () => {
+    if (!applyingLoadedData.value) syncPeriodKey();
+});
+watch(() => formParam.value.periodKey, () => {
+    if (!applyingLoadedData.value) syncMeasureDate();
+});
+watch(() => [formParam.value.kpiOid, formParam.value.periodType, formParam.value.periodKey, formParam.value.dataForType, formParam.value.account, formParam.value.orgOid], () => {
+    if (!applyingLoadedData.value) loadByKey();
+});
 watch(() => formParam.value.dataForType, () => {
+    if (applyingLoadedData.value) {
+        return;
+    }
     if (formParam.value.dataForType !== 'ACCOUNT') {
         formParam.value.account = pleaseSelectId;
     }
@@ -625,9 +659,14 @@ onMounted(async () => {
 <div class="card mb-4">
   <div class="card-body">
     <div class="row g-3">
+      <div v-if="persistedLocked" class="col-12">
+        <div class="alert alert-warning mb-0">
+          This measure data is locked. Set Locked to No and save first. Other fields cannot be changed until it is unlocked.
+        </div>
+      </div>
       <div class="col-md-6">
         <label for="kpiOid" class="form-label">KPI</label>
-        <select :class="['form-select', checkInvalid('kpiOid', checkFields) ? 'is-invalid' : '']" id="kpiOid" v-model="formParam.kpiOid">
+        <select :class="['form-select', checkInvalid('kpiOid', checkFields) ? 'is-invalid' : '']" id="kpiOid" v-model="formParam.kpiOid" :disabled="persistedLocked">
           <option :value="pleaseSelectId">Please select</option>
           <option v-for="item in kpiList" :key="item.oid" :value="item.oid">{{ item.kpiCode }} - {{ item.kpiName }}</option>
         </select>
@@ -635,7 +674,7 @@ onMounted(async () => {
       </div>
       <div class="col-md-2">
         <label for="periodType" class="form-label">Period Type</label>
-        <select :class="['form-select', checkInvalid('periodType', checkFields) ? 'is-invalid' : '']" id="periodType" v-model="formParam.periodType" :disabled="!selectedKpiAllowsAllPeriods()">
+        <select :class="['form-select', checkInvalid('periodType', checkFields) ? 'is-invalid' : '']" id="periodType" v-model="formParam.periodType" :disabled="persistedLocked || !selectedKpiAllowsAllPeriods()">
           <option v-for="item in periodTypeOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
         </select>
         <div v-if="checkInvalid('periodType', checkFields)" class="invalid-feedback">{{ invalidFeedback('periodType', checkFields) }}</div>
@@ -643,30 +682,30 @@ onMounted(async () => {
       <div class="col-md-4">
         <label for="periodKey" class="form-label">Period Key</label>
         <div class="input-group">
-          <button type="button" class="btn btn-outline-secondary" @click="shiftPeriod(-1)"><i class="bi bi-chevron-left"></i></button>
-          <input type="text" :class="['form-control', checkInvalid('periodKey', checkFields) ? 'is-invalid' : '']" id="periodKey" v-model="formParam.periodKey">
-          <button type="button" class="btn btn-outline-secondary" @click="shiftPeriod(1)"><i class="bi bi-chevron-right"></i></button>
+          <button type="button" class="btn btn-outline-secondary" :disabled="persistedLocked" @click="shiftPeriod(-1)"><i class="bi bi-chevron-left"></i></button>
+          <input type="text" :class="['form-control', checkInvalid('periodKey', checkFields) ? 'is-invalid' : '']" id="periodKey" v-model="formParam.periodKey" :disabled="persistedLocked">
+          <button type="button" class="btn btn-outline-secondary" :disabled="persistedLocked" @click="shiftPeriod(1)"><i class="bi bi-chevron-right"></i></button>
         </div>
         <div v-if="checkInvalid('periodKey', checkFields)" class="invalid-feedback d-block">{{ invalidFeedback('periodKey', checkFields) }}</div>
       </div>
 
       <div class="col-md-3">
         <label for="dataForType" class="form-label">Data For</label>
-        <select :class="['form-select', checkInvalid('dataForType', checkFields) ? 'is-invalid' : '']" id="dataForType" v-model="formParam.dataForType">
+        <select :class="['form-select', checkInvalid('dataForType', checkFields) ? 'is-invalid' : '']" id="dataForType" v-model="formParam.dataForType" :disabled="persistedLocked">
           <option v-for="item in dataForTypeOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
         </select>
         <div v-if="checkInvalid('dataForType', checkFields)" class="invalid-feedback">{{ invalidFeedback('dataForType', checkFields) }}</div>
       </div>
       <div v-if="formParam.dataForType === 'ORG'" class="col-md-5">
         <label for="orgOid" class="form-label">Organization</label>
-        <select class="form-select" id="orgOid" v-model="formParam.orgOid">
+        <select class="form-select" id="orgOid" v-model="formParam.orgOid" :disabled="persistedLocked">
           <option :value="pleaseSelectId">Please select</option>
           <option v-for="item in orgList" :key="item.oid" :value="item.oid">{{ item.orgCode }} - {{ item.orgName }}</option>
         </select>
       </div>
       <div v-if="formParam.dataForType === 'ACCOUNT'" class="col-md-5">
         <label for="account" class="form-label">Account</label>
-        <select class="form-select" id="account" v-model="formParam.account">
+        <select class="form-select" id="account" v-model="formParam.account" :disabled="persistedLocked">
           <option :value="pleaseSelectId">Please select</option>
           <option v-for="item in memberList" :key="item.account" :value="item.account">{{ item.account }}<template v-if="item.displayName"> - {{ item.displayName }}</template></option>
         </select>
@@ -685,35 +724,35 @@ onMounted(async () => {
 
       <div class="col-md-3">
         <label for="targetValue" class="form-label">Target</label>
-        <input type="number" step="0.0001" class="form-control" id="targetValue" v-model.number="formParam.targetValue">
+        <input type="number" step="0.0001" class="form-control" id="targetValue" v-model.number="formParam.targetValue" :disabled="persistedLocked">
       </div>
       <div class="col-md-3">
         <label for="actualValue" class="form-label">Actual</label>
-        <input type="number" step="0.0001" :class="['form-control', checkInvalid('actualValue', checkFields) ? 'is-invalid' : '']" id="actualValue" v-model.number="formParam.actualValue">
+        <input type="number" step="0.0001" :class="['form-control', checkInvalid('actualValue', checkFields) ? 'is-invalid' : '']" id="actualValue" v-model.number="formParam.actualValue" :disabled="persistedLocked">
         <div v-if="checkInvalid('actualValue', checkFields)" class="invalid-feedback">{{ invalidFeedback('actualValue', checkFields) }}</div>
       </div>
       <div class="col-md-3">
         <label for="minValue" class="form-label">Min</label>
-        <input type="number" step="0.0001" class="form-control" id="minValue" v-model.number="formParam.minValue">
+        <input type="number" step="0.0001" class="form-control" id="minValue" v-model.number="formParam.minValue" :disabled="persistedLocked">
       </div>
       <div class="col-md-3">
         <label for="maxValue" class="form-label">Max</label>
-        <input type="number" step="0.0001" class="form-control" id="maxValue" v-model.number="formParam.maxValue">
+        <input type="number" step="0.0001" class="form-control" id="maxValue" v-model.number="formParam.maxValue" :disabled="persistedLocked">
       </div>
 
       <div class="col-md-3">
         <label for="sourceType" class="form-label">Source</label>
-        <select class="form-select" id="sourceType" v-model="formParam.sourceType">
+        <select class="form-select" id="sourceType" v-model="formParam.sourceType" :disabled="persistedLocked">
           <option v-for="item in sourceTypeOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
         </select>
       </div>
       <div class="col-md-9">
         <label for="sourceRef" class="form-label">Source Ref</label>
-        <input type="text" class="form-control" id="sourceRef" v-model="formParam.sourceRef">
+        <input type="text" class="form-control" id="sourceRef" v-model="formParam.sourceRef" :disabled="persistedLocked">
       </div>
       <div class="col-md-12">
         <label for="evidenceText" class="form-label">Evidence</label>
-        <textarea class="form-control" id="evidenceText" rows="3" v-model="formParam.evidenceText"></textarea>
+        <textarea class="form-control" id="evidenceText" rows="3" v-model="formParam.evidenceText" :disabled="persistedLocked"></textarea>
       </div>
     </div>
     <div class="mt-4 d-flex gap-2">
