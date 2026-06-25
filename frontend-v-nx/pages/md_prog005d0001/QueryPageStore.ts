@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia';
 import { getInitGridConfigVariable, type GridConfig } from '@/components/GridHelper';
+import { defaultPeriodKey } from '@/types/Period';
 
-const currentMonthKey = () => new Date().toISOString().slice(0, 7);
+const currentMonthKey = () => defaultPeriodKey('MONTH');
 
 export const useMdProg005d0001Store = defineStore('md_prog005d0001', {
     state: () => {

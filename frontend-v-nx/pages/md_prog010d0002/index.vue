@@ -11,7 +11,9 @@ import PeriodPicker from '@/components/PeriodPicker.vue';
 import { getGridConfig, resetConfigByOld, setConfigPage, setConfigRow, setConfigTotal } from '@/components/GridHelper';
 import { escapeQifuHtmlMsg, getAxiosInstance } from '@/components/BaseHelper';
 import { useSwalLoading } from '@/composables/useSwalLoading';
-import { PageConstants, periodTypeOptions, signalTypeOptions } from './config';
+import { periodTypeOptions as basePeriodTypeOptions, withAllOption } from '@/types/MindScoreOptions';
+import { defaultPeriodKey } from '@/types/Period';
+import { PageConstants, signalTypeOptions } from './config';
 import { useMdProg010d0002Store } from './QueryPageStore';
 
 definePageMeta({ middleware: ['auth'] });
@@ -22,6 +24,7 @@ const pageProgramId = ref(PageConstants.QueryId);
 const qFieldShow = ref(true);
 const dsList = ref<any[]>([]);
 const kpiList = ref<any[]>([]);
+const periodTypeOptions = withAllOption(basePeriodTypeOptions);
 
 const statusHtml = (value: string) => {
     const status = value || 'UNKNOWN';
@@ -38,26 +41,6 @@ const lifecycleHtml = (value: string) => `<span class="badge ${value === 'OPEN' 
 const numberText = (value: any) => value == null ? '-' : Number(value).toFixed(2);
 const dateText = (value: any) => value ? new Date(value).toLocaleString() : '-';
 const isSearchNoData = (message: any) => String(message || '').toLowerCase().includes('search no data');
-const pad2 = (value: number) => String(value).padStart(2, '0');
-const isoWeek = (date: Date) => {
-    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-    d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
-    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-    return { year: d.getUTCFullYear(), week: Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7) };
-};
-const defaultPeriodKey = (periodType: string) => {
-    const now = new Date();
-    if (periodType === 'DAY') return now.toISOString().slice(0, 10);
-    if (periodType === 'WEEK') {
-        const info = isoWeek(now);
-        return `${info.year}-W${pad2(info.week)}`;
-    }
-    if (periodType === 'MONTH') return now.toISOString().slice(0, 7);
-    if (periodType === 'QUARTER') return `${now.getFullYear()}-Q${Math.floor(now.getMonth() / 3) + 1}`;
-    if (periodType === 'HALFYEAR') return `${now.getFullYear()}-H${now.getMonth() < 6 ? '1' : '2'}`;
-    if (periodType === 'YEAR') return String(now.getFullYear());
-    return '';
-};
 const validatePeriodPair = (periodType: string, periodKey: string, allowBothBlank: boolean) => {
     if (!periodType && !periodKey) return allowBothBlank;
     if (!periodType || !periodKey) {

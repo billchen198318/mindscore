@@ -25,6 +25,7 @@ import { escapeQifuHtmlMsg, getAxiosInstance } from '../../components/BaseHelper
 import { useSwalLoading } from '@/composables/useSwalLoading';
 import { useActionSourceNavigation } from '@/composables/useActionSourceNavigation';
 import { optionName, periodTypeOptions, withAllOption } from '@/types/MindScoreOptions';
+import { countPeriodRange, defaultPeriodKey as getDefaultPeriodKey } from '@/types/Period';
 
 definePageMeta({ middleware: ['auth'] });
 
@@ -81,9 +82,6 @@ const periodRangeLimits: Record<string, { max: number; unit: string }> = {
     HALFYEAR : { max: 12, unit: 'half-years' },
     YEAR : { max: 6, unit: 'years' }
 };
-const pad2 = (value: number) => String(value).padStart(2, '0');
-const currentDateValue = () => new Date().toISOString().slice(0, 10);
-const currentMonthValue = () => new Date().toISOString().slice(0, 7);
 const numberText = (value: any) => value === null || value === undefined || value === '' ? '' : Number(value).toLocaleString(undefined, { maximumFractionDigits: 4 });
 const kpiName = (oid: string) => {
     const item = kpiList.value.find((kpi: any) => kpi.oid === oid);
@@ -167,109 +165,12 @@ const showAccountFilter = computed(() => queryPageStore.queryParam.dataForType =
 const isPeriodRangeMode = computed(() => queryPageStore.queryParam.periodMode === 'RANGE');
 const periodPickerType = computed(() => queryPageStore.queryParam.periodType);
 
-const weekOfYear = (date: Date) => {
-    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-    d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
-    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-    return {
-        year : d.getUTCFullYear(),
-        week : Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7)
-    };
-};
 const defaultPeriodKey = () => {
-    const now = new Date();
-    const dateValue = currentDateValue();
-    if (periodPickerType.value === 'DAY') {
-        return dateValue;
-    }
-    if (periodPickerType.value === 'WEEK') {
-        const info = weekOfYear(now);
-        return info.year + '-W' + pad2(info.week);
-    }
-    if (periodPickerType.value === 'MONTH') {
-        return currentMonthValue();
-    }
-    if (periodPickerType.value === 'QUARTER') {
-        return now.getFullYear() + '-Q' + Math.floor(now.getMonth() / 3 + 1);
-    }
-    if (periodPickerType.value === 'HALFYEAR') {
-        return now.getFullYear() + '-H' + (now.getMonth() < 6 ? '1' : '2');
-    }
-    if (periodPickerType.value === 'YEAR') {
-        return String(now.getFullYear());
-    }
-    return '';
-};
-const parsePeriodStart = (periodType: string, periodKey: string) => {
-    if (periodType === 'DAY' && /^\d{4}-\d{2}-\d{2}$/.test(periodKey)) {
-        return new Date(periodKey + 'T00:00:00');
-    }
-    if (periodType === 'WEEK') {
-        const match = /^(\d{4})-W(\d{2})$/.exec(periodKey || '');
-        if (match) {
-            const date = new Date(Date.UTC(Number(match[1]), 0, 4));
-            const day = date.getUTCDay() || 7;
-            date.setUTCDate(date.getUTCDate() - day + 1 + (Number(match[2]) - 1) * 7);
-            return new Date(date.toISOString().slice(0, 10) + 'T00:00:00');
-        }
-    }
-    if (periodType === 'MONTH' && /^\d{4}-\d{2}$/.test(periodKey)) {
-        const [year, month] = periodKey.split('-').map(Number);
-        return new Date(year, month - 1, 1);
-    }
-    if (periodType === 'QUARTER') {
-        const match = /^(\d{4})-Q([1-4])$/.exec(periodKey || '');
-        if (match) {
-            return new Date(Number(match[1]), (Number(match[2]) - 1) * 3, 1);
-        }
-    }
-    if (periodType === 'HALFYEAR') {
-        const match = /^(\d{4})-H([1-2])$/.exec(periodKey || '');
-        if (match) {
-            return new Date(Number(match[1]), (Number(match[2]) - 1) * 6, 1);
-        }
-    }
-    if (periodType === 'YEAR' && /^\d{4}$/.test(periodKey)) {
-        return new Date(Number(periodKey), 0, 1);
-    }
-    return null;
-};
-const nextPeriodDate = (periodType: string, date: Date) => {
-    const next = new Date(date.getTime());
-    if (periodType === 'DAY') {
-        next.setDate(next.getDate() + 1);
-    } else if (periodType === 'WEEK') {
-        next.setDate(next.getDate() + 7);
-    } else if (periodType === 'MONTH') {
-        next.setMonth(next.getMonth() + 1);
-    } else if (periodType === 'QUARTER') {
-        next.setMonth(next.getMonth() + 3);
-    } else if (periodType === 'HALFYEAR') {
-        next.setMonth(next.getMonth() + 6);
-    } else {
-        next.setFullYear(next.getFullYear() + 1);
-    }
-    return next;
+    return getDefaultPeriodKey(periodPickerType.value);
 };
 const periodRangeCount = (periodType: string, from: string, to: string) => {
     const limit = periodRangeLimits[periodType];
-    if (!limit) {
-        return null;
-    }
-    let current = parsePeriodStart(periodType, from);
-    const end = parsePeriodStart(periodType, to);
-    if (!current || !end) {
-        return null;
-    }
-    if (current.getTime() > end.getTime()) {
-        return 0;
-    }
-    let count = 0;
-    while (current.getTime() <= end.getTime() && count <= limit.max) {
-        count++;
-        current = nextPeriodDate(periodType, current);
-    }
-    return count;
+    return limit ? countPeriodRange(periodType, from, to, limit.max) : null;
 };
 
 const trendOption = reactive<any>({

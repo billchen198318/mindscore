@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { shiftPeriodKey, weeksInIsoYear } from '@/types/Period';
 
 const props = defineProps<{
     label: string;
@@ -21,6 +22,7 @@ const halfYearOptions = [
     { value: '1', label: 'H1' },
     { value: '2', label: 'H2' }
 ];
+const pad2 = (value: number) => String(value).padStart(2, '0');
 const monthOptions = [
     { value: '01', label: '01' },
     { value: '02', label: '02' },
@@ -36,8 +38,6 @@ const monthOptions = [
     { value: '12', label: '12' }
 ];
 
-const pad2 = (value: number) => String(value).padStart(2, '0');
-const currentDate = () => new Date(new Date().toISOString().slice(0, 10) + 'T00:00:00');
 const yearOptions = computed(() => {
     const currentYear = new Date().getFullYear();
     const years = [];
@@ -52,94 +52,11 @@ const weekOptions = computed(() => {
 });
 
 const emitValue = (value: string) => emit('update:modelValue', value);
-const isoWeek = (date: Date) => {
-    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-    d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
-    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-    return {
-        year : d.getUTCFullYear(),
-        week : Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7)
-    };
-};
-const weeksInIsoYear = (year: number) => isoWeek(new Date(year, 11, 28)).week;
-const parsePeriodDate = () => {
-    const key = props.modelValue || '';
-    if (props.periodType === 'DAY' && /^\d{4}-\d{2}-\d{2}$/.test(key)) {
-        return new Date(key + 'T00:00:00');
-    }
-    if (props.periodType === 'WEEK') {
-        const match = /^(\d{4})-W(\d{2})$/.exec(key);
-        if (match) {
-            const date = new Date(Date.UTC(Number(match[1]), 0, 4));
-            const day = date.getUTCDay() || 7;
-            date.setUTCDate(date.getUTCDate() - day + 1 + (Number(match[2]) - 1) * 7);
-            return new Date(date.toISOString().slice(0, 10) + 'T00:00:00');
-        }
-    }
-    if (props.periodType === 'MONTH' && /^\d{4}-\d{2}$/.test(key)) {
-        const [year, month] = key.split('-').map(Number);
-        return new Date(year, month - 1, 1);
-    }
-    if (props.periodType === 'QUARTER') {
-        const match = /^(\d{4})-Q([1-4])$/.exec(key);
-        if (match) {
-            return new Date(Number(match[1]), (Number(match[2]) - 1) * 3, 1);
-        }
-    }
-    if (props.periodType === 'HALFYEAR') {
-        const match = /^(\d{4})-H([1-2])$/.exec(key);
-        if (match) {
-            return new Date(Number(match[1]), (Number(match[2]) - 1) * 6, 1);
-        }
-    }
-    if (props.periodType === 'YEAR' && /^\d{4}$/.test(key)) {
-        return new Date(Number(key), 0, 1);
-    }
-    return currentDate();
-};
-const buildPeriodKey = (date: Date) => {
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    if (props.periodType === 'DAY') {
-        return year + '-' + pad2(month) + '-' + pad2(date.getDate());
-    }
-    if (props.periodType === 'WEEK') {
-        const info = isoWeek(date);
-        return info.year + '-W' + pad2(info.week);
-    }
-    if (props.periodType === 'MONTH') {
-        return year + '-' + pad2(month);
-    }
-    if (props.periodType === 'QUARTER') {
-        return year + '-Q' + Math.floor((month - 1) / 3 + 1);
-    }
-    if (props.periodType === 'HALFYEAR') {
-        return year + '-H' + (month <= 6 ? '1' : '2');
-    }
-    if (props.periodType === 'YEAR') {
-        return String(year);
-    }
-    return '';
-};
 const shiftPeriod = (offset: number) => {
     if (!props.periodType) {
         return;
     }
-    const date = parsePeriodDate();
-    if (props.periodType === 'DAY') {
-        date.setDate(date.getDate() + offset);
-    } else if (props.periodType === 'WEEK') {
-        date.setDate(date.getDate() + offset * 7);
-    } else if (props.periodType === 'MONTH') {
-        date.setMonth(date.getMonth() + offset);
-    } else if (props.periodType === 'QUARTER') {
-        date.setMonth(date.getMonth() + offset * 3);
-    } else if (props.periodType === 'HALFYEAR') {
-        date.setMonth(date.getMonth() + offset * 6);
-    } else {
-        date.setFullYear(date.getFullYear() + offset);
-    }
-    emitValue(buildPeriodKey(date));
+    emitValue(shiftPeriodKey(props.periodType, props.modelValue, offset));
 };
 
 const selectedYear = computed(() => {

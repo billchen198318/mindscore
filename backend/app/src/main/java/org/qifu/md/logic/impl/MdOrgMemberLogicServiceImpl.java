@@ -45,6 +45,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.util.HtmlUtils;
 
 @Service
 @ServiceAuthority(check = true)
@@ -342,9 +343,16 @@ public class MdOrgMemberLogicServiceImpl implements IMdOrgMemberLogicService {
                 + "/password-reset?token="
                 + URLEncoder.encode(tokenValue, StandardCharsets.UTF_8);
         String displayName = StringUtils.defaultIfBlank(member.getDisplayName(), member.getAccount());
-        return "Hello " + displayName + ",\n\n"
-                + "Please use the following link to set your MindScore password within " + MINS + " minute:\n"
-                + resetUrl + "\n\n"
-                + "If the link has expired, please contact the administrator to send a new password reset mail.";
+        String escapedDisplayName = HtmlUtils.htmlEscape(displayName, StandardCharsets.UTF_8.name());
+        String escapedResetUrl = HtmlUtils.htmlEscape(resetUrl, StandardCharsets.UTF_8.name());
+        return "<!DOCTYPE html>"
+                + "<html><body>"
+                + "<p>Hello " + escapedDisplayName + ",</p>"
+                + "<p>Please use the following link to set your MindScore password within "
+                + MINS + " minutes:</p>"
+                + "<p><a href=\"" + escapedResetUrl + "\">Set MindScore password</a></p>"
+                + "<p>If the link has expired, please contact the administrator "
+                + "to send a new password reset mail.</p>"
+                + "</body></html>";
     }
 }

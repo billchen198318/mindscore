@@ -1,8 +1,6 @@
 package org.qifu.md.api;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.WeekFields;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +28,7 @@ import org.qifu.md.service.IMdKpiScoreSnapshotService;
 import org.qifu.md.service.IMdKpiService;
 import org.qifu.md.service.IMdOrgMemberService;
 import org.qifu.md.service.IMdOrgUnitService;
+import org.qifu.md.util.PeriodKeyUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -237,7 +236,7 @@ public class MdPROG005D0001Controller extends CoreApiSupport {
             return;
         }
         if (StringUtils.isNotBlank(request.getPeriodKey())) {
-            parsePeriodStart(request.getPeriodType(), request.getPeriodKey());
+            PeriodKeyUtils.parseStart(request.getPeriodType(), request.getPeriodKey());
             return;
         }
         throw new ServiceException("Please select period.");
@@ -288,8 +287,8 @@ public class MdPROG005D0001Controller extends CoreApiSupport {
         if (limit == null) {
             throw new ServiceException("Unsupported period type: " + periodType);
         }
-        LocalDate current = parsePeriodStart(periodType, from);
-        LocalDate end = parsePeriodStart(periodType, to);
+        LocalDate current = PeriodKeyUtils.parseStart(periodType, from);
+        LocalDate end = PeriodKeyUtils.parseStart(periodType, to);
         if (current.isAfter(end)) {
             throw new ServiceException("Period From must be earlier than or equal to Period To.");
         }
@@ -297,87 +296,10 @@ public class MdPROG005D0001Controller extends CoreApiSupport {
             if (keys.size() >= limit.max()) {
                 throw new ServiceException("Period range cannot exceed " + limit.max() + " " + limit.unit() + ".");
             }
-            keys.add(formatPeriodKey(periodType, current));
-            current = nextPeriod(periodType, current);
+            keys.add(PeriodKeyUtils.format(periodType, current));
+            current = PeriodKeyUtils.next(periodType, current);
         }
         return keys;
-    }
-
-    private LocalDate parsePeriodStart(String periodType, String periodKey) throws ServiceException {
-        try {
-            if ("DAY".equals(periodType)) {
-                return LocalDate.parse(periodKey);
-            }
-            if ("WEEK".equals(periodType)) {
-                String[] parts = periodKey.split("-W");
-                return LocalDate.of(Integer.parseInt(parts[0]), 1, 4)
-                        .with(WeekFields.ISO.weekOfWeekBasedYear(), Integer.parseInt(parts[1]))
-                        .with(WeekFields.ISO.dayOfWeek(), 1);
-            }
-            if ("MONTH".equals(periodType)) {
-                return LocalDate.parse(periodKey + "-01");
-            }
-            if ("QUARTER".equals(periodType)) {
-                String[] parts = periodKey.split("-Q");
-                return LocalDate.of(Integer.parseInt(parts[0]), (Integer.parseInt(parts[1]) - 1) * 3 + 1, 1);
-            }
-            if ("HALFYEAR".equals(periodType)) {
-                String[] parts = periodKey.split("-H");
-                return LocalDate.of(Integer.parseInt(parts[0]), "1".equals(parts[1]) ? 1 : 7, 1);
-            }
-            if ("YEAR".equals(periodType)) {
-                return LocalDate.of(Integer.parseInt(periodKey), 1, 1);
-            }
-        } catch (RuntimeException e) {
-            throw new ServiceException("Invalid period key: " + periodKey);
-        }
-        throw new ServiceException("Unsupported period type: " + periodType);
-    }
-
-    private LocalDate nextPeriod(String periodType, LocalDate current) throws ServiceException {
-        if ("DAY".equals(periodType)) {
-            return current.plusDays(1);
-        }
-        if ("WEEK".equals(periodType)) {
-            return current.plusWeeks(1);
-        }
-        if ("MONTH".equals(periodType)) {
-            return current.plusMonths(1);
-        }
-        if ("QUARTER".equals(periodType)) {
-            return current.plusMonths(3);
-        }
-        if ("HALFYEAR".equals(periodType)) {
-            return current.plusMonths(6);
-        }
-        if ("YEAR".equals(periodType)) {
-            return current.plusYears(1);
-        }
-        throw new ServiceException("Unsupported period type: " + periodType);
-    }
-
-    private String formatPeriodKey(String periodType, LocalDate date) throws ServiceException {
-        if ("DAY".equals(periodType)) {
-            return date.format(DateTimeFormatter.ISO_LOCAL_DATE);
-        }
-        if ("WEEK".equals(periodType)) {
-            int year = date.get(WeekFields.ISO.weekBasedYear());
-            int week = date.get(WeekFields.ISO.weekOfWeekBasedYear());
-            return String.format("%04d-W%02d", year, week);
-        }
-        if ("MONTH".equals(periodType)) {
-            return String.format("%04d-%02d", date.getYear(), date.getMonthValue());
-        }
-        if ("QUARTER".equals(periodType)) {
-            return String.format("%04d-Q%d", date.getYear(), ((date.getMonthValue() - 1) / 3) + 1);
-        }
-        if ("HALFYEAR".equals(periodType)) {
-            return String.format("%04d-H%d", date.getYear(), date.getMonthValue() <= 6 ? 1 : 2);
-        }
-        if ("YEAR".equals(periodType)) {
-            return String.valueOf(date.getYear());
-        }
-        throw new ServiceException("Unsupported period type: " + periodType);
     }
 
     private record PeriodRangeLimit(int max, String unit) {
