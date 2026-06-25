@@ -6,10 +6,6 @@ import java.io.InputStreamReader;
 import java.io.PushbackReader;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.temporal.ChronoField;
-import java.time.temporal.IsoFields;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.HashMap;
@@ -44,6 +40,7 @@ import org.qifu.md.service.IMdKpiService;
 import org.qifu.md.service.IMdKpiMeasureDataService;
 import org.qifu.md.service.IMdOrgMemberService;
 import org.qifu.md.service.IMdOrgUnitService;
+import org.qifu.md.util.PeriodKeyUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -401,30 +398,7 @@ public class KpiMeasureDataLogicServiceImpl implements IKpiMeasureDataLogicServi
     }
 
     private boolean isValidPeriodKey(String periodType, String periodKey) {
-        if (PERIOD_DAY.equals(periodType)) {
-            try {
-                LocalDate.parse(periodKey);
-                return periodKey.matches("\\d{4}-\\d{2}-\\d{2}");
-            } catch (RuntimeException e) {
-                return false;
-            }
-        }
-        if (PERIOD_WEEK.equals(periodType)) {
-            return periodKey.matches("\\d{4}-W(0[1-9]|[1-4]\\d|5[0-3])");
-        }
-        if (PERIOD_MONTH.equals(periodType)) {
-            return periodKey.matches("\\d{4}-(0[1-9]|1[0-2])");
-        }
-        if (PERIOD_QUARTER.equals(periodType)) {
-            return periodKey.matches("\\d{4}-Q[1-4]");
-        }
-        if (PERIOD_HALFYEAR.equals(periodType)) {
-            return periodKey.matches("\\d{4}-H[1-2]");
-        }
-        if (PERIOD_YEAR.equals(periodType)) {
-            return periodKey.matches("\\d{4}");
-        }
-        return false;
+        return PeriodKeyUtils.isValid(periodType, periodKey);
     }
 
     private ImportLookup loadImportLookup() throws ServiceException {
@@ -509,34 +483,7 @@ public class KpiMeasureDataLogicServiceImpl implements IKpiMeasureDataLogicServi
         }
     }
     private java.util.Date toMeasureDate(String periodType, String periodKey) throws ServiceException {
-        try {
-            LocalDate date;
-            if (PERIOD_DAY.equals(periodType)) {
-                date = LocalDate.parse(periodKey);
-            } else if (PERIOD_WEEK.equals(periodType)) {
-                String[] parts = periodKey.split("-W");
-                int year = Integer.parseInt(parts[0]);
-                int week = Integer.parseInt(parts[1]);
-                date = LocalDate.of(year, 1, 4)
-                        .with(IsoFields.WEEK_OF_WEEK_BASED_YEAR, week)
-                        .with(ChronoField.DAY_OF_WEEK, 1);
-            } else if (PERIOD_MONTH.equals(periodType)) {
-                date = LocalDate.parse(periodKey + "-01");
-            } else if (PERIOD_QUARTER.equals(periodType)) {
-                String[] parts = periodKey.split("-Q");
-                date = LocalDate.of(Integer.parseInt(parts[0]), (Integer.parseInt(parts[1]) - 1) * 3 + 1, 1);
-            } else if (PERIOD_HALFYEAR.equals(periodType)) {
-                String[] parts = periodKey.split("-H");
-                date = LocalDate.of(Integer.parseInt(parts[0]), "1".equals(parts[1]) ? 1 : 7, 1);
-            } else if (PERIOD_YEAR.equals(periodType)) {
-                date = LocalDate.of(Integer.parseInt(periodKey), 1, 1);
-            } else {
-                throw new ServiceException("Unsupported period type: " + periodType);
-            }
-            return java.util.Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        } catch (RuntimeException e) {
-            throw new ServiceException("Invalid period key: " + periodKey);
-        }
+        return PeriodKeyUtils.toDate(periodType, periodKey);
     }
 
     private MdKpiMeasureData normalizeKey(MdKpiMeasureData entity) throws ServiceException {

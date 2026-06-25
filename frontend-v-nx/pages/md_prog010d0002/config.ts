@@ -10,13 +10,3 @@ export const signalTypeOptions = [
     { value: 'TARGET_VARIANCE', label: 'Target Variance' },
     { value: 'TREND_DOWN', label: 'Trend' }
 ];
-
-export const periodTypeOptions = [
-    { value: '', label: 'All periods' },
-    { value: 'DAY', label: 'Day' },
-    { value: 'WEEK', label: 'Week' },
-    { value: 'MONTH', label: 'Month' },
-    { value: 'QUARTER', label: 'Quarter' },
-    { value: 'HALFYEAR', label: 'Half Year' },
-    { value: 'YEAR', label: 'Year' }
-];

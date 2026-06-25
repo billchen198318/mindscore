@@ -7,6 +7,7 @@ import Toolbar from '@/components/Toolbar.vue';
 import Grid from '@/components/Grid.vue';
 import GridPagination from '@/components/GridPagination.vue';
 import HiddenQueryFieldAlertInfo from '@/components/HiddenQueryFieldAlertInfo.vue';
+import PeriodPicker from '@/components/PeriodPicker.vue';
 import { PageConstants } from './config';
 import { getGridConfig, setConfigRow, setConfigPage, setConfigTotal, resetConfigByOld } from '../../components/GridHelper';
 import { useMdProg004d0001Store } from './QueryPageStore';
@@ -17,6 +18,11 @@ import {
     escapeQifuHtmlMsg
 } from '../../components/BaseHelper';
 import { useSwalLoading } from '@/composables/useSwalLoading';
+import {
+    formatDateValue,
+    formatPeriodKey,
+    parsePeriodKey
+} from '@/types/Period';
 import {
     periodTypeOptions,
     yesNoOptions,
@@ -46,7 +52,7 @@ const importPreview = ref<any>(null);
 const showImportModal = ref(false);
 const persistedLocked = ref(false);
 const pleaseSelectId = import.meta.env.VITE_PLEASE_SELECT_ID;
-const today = new Date().toISOString().slice(0, 10);
+const today = formatDateValue(new Date());
 
 const dataForTypeOptions = [
     { value: 'GLOBAL', label: 'Global' },
@@ -125,107 +131,14 @@ const accountName = (account: string) => {
 const dataForTypeName = (value: string) => optionName(dataForTypeOptions, value);
 const sourceTypeName = (value: string) => optionName(sourceTypeOptions, value);
 
-const pad2 = (value: number) => String(value).padStart(2, '0');
 const parsePeriodDate = () => {
-    const key = formParam.value.periodKey;
-    const now = new Date();
-    if (formParam.value.periodType === 'DAY' && /^\d{4}-\d{2}-\d{2}$/.test(key)) {
-        return new Date(key + 'T00:00:00');
-    }
-    if (formParam.value.periodType === 'WEEK') {
-        const match = /^(\d{4})-W(\d{2})$/.exec(key);
-        if (match) {
-            const date = new Date(Number(match[1]), 0, 1 + (Number(match[2]) - 1) * 7);
-            return date;
-        }
-    }
-    if (formParam.value.periodType === 'MONTH' && /^\d{4}-\d{2}$/.test(key)) {
-        const [year, month] = key.split('-').map(Number);
-        return new Date(year, month - 1, 1);
-    }
-    if (formParam.value.periodType === 'QUARTER') {
-        const match = /^(\d{4})-Q([1-4])$/.exec(key);
-        if (match) {
-            return new Date(Number(match[1]), (Number(match[2]) - 1) * 3, 1);
-        }
-    }
-    if (formParam.value.periodType === 'HALFYEAR') {
-        const match = /^(\d{4})-H([1-2])$/.exec(key);
-        if (match) {
-            return new Date(Number(match[1]), (Number(match[2]) - 1) * 6, 1);
-        }
-    }
-    if (formParam.value.periodType === 'YEAR' && /^\d{4}$/.test(key)) {
-        return new Date(Number(key), 0, 1);
-    }
-    return now;
-};
-const weekOfYear = (date: Date) => {
-    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-    d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
-    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-    return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+    return parsePeriodKey(formParam.value.periodType, formParam.value.periodKey) || new Date();
 };
 const buildPeriodKey = (date: Date) => {
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    if (formParam.value.periodType === 'DAY') {
-        return year + '-' + pad2(month) + '-' + pad2(date.getDate());
-    }
-    if (formParam.value.periodType === 'WEEK') {
-        return year + '-W' + pad2(weekOfYear(date));
-    }
-    if (formParam.value.periodType === 'MONTH') {
-        return year + '-' + pad2(month);
-    }
-    if (formParam.value.periodType === 'QUARTER') {
-        return year + '-Q' + Math.floor((month - 1) / 3 + 1);
-    }
-    if (formParam.value.periodType === 'HALFYEAR') {
-        return year + '-H' + (month <= 6 ? '1' : '2');
-    }
-    return String(year);
-};
-const shiftPeriod = (offset: number) => {
-    const date = parsePeriodDate();
-    if (formParam.value.periodType === 'DAY') {
-        date.setDate(date.getDate() + offset);
-    } else if (formParam.value.periodType === 'WEEK') {
-        date.setDate(date.getDate() + offset * 7);
-    } else if (formParam.value.periodType === 'MONTH') {
-        date.setMonth(date.getMonth() + offset);
-    } else if (formParam.value.periodType === 'QUARTER') {
-        date.setMonth(date.getMonth() + offset * 3);
-    } else if (formParam.value.periodType === 'HALFYEAR') {
-        date.setMonth(date.getMonth() + offset * 6);
-    } else {
-        date.setFullYear(date.getFullYear() + offset);
-    }
-    formParam.value.periodKey = buildPeriodKey(date);
-    syncMeasureDate();
+    return formatPeriodKey(formParam.value.periodType, date);
 };
 const measureDateFromPeriod = () => {
-    const date = parsePeriodDate();
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    if (formParam.value.periodType === 'DAY') {
-        return buildPeriodKey(date);
-    }
-    if (formParam.value.periodType === 'WEEK') {
-        const day = date.getDay() || 7;
-        date.setDate(date.getDate() - day + 1);
-        return date.getFullYear() + '-' + pad2(date.getMonth() + 1) + '-' + pad2(date.getDate());
-    }
-    if (formParam.value.periodType === 'MONTH') {
-        return year + '-' + pad2(month) + '-01';
-    }
-    if (formParam.value.periodType === 'QUARTER') {
-        return year + '-' + pad2((Math.floor((month - 1) / 3) * 3) + 1) + '-01';
-    }
-    if (formParam.value.periodType === 'HALFYEAR') {
-        return year + '-' + (month <= 6 ? '01' : '07') + '-01';
-    }
-    return year + '-01-01';
+    return formatDateValue(parsePeriodDate());
 };
 const syncMeasureDate = () => {
     formParam.value.measureDate = measureDateFromPeriod();
@@ -680,12 +593,9 @@ onMounted(async () => {
         <div v-if="checkInvalid('periodType', checkFields)" class="invalid-feedback">{{ invalidFeedback('periodType', checkFields) }}</div>
       </div>
       <div class="col-md-4">
-        <label for="periodKey" class="form-label">Period Key</label>
-        <div class="input-group">
-          <button type="button" class="btn btn-outline-secondary" :disabled="persistedLocked" @click="shiftPeriod(-1)"><i class="bi bi-chevron-left"></i></button>
-          <input type="text" :class="['form-control', checkInvalid('periodKey', checkFields) ? 'is-invalid' : '']" id="periodKey" v-model="formParam.periodKey" :disabled="persistedLocked">
-          <button type="button" class="btn btn-outline-secondary" :disabled="persistedLocked" @click="shiftPeriod(1)"><i class="bi bi-chevron-right"></i></button>
-        </div>
+        <fieldset :disabled="persistedLocked" class="p-0 m-0 border-0">
+          <PeriodPicker label="Period Key" :periodType="formParam.periodType" v-model="formParam.periodKey" />
+        </fieldset>
         <div v-if="checkInvalid('periodKey', checkFields)" class="invalid-feedback d-block">{{ invalidFeedback('periodKey', checkFields) }}</div>
       </div>
 

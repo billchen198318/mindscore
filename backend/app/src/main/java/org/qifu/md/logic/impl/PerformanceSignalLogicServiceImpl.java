@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.time.temporal.TemporalAdjusters;
-import java.time.temporal.WeekFields;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -32,6 +30,7 @@ import org.qifu.md.model.PerformanceSignalGenerationResult;
 import org.qifu.md.service.IMdKpiScoreSnapshotService;
 import org.qifu.md.service.IMdKpiService;
 import org.qifu.md.service.IMdPerformanceSignalService;
+import org.qifu.md.util.PeriodKeyUtils;
 import org.qifu.util.LoadResources;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -320,43 +319,9 @@ public class PerformanceSignalLogicServiceImpl implements IPerformanceSignalLogi
 
     private DateRange resolveDateRange(String periodType, String periodKey) throws ServiceException {
         try {
-            String type = StringUtils.defaultString(periodType).toUpperCase(Locale.ROOT);
-            return switch (type) {
-                case "DAY" -> {
-                    LocalDate date = LocalDate.parse(periodKey);
-                    yield new DateRange(date, date);
-                }
-                case "WEEK" -> {
-                    String[] parts = periodKey.split("-W");
-                    int year = Integer.parseInt(parts[0]);
-                    int week = Integer.parseInt(parts[1]);
-                    LocalDate start = LocalDate.of(year, 1, 4)
-                            .with(WeekFields.ISO.weekOfWeekBasedYear(), week)
-                            .with(WeekFields.ISO.dayOfWeek(), 1);
-                    yield new DateRange(start, start.plusDays(6));
-                }
-                case "MONTH" -> {
-                    LocalDate start = LocalDate.parse(periodKey + "-01");
-                    yield new DateRange(start, start.with(TemporalAdjusters.lastDayOfMonth()));
-                }
-                case "QUARTER" -> {
-                    String[] parts = periodKey.split("-Q");
-                    int month = (Integer.parseInt(parts[1]) - 1) * 3 + 1;
-                    LocalDate start = LocalDate.of(Integer.parseInt(parts[0]), month, 1);
-                    yield new DateRange(start, start.plusMonths(2).with(TemporalAdjusters.lastDayOfMonth()));
-                }
-                case "HALFYEAR" -> {
-                    String[] parts = periodKey.split("-H");
-                    int month = "1".equals(parts[1]) ? 1 : 7;
-                    LocalDate start = LocalDate.of(Integer.parseInt(parts[0]), month, 1);
-                    yield new DateRange(start, start.plusMonths(5).with(TemporalAdjusters.lastDayOfMonth()));
-                }
-                case "YEAR" -> {
-                    LocalDate start = LocalDate.of(Integer.parseInt(periodKey), 1, 1);
-                    yield new DateRange(start, start.with(TemporalAdjusters.lastDayOfYear()));
-                }
-                default -> throw new IllegalArgumentException("Unsupported period type");
-            };
+            return new DateRange(
+                    PeriodKeyUtils.parseStart(periodType, periodKey),
+                    PeriodKeyUtils.end(periodType, periodKey));
         } catch (Exception e) {
             throw new ServiceException("Invalid KPI snapshot period: " + periodType + " / " + periodKey);
         }
