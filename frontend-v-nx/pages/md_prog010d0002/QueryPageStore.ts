@@ -5,6 +5,7 @@ export const useMdProg010d0002Store = defineStore('md_prog010d0002', {
     state: () => ({
         gridConfig: getInitGridConfigVariable() as GridConfig,
         queryParam: {
+            sourceType: '',
             sourceCode: '',
             sourceName: '',
             signalType: '',
@@ -22,6 +23,7 @@ export const useMdProg010d0002Store = defineStore('md_prog010d0002', {
     }),
     actions: {
         clearData() {
+            this.queryParam.sourceType = '';
             this.queryParam.sourceCode = '';
             this.queryParam.sourceName = '';
             this.queryParam.signalType = '';

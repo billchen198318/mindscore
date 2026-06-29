@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -21,15 +23,25 @@ import org.qifu.base.model.ServiceAuthority;
 import org.qifu.base.model.ServiceMethodAuthority;
 import org.qifu.base.model.ServiceMethodType;
 import org.qifu.base.model.YesNoKeyProvide;
+import org.qifu.md.entity.MdActionItem;
 import org.qifu.md.entity.MdKpi;
 import org.qifu.md.entity.MdKpiScoreSnapshot;
+import org.qifu.md.entity.MdOkrObjective;
+import org.qifu.md.entity.MdOkrSnapshot;
 import org.qifu.md.entity.MdPerformanceSignal;
+import org.qifu.md.entity.MdStrategySnapshot;
+import org.qifu.md.entity.MdStrategyWorkspace;
 import org.qifu.md.logic.IPerformanceSignalLogicService;
 import org.qifu.md.mapper.MdPerformanceSignalMapper;
 import org.qifu.md.model.PerformanceSignalGenerationResult;
+import org.qifu.md.service.IMdActionItemService;
 import org.qifu.md.service.IMdKpiScoreSnapshotService;
 import org.qifu.md.service.IMdKpiService;
+import org.qifu.md.service.IMdOkrObjectiveService;
+import org.qifu.md.service.IMdOkrSnapshotService;
 import org.qifu.md.service.IMdPerformanceSignalService;
+import org.qifu.md.service.IMdStrategySnapshotService;
+import org.qifu.md.service.IMdStrategyWorkspaceService;
 import org.qifu.md.util.PeriodKeyUtils;
 import org.qifu.util.LoadResources;
 import org.springframework.stereotype.Service;
@@ -41,25 +53,47 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(propagation = Propagation.REQUIRED, timeout = 300, readOnly = true)
 public class PerformanceSignalLogicServiceImpl implements IPerformanceSignalLogicService {
     private static final String SOURCE_KPI = "KPI";
+    private static final String SOURCE_OKR = "OKR";
+    private static final String SOURCE_STRATEGY = "STRATEGY";
+    private static final String SOURCE_ACTION = "ACTION";
     private static final String SIGNAL_SCORE_STATUS = "SCORE_STATUS";
     private static final String SIGNAL_TARGET_VARIANCE = "TARGET_VARIANCE";
     private static final String SIGNAL_TREND_DOWN = "TREND_DOWN";
+    private static final String SIGNAL_OVERDUE = "OVERDUE";
     private static final String OPEN = "OPEN";
     private static final String RESOLVED = "RESOLVED";
-    private static final String GENERATOR_VERSION = "KPI_V1";
+    private static final String KPI_GENERATOR_VERSION = "KPI_V1";
+    private static final String OKR_GENERATOR_VERSION = "OKR_V1";
+    private static final String STRATEGY_GENERATOR_VERSION = "STRATEGY_V1";
+    private static final String ACTION_GENERATOR_VERSION = "ACTION_V1";
 
     private final IMdKpiScoreSnapshotService<MdKpiScoreSnapshot, String> snapshotService;
     private final IMdKpiService<MdKpi, String> kpiService;
+    private final IMdOkrSnapshotService<MdOkrSnapshot, String> okrSnapshotService;
+    private final IMdOkrObjectiveService<MdOkrObjective, String> okrObjectiveService;
+    private final IMdStrategySnapshotService<MdStrategySnapshot, String> strategySnapshotService;
+    private final IMdStrategyWorkspaceService<MdStrategyWorkspace, String> strategyWorkspaceService;
+    private final IMdActionItemService<MdActionItem, String> actionItemService;
     private final IMdPerformanceSignalService<MdPerformanceSignal, String> signalService;
     private final MdPerformanceSignalMapper signalMapper;
 
     public PerformanceSignalLogicServiceImpl(
             IMdKpiScoreSnapshotService<MdKpiScoreSnapshot, String> snapshotService,
             IMdKpiService<MdKpi, String> kpiService,
+            IMdOkrSnapshotService<MdOkrSnapshot, String> okrSnapshotService,
+            IMdOkrObjectiveService<MdOkrObjective, String> okrObjectiveService,
+            IMdStrategySnapshotService<MdStrategySnapshot, String> strategySnapshotService,
+            IMdStrategyWorkspaceService<MdStrategyWorkspace, String> strategyWorkspaceService,
+            IMdActionItemService<MdActionItem, String> actionItemService,
             IMdPerformanceSignalService<MdPerformanceSignal, String> signalService,
             MdPerformanceSignalMapper signalMapper) {
         this.snapshotService = snapshotService;
         this.kpiService = kpiService;
+        this.okrSnapshotService = okrSnapshotService;
+        this.okrObjectiveService = okrObjectiveService;
+        this.strategySnapshotService = strategySnapshotService;
+        this.strategyWorkspaceService = strategyWorkspaceService;
+        this.actionItemService = actionItemService;
         this.signalService = signalService;
         this.signalMapper = signalMapper;
     }
@@ -76,13 +110,9 @@ public class PerformanceSignalLogicServiceImpl implements IPerformanceSignalLogi
         PerformanceSignalGenerationResult generation = new PerformanceSignalGenerationResult();
         generation.setSnapshotCount(snapshots == null ? 0 : snapshots.size());
         for (MdKpiScoreSnapshot snapshot : safeList(snapshots)) {
-            generateForSnapshot(snapshot, generation);
+            generateForKpiSnapshot(snapshot, generation);
         }
-        DefaultResult<PerformanceSignalGenerationResult> result = new DefaultResult<>();
-        result.setSuccess(YesNoKeyProvide.YES);
-        result.setValue(generation);
-        result.setMessage("KPI signals generated.");
-        return result;
+        return generationResult(generation, "KPI signals generated.");
     }
 
     @Override
@@ -97,7 +127,7 @@ public class PerformanceSignalLogicServiceImpl implements IPerformanceSignalLogi
         MdKpiScoreSnapshot key = new MdKpiScoreSnapshot();
         key.setOid(snapshotOid);
         MdKpiScoreSnapshot snapshot = snapshotService.selectByEntityPrimaryKey(key).getValueEmptyThrowMessage();
-        List<MdPerformanceSignal> signals = generateForSnapshot(snapshot, null);
+        List<MdPerformanceSignal> signals = generateForKpiSnapshot(snapshot, null);
         DefaultResult<List<MdPerformanceSignal>> result = new DefaultResult<>();
         result.setSuccess(YesNoKeyProvide.YES);
         result.setValue(signals);
@@ -105,7 +135,59 @@ public class PerformanceSignalLogicServiceImpl implements IPerformanceSignalLogi
         return result;
     }
 
-    private List<MdPerformanceSignal> generateForSnapshot(MdKpiScoreSnapshot snapshot,
+    @Override
+    @ServiceMethodAuthority(type = {ServiceMethodType.INSERT, ServiceMethodType.UPDATE})
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = false,
+            rollbackFor = {RuntimeException.class, IOException.class, Exception.class})
+    public DefaultResult<PerformanceSignalGenerationResult> generateOkrSignals(Map<String, Object> params)
+            throws ServiceException {
+        Map<String, Object> query = params == null ? new HashMap<>() : new HashMap<>(params);
+        List<MdOkrSnapshot> snapshots = okrSnapshotService
+                .selectListByParams(query, "PERIOD_KEY, OBJECTIVE_OID", "ASC").getValue();
+        PerformanceSignalGenerationResult generation = new PerformanceSignalGenerationResult();
+        generation.setSnapshotCount(snapshots == null ? 0 : snapshots.size());
+        for (MdOkrSnapshot snapshot : safeList(snapshots)) {
+            saveSignal(buildOkrScoreStatusSignal(snapshot), generation);
+        }
+        return generationResult(generation, "OKR signals generated.");
+    }
+
+    @Override
+    @ServiceMethodAuthority(type = {ServiceMethodType.INSERT, ServiceMethodType.UPDATE})
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = false,
+            rollbackFor = {RuntimeException.class, IOException.class, Exception.class})
+    public DefaultResult<PerformanceSignalGenerationResult> generateStrategySignals(Map<String, Object> params)
+            throws ServiceException {
+        Map<String, Object> query = params == null ? new HashMap<>() : new HashMap<>(params);
+        List<MdStrategySnapshot> snapshots = strategySnapshotService
+                .selectListByParams(query, "PERIOD_TYPE, PERIOD_KEY, WORKSPACE_OID", "ASC").getValue();
+        PerformanceSignalGenerationResult generation = new PerformanceSignalGenerationResult();
+        generation.setSnapshotCount(snapshots == null ? 0 : snapshots.size());
+        for (MdStrategySnapshot snapshot : safeList(snapshots)) {
+            saveSignal(buildStrategyScoreStatusSignal(snapshot), generation);
+        }
+        return generationResult(generation, "Strategy signals generated.");
+    }
+
+    @Override
+    @ServiceMethodAuthority(type = {ServiceMethodType.INSERT, ServiceMethodType.UPDATE})
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = false,
+            rollbackFor = {RuntimeException.class, IOException.class, Exception.class})
+    public DefaultResult<PerformanceSignalGenerationResult> generateActionSignals(Map<String, Object> params)
+            throws ServiceException {
+        Map<String, Object> query = params == null ? new HashMap<>() : new HashMap<>(params);
+        List<MdActionItem> items = actionItemService.selectListByParams(query, "END_DATE, PLAN_OID, SORT_NO", "ASC").getValue();
+        PerformanceSignalGenerationResult generation = new PerformanceSignalGenerationResult();
+        generation.setSnapshotCount(items == null ? 0 : items.size());
+        for (MdActionItem item : safeList(items)) {
+            if (item.getEndDate() != null) {
+                saveSignal(buildActionOverdueSignal(item), generation);
+            }
+        }
+        return generationResult(generation, "Action signals generated.");
+    }
+
+    private List<MdPerformanceSignal> generateForKpiSnapshot(MdKpiScoreSnapshot snapshot,
             PerformanceSignalGenerationResult generation) throws ServiceException {
         MdKpi kpi = loadKpi(snapshot.getKpiOid());
         MdKpiScoreSnapshot previous = loadPreviousSnapshot(snapshot);
@@ -122,19 +204,17 @@ public class PerformanceSignalLogicServiceImpl implements IPerformanceSignalLogi
 
     private MdPerformanceSignal buildScoreStatusSignal(MdKpi kpi, MdKpiScoreSnapshot snapshot) throws ServiceException {
         String status = StringUtils.defaultIfBlank(snapshot.getScoreStatus(), "UNKNOWN").toUpperCase(Locale.ROOT);
-        boolean resolved = "GOOD".equals(status);
-        String risk = switch (status) {
-            case "BAD" -> "HIGH";
-            case "WARNING", "UNKNOWN" -> "MEDIUM";
-            default -> "LOW";
-        };
-        MdPerformanceSignal signal = baseSignal(kpi, snapshot, SIGNAL_SCORE_STATUS);
+        MdPerformanceSignal signal = baseSignal(SOURCE_KPI, snapshot.getOid(), kpi.getKpiCode(), kpi.getKpiName(),
+                snapshot.getPeriodType(), snapshot.getPeriodKey(), SIGNAL_SCORE_STATUS, KPI_GENERATOR_VERSION);
+        signal.setOwnerAccount(snapshot.getAccount());
+        signal.setOrgOid(snapshot.getOrgOid());
+        signal.setSnapshotOid(snapshot.getOid());
         signal.setScoreValue(snapshot.getScoreValue());
         signal.setTargetValue(snapshot.getRawTarget());
         signal.setActualValue(snapshot.getRawActual());
         signal.setStatusCode(status);
-        applyLifecycle(signal, risk, resolved);
-        signal.setEvidenceJson(toJson(evidence(kpi, snapshot, null)));
+        applyStatusLifecycle(signal, status);
+        signal.setEvidenceJson(toJson(kpiEvidence(kpi, snapshot, null)));
         signal.setExplanationInput("KPI " + kpi.getKpiCode() + " score status is " + status + ".");
         return signal;
     }
@@ -161,7 +241,11 @@ public class PerformanceSignalLogicServiceImpl implements IPerformanceSignalLogi
         }
         BigDecimal unfavorableRate = varianceRate == null ? BigDecimal.ZERO : varianceRate.abs();
         String risk = normal ? "LOW" : riskByMagnitude(unfavorableRate);
-        MdPerformanceSignal signal = baseSignal(kpi, snapshot, SIGNAL_TARGET_VARIANCE);
+        MdPerformanceSignal signal = baseSignal(SOURCE_KPI, snapshot.getOid(), kpi.getKpiCode(), kpi.getKpiName(),
+                snapshot.getPeriodType(), snapshot.getPeriodKey(), SIGNAL_TARGET_VARIANCE, KPI_GENERATOR_VERSION);
+        signal.setOwnerAccount(snapshot.getAccount());
+        signal.setOrgOid(snapshot.getOrgOid());
+        signal.setSnapshotOid(snapshot.getOid());
         signal.setScoreValue(snapshot.getScoreValue());
         signal.setTargetValue(target);
         signal.setActualValue(actual);
@@ -169,7 +253,7 @@ public class PerformanceSignalLogicServiceImpl implements IPerformanceSignalLogi
         signal.setVarianceRate(varianceRate);
         signal.setStatusCode(status);
         applyLifecycle(signal, risk, normal);
-        Map<String, Object> evidence = evidence(kpi, snapshot, null);
+        Map<String, Object> evidence = kpiEvidence(kpi, snapshot, null);
         evidence.put("managementMode", mode);
         evidence.put("varianceValue", variance);
         evidence.put("varianceRate", varianceRate);
@@ -185,13 +269,17 @@ public class PerformanceSignalLogicServiceImpl implements IPerformanceSignalLogi
                 : delta.compareTo(BigDecimal.ZERO) > 0 ? "UP" : "STABLE";
         boolean resolved = !"DOWN".equals(trend);
         String risk = resolved ? "LOW" : riskByMagnitude(delta.abs());
-        MdPerformanceSignal signal = baseSignal(kpi, snapshot, SIGNAL_TREND_DOWN);
+        MdPerformanceSignal signal = baseSignal(SOURCE_KPI, snapshot.getOid(), kpi.getKpiCode(), kpi.getKpiName(),
+                snapshot.getPeriodType(), snapshot.getPeriodKey(), SIGNAL_TREND_DOWN, KPI_GENERATOR_VERSION);
+        signal.setOwnerAccount(snapshot.getAccount());
+        signal.setOrgOid(snapshot.getOrgOid());
+        signal.setSnapshotOid(snapshot.getOid());
         signal.setScoreValue(snapshot.getScoreValue());
         signal.setVarianceValue(delta);
         signal.setTrendCode(trend);
         signal.setStatusCode(trend);
         applyLifecycle(signal, risk, resolved);
-        Map<String, Object> evidence = evidence(kpi, snapshot, previous);
+        Map<String, Object> evidence = kpiEvidence(kpi, snapshot, previous);
         evidence.put("previousScore", previous.getScoreValue());
         evidence.put("scoreDelta", delta);
         signal.setEvidenceJson(toJson(evidence));
@@ -199,25 +287,110 @@ public class PerformanceSignalLogicServiceImpl implements IPerformanceSignalLogi
         return signal;
     }
 
-    private MdPerformanceSignal baseSignal(MdKpi kpi, MdKpiScoreSnapshot snapshot, String signalType)
-            throws ServiceException {
-        DateRange range = resolveDateRange(snapshot.getPeriodType(), snapshot.getPeriodKey());
+    private MdPerformanceSignal buildOkrScoreStatusSignal(MdOkrSnapshot snapshot) throws ServiceException {
+        MdOkrObjective objective = loadOkrObjective(snapshot.getObjectiveOid());
+        String status = StringUtils.defaultIfBlank(snapshot.getScoreStatus(), "UNKNOWN").toUpperCase(Locale.ROOT);
+        MdPerformanceSignal signal = baseSignal(SOURCE_OKR, snapshot.getOid(), snapshot.getObjectiveOid(),
+                objective.getObjectiveName(), PeriodKeyUtils.DAY, snapshot.getPeriodKey(), SIGNAL_SCORE_STATUS,
+                OKR_GENERATOR_VERSION);
+        signal.setSnapshotOid(snapshot.getOid());
+        signal.setScoreValue(snapshot.getProgressValue());
+        signal.setActualValue(snapshot.getProgressValue());
+        signal.setStatusCode(status);
+        applyStatusLifecycle(signal, status);
+        Map<String, Object> evidence = new LinkedHashMap<>();
+        evidence.put("source", "OKR_SNAPSHOT");
+        evidence.put("objectiveOid", snapshot.getObjectiveOid());
+        evidence.put("snapshotOid", snapshot.getOid());
+        evidence.put("progressValue", snapshot.getProgressValue());
+        evidence.put("confidenceScore", snapshot.getConfidenceScore());
+        evidence.put("scoreStatus", snapshot.getScoreStatus());
+        evidence.put("snapshotAt", snapshot.getSnapshotAt());
+        signal.setEvidenceJson(toJson(evidence));
+        signal.setExplanationInput("OKR objective " + snapshot.getObjectiveOid() + " score status is " + status + ".");
+        return signal;
+    }
+
+    private MdPerformanceSignal buildStrategyScoreStatusSignal(MdStrategySnapshot snapshot) throws ServiceException {
+        MdStrategyWorkspace workspace = loadStrategyWorkspace(snapshot.getWorkspaceOid());
+        String status = scoreStatusByValue(snapshot.getScoreValue());
+        MdPerformanceSignal signal = baseSignal(SOURCE_STRATEGY, snapshot.getOid(), workspace.getWorkspaceCode(),
+                workspace.getWorkspaceName(), snapshot.getPeriodType(), snapshot.getPeriodKey(), SIGNAL_SCORE_STATUS,
+                STRATEGY_GENERATOR_VERSION);
+        signal.setSnapshotOid(snapshot.getOid());
+        signal.setScoreValue(snapshot.getScoreValue());
+        signal.setActualValue(snapshot.getScoreValue());
+        signal.setStatusCode(status);
+        applyStatusLifecycle(signal, status);
+        Map<String, Object> evidence = new LinkedHashMap<>();
+        evidence.put("source", "STRATEGY_SNAPSHOT");
+        evidence.put("workspaceOid", snapshot.getWorkspaceOid());
+        evidence.put("snapshotOid", snapshot.getOid());
+        evidence.put("scoreValue", snapshot.getScoreValue());
+        evidence.put("kpiCount", snapshot.getKpiCount());
+        evidence.put("okrCount", snapshot.getOkrCount());
+        evidence.put("snapshotAt", snapshot.getSnapshotAt());
+        signal.setEvidenceJson(toJson(evidence));
+        signal.setExplanationInput("Strategy workspace " + workspace.getWorkspaceCode() + " score status is " + status + ".");
+        return signal;
+    }
+
+    private MdPerformanceSignal buildActionOverdueSignal(MdActionItem item) throws ServiceException {
+        LocalDate endDate = toLocalDate(item.getEndDate());
+        LocalDate today = LocalDate.now();
+        boolean done = item.getDoneDate() != null || isCompletedStatus(item.getStatus());
+        boolean overdue = !done && endDate.isBefore(today);
+        long daysOverdue = overdue ? ChronoUnit.DAYS.between(endDate, today) : 0L;
+        String status = done ? "DONE" : overdue ? "OVERDUE" : "ON_TRACK";
+        MdPerformanceSignal signal = baseSignal(SOURCE_ACTION, item.getOid(), item.getOid(), item.getItemName(),
+                PeriodKeyUtils.DAY, endDate.toString(), SIGNAL_OVERDUE, ACTION_GENERATOR_VERSION);
+        signal.setRelatedActionOid(item.getOid());
+        signal.setActualValue(item.getProgressValue());
+        signal.setVarianceValue(BigDecimal.valueOf(daysOverdue));
+        signal.setStatusCode(status);
+        applyLifecycle(signal, overdue ? overdueRisk(daysOverdue) : "LOW", !overdue);
+        Map<String, Object> evidence = new LinkedHashMap<>();
+        evidence.put("source", "ACTION_ITEM");
+        evidence.put("actionItemOid", item.getOid());
+        evidence.put("planOid", item.getPlanOid());
+        evidence.put("actionStage", item.getActionStage());
+        evidence.put("status", item.getStatus());
+        evidence.put("progressValue", item.getProgressValue());
+        evidence.put("startDate", item.getStartDate());
+        evidence.put("endDate", item.getEndDate());
+        evidence.put("doneDate", item.getDoneDate());
+        evidence.put("daysOverdue", daysOverdue);
+        signal.setEvidenceJson(toJson(evidence));
+        signal.setExplanationInput("Action item " + item.getItemName() + " overdue status is " + status + ".");
+        return signal;
+    }
+
+    private MdPerformanceSignal baseSignal(String sourceType, String sourceOid, String sourceCode, String sourceName,
+            String periodType, String periodKey, String signalType, String generatorVersion) throws ServiceException {
+        DateRange range = resolveDateRange(periodType, periodKey);
         MdPerformanceSignal signal = new MdPerformanceSignal();
         signal.setSignalType(signalType);
-        signal.setSourceType(SOURCE_KPI);
-        signal.setSourceOid(snapshot.getOid());
-        signal.setSourceCode(kpi.getKpiCode());
-        signal.setSourceName(kpi.getKpiName());
-        signal.setPeriodType(snapshot.getPeriodType());
-        signal.setPeriodKey(snapshot.getPeriodKey());
+        signal.setSourceType(sourceType);
+        signal.setSourceOid(sourceOid);
+        signal.setSourceCode(sourceCode);
+        signal.setSourceName(sourceName);
+        signal.setPeriodType(periodType);
+        signal.setPeriodKey(periodKey);
         signal.setStartDate(java.sql.Date.valueOf(range.start()));
         signal.setEndDate(java.sql.Date.valueOf(range.end()));
-        signal.setOwnerAccount(snapshot.getAccount());
-        signal.setOrgOid(snapshot.getOrgOid());
-        signal.setSnapshotOid(snapshot.getOid());
-        signal.setGeneratorVersion(GENERATOR_VERSION);
+        signal.setGeneratorVersion(generatorVersion);
         signal.setGeneratedAt(new Date());
         return signal;
+    }
+
+    private void applyStatusLifecycle(MdPerformanceSignal signal, String status) {
+        boolean resolved = "GOOD".equals(status);
+        String risk = switch (status) {
+            case "BAD" -> "HIGH";
+            case "WARNING", "UNKNOWN" -> "MEDIUM";
+            default -> "LOW";
+        };
+        applyLifecycle(signal, risk, resolved);
     }
 
     private void applyLifecycle(MdPerformanceSignal signal, String risk, boolean resolved) {
@@ -266,6 +439,18 @@ public class PerformanceSignalLogicServiceImpl implements IPerformanceSignalLogi
         return kpiService.selectByEntityPrimaryKey(key).getValueEmptyThrowMessage();
     }
 
+    private MdOkrObjective loadOkrObjective(String objectiveOid) throws ServiceException {
+        MdOkrObjective key = new MdOkrObjective();
+        key.setOid(objectiveOid);
+        return okrObjectiveService.selectByEntityPrimaryKey(key).getValueEmptyThrowMessage();
+    }
+
+    private MdStrategyWorkspace loadStrategyWorkspace(String workspaceOid) throws ServiceException {
+        MdStrategyWorkspace key = new MdStrategyWorkspace();
+        key.setOid(workspaceOid);
+        return strategyWorkspaceService.selectByEntityPrimaryKey(key).getValueEmptyThrowMessage();
+    }
+
     private MdKpiScoreSnapshot loadPreviousSnapshot(MdKpiScoreSnapshot current) throws ServiceException {
         Map<String, Object> params = new HashMap<>();
         params.put("kpiOid", current.getKpiOid());
@@ -282,7 +467,7 @@ public class PerformanceSignalLogicServiceImpl implements IPerformanceSignalLogi
         return previous;
     }
 
-    private Map<String, Object> evidence(MdKpi kpi, MdKpiScoreSnapshot snapshot,
+    private Map<String, Object> kpiEvidence(MdKpi kpi, MdKpiScoreSnapshot snapshot,
             MdKpiScoreSnapshot previous) {
         Map<String, Object> evidence = new LinkedHashMap<>();
         evidence.put("source", "KPI_SCORE_SNAPSHOT");
@@ -311,10 +496,37 @@ public class PerformanceSignalLogicServiceImpl implements IPerformanceSignalLogi
         }
     }
 
+    private DefaultResult<PerformanceSignalGenerationResult> generationResult(
+            PerformanceSignalGenerationResult generation, String message) {
+        DefaultResult<PerformanceSignalGenerationResult> result = new DefaultResult<>();
+        result.setSuccess(YesNoKeyProvide.YES);
+        result.setValue(generation);
+        result.setMessage(message);
+        return result;
+    }
+
+    private String scoreStatusByValue(BigDecimal value) {
+        if (value == null) return "UNKNOWN";
+        if (value.compareTo(new BigDecimal("70")) >= 0) return "GOOD";
+        if (value.compareTo(new BigDecimal("40")) >= 0) return "WARNING";
+        return "BAD";
+    }
+
     private String riskByMagnitude(BigDecimal magnitude) {
         if (magnitude.compareTo(new BigDecimal("20")) >= 0) return "HIGH";
         if (magnitude.compareTo(new BigDecimal("10")) >= 0) return "MEDIUM";
         return "LOW";
+    }
+
+    private String overdueRisk(long daysOverdue) {
+        if (daysOverdue >= 30) return "HIGH";
+        if (daysOverdue >= 7) return "MEDIUM";
+        return "LOW";
+    }
+
+    private boolean isCompletedStatus(String status) {
+        String value = StringUtils.defaultString(status).toUpperCase(Locale.ROOT);
+        return "DONE".equals(value) || "COMPLETED".equals(value) || "CLOSED".equals(value) || "RESOLVED".equals(value);
     }
 
     private DateRange resolveDateRange(String periodType, String periodKey) throws ServiceException {
@@ -323,8 +535,12 @@ public class PerformanceSignalLogicServiceImpl implements IPerformanceSignalLogi
                     PeriodKeyUtils.parseStart(periodType, periodKey),
                     PeriodKeyUtils.end(periodType, periodKey));
         } catch (Exception e) {
-            throw new ServiceException("Invalid KPI snapshot period: " + periodType + " / " + periodKey);
+            throw new ServiceException("Invalid performance signal period: " + periodType + " / " + periodKey);
         }
+    }
+
+    private LocalDate toLocalDate(Date date) {
+        return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
     }
 
     private <T> List<T> safeList(List<T> values) {

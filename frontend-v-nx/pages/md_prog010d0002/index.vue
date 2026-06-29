@@ -13,7 +13,7 @@ import { escapeQifuHtmlMsg, getAxiosInstance } from '@/components/BaseHelper';
 import { useSwalLoading } from '@/composables/useSwalLoading';
 import { periodTypeOptions as basePeriodTypeOptions, withAllOption } from '@/types/MindScoreOptions';
 import { defaultPeriodKey } from '@/types/Period';
-import { PageConstants, signalTypeOptions } from './config';
+import { PageConstants, signalTypeOptions, sourceTypeOptions } from './config';
 import { useMdProg010d0002Store } from './QueryPageStore';
 
 definePageMeta({ middleware: ['auth'] });
@@ -88,7 +88,7 @@ const btnQuery = async () => {
     try {
         const response = await getAxiosInstance().post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/findPage', {
             field: {
-                sourceType: 'KPI',
+                sourceType: queryPageStore.queryParam.sourceType,
                 sourceCodeLike: queryPageStore.queryParam.sourceCode,
                 sourceNameLike: queryPageStore.queryParam.sourceName,
                 signalType: queryPageStore.queryParam.signalType,
@@ -115,17 +115,14 @@ const btnQuery = async () => {
     }
 };
 
-const generateKpi = async () => {
+const generationMessage = (label: string, value: any) => `${label}: processed ${value.snapshotCount || 0}; inserted ${value.insertedCount || 0}, updated ${value.updatedCount || 0}, open ${value.openCount || 0}, resolved ${value.resolvedCount || 0}.`;
+
+const generateSignals = async (endpoint: string, payload: any, label: string) => {
     showLoading();
     try {
-        const response = await getAxiosInstance().post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/generateKpi', {
-            kpiOid: queryPageStore.generationParam.kpiOid,
-            periodType: queryPageStore.generationParam.periodType,
-            periodKey: queryPageStore.generationParam.periodKey
-        });
+        const response = await getAxiosInstance().post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + endpoint, payload);
         if (response.data?.success !== import.meta.env.VITE_SUCCESS_FLAG) throw new Error(response.data?.message || 'Generation failed');
-        const value = response.data.value || {};
-        toast.success(`Generated from ${value.snapshotCount || 0} snapshots; inserted ${value.insertedCount || 0}, updated ${value.updatedCount || 0}.`);
+        toast.success(generationMessage(label, response.data.value || {}));
         await btnQuery();
     } catch (e: any) {
         toast.warning(escapeQifuHtmlMsg(e?.message || String(e)));
@@ -133,6 +130,20 @@ const generateKpi = async () => {
         hideLoading();
     }
 };
+
+const generateKpi = async () => generateSignals('/generateKpi', {
+    kpiOid: queryPageStore.generationParam.kpiOid,
+    periodType: queryPageStore.generationParam.periodType,
+    periodKey: queryPageStore.generationParam.periodKey
+}, 'KPI signals');
+const generateOkr = async () => generateSignals('/generateOkr', {
+    periodKey: queryPageStore.generationParam.periodType === 'DAY' ? queryPageStore.generationParam.periodKey : ''
+}, 'OKR signals');
+const generateStrategy = async () => generateSignals('/generateStrategy', {
+    periodType: queryPageStore.generationParam.periodType,
+    periodKey: queryPageStore.generationParam.periodKey
+}, 'Strategy signals');
+const generateAction = async () => generateSignals('/generateAction', {}, 'Action signals');
 
 const generateBySnapshot = async (snapshotOid: string) => {
     showLoading();
@@ -190,8 +201,9 @@ onMounted(() => {
   <div v-show="qFieldShow" class="card mb-3">
     <div class="card-body">
       <div class="row g-3">
-        <div class="col-md-2"><input class="form-control" placeholder="KPI code" v-model="queryPageStore.queryParam.sourceCode"></div>
-        <div class="col-md-3"><input class="form-control" placeholder="KPI name" v-model="queryPageStore.queryParam.sourceName"></div>
+        <div class="col-md-2"><input class="form-control" placeholder="Source code" v-model="queryPageStore.queryParam.sourceCode"></div>
+        <div class="col-md-3"><input class="form-control" placeholder="Source name" v-model="queryPageStore.queryParam.sourceName"></div>
+        <div class="col-md-2"><select class="form-select" v-model="queryPageStore.queryParam.sourceType"><option v-for="item in sourceTypeOptions" :key="item.value" :value="item.value">{{ item.label }}</option></select></div>
         <div class="col-md-2"><select class="form-select" v-model="queryPageStore.queryParam.signalType"><option v-for="item in signalTypeOptions" :key="item.value" :value="item.value">{{ item.label }}</option></select></div>
         <div class="col-md-2"><select class="form-select" v-model="queryPageStore.queryParam.periodType"><option v-for="item in periodTypeOptions" :key="item.value" :value="item.value">{{ item.label }}</option></select></div>
         <div class="col-md-3"><PeriodPicker label="Period" :periodType="queryPageStore.queryParam.periodType" v-model="queryPageStore.queryParam.periodKey" /></div>
@@ -204,15 +216,15 @@ onMounted(() => {
   </div>
 
   <div class="card mb-3 border-primary-subtle">
-    <div class="card-header">Generate KPI Signals</div>
+    <div class="card-header">Generate Performance Signals</div>
     <div class="card-body">
       <div class="row g-3 align-items-center">
         <div class="col-md-4"><select class="form-select" v-model="queryPageStore.generationParam.kpiOid"><option value="">All KPIs</option><option v-for="item in kpiList" :key="item.oid" :value="item.oid">{{ item.kpiCode }} - {{ item.kpiName }}</option></select></div>
         <div class="col-md-2"><select class="form-select" v-model="queryPageStore.generationParam.periodType"><option v-for="item in periodTypeOptions" :key="item.value" :value="item.value">{{ item.label }}</option></select></div>
         <div class="col-md-3"><PeriodPicker label="Period" :periodType="queryPageStore.generationParam.periodType" v-model="queryPageStore.generationParam.periodKey" /></div>
-        <div class="col-md-3"><button class="btn btn-primary" @click="confirmFire('Generate KPI signals from matching snapshots?', generateKpi, null)"><i class="bi bi-lightning-charge"></i> Generate</button></div>
+        <div class="col-md-3 d-flex flex-wrap gap-2"><button class="btn btn-primary" @click="confirmFire('Generate KPI signals from matching snapshots?', generateKpi, null)"><i class="bi bi-lightning-charge"></i> KPI</button><button class="btn btn-outline-primary" @click="confirmFire('Generate OKR signals from matching snapshots?', generateOkr, null)"><i class="bi bi-lightning-charge"></i> OKR</button><button class="btn btn-outline-primary" @click="confirmFire('Generate Strategy signals from matching snapshots?', generateStrategy, null)"><i class="bi bi-lightning-charge"></i> Strategy</button><button class="btn btn-outline-primary" @click="confirmFire('Generate Action overdue signals?', generateAction, null)"><i class="bi bi-lightning-charge"></i> Action</button></div>
       </div>
-      <div class="form-text mt-2">Generation reads existing official KPI score snapshots. It does not recalculate KPI scores.</div>
+      <div class="form-text mt-2">Generation reads existing official KPI, OKR, Strategy snapshots and Action due dates. It does not recalculate source scores.</div>
     </div>
   </div>
 

@@ -96,6 +96,51 @@ public class MdPROG010D0002Controller extends CoreApiSupport {
         return ResponseEntity.ok(result);
     }
 
+
+    @ControllerMethodAuthority(programId = "MD_PROG010D0002U", check = true)
+    @Operation(summary = "Generate OKR signals")
+    @PostMapping(value = "/generateOkr", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<DefaultControllerJsonResultObj<PerformanceSignalGenerationResult>> generateOkr(
+            @RequestBody Map<String, Object> request) {
+        DefaultControllerJsonResultObj<PerformanceSignalGenerationResult> result = initDefaultJsonResult();
+        try {
+            DefaultResult<PerformanceSignalGenerationResult> generation = signalLogicService.generateOkrSignals(request);
+            setDefaultResponseJsonResult(generation, result);
+        } catch (ServiceException | ControllerException e) {
+            exceptionResult(result, e);
+        }
+        return ResponseEntity.ok(result);
+    }
+
+    @ControllerMethodAuthority(programId = "MD_PROG010D0002U", check = true)
+    @Operation(summary = "Generate Strategy signals")
+    @PostMapping(value = "/generateStrategy", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<DefaultControllerJsonResultObj<PerformanceSignalGenerationResult>> generateStrategy(
+            @RequestBody Map<String, Object> request) {
+        DefaultControllerJsonResultObj<PerformanceSignalGenerationResult> result = initDefaultJsonResult();
+        try {
+            DefaultResult<PerformanceSignalGenerationResult> generation = signalLogicService.generateStrategySignals(request);
+            setDefaultResponseJsonResult(generation, result);
+        } catch (ServiceException | ControllerException e) {
+            exceptionResult(result, e);
+        }
+        return ResponseEntity.ok(result);
+    }
+
+    @ControllerMethodAuthority(programId = "MD_PROG010D0002U", check = true)
+    @Operation(summary = "Generate Action signals")
+    @PostMapping(value = "/generateAction", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<DefaultControllerJsonResultObj<PerformanceSignalGenerationResult>> generateAction(
+            @RequestBody Map<String, Object> request) {
+        DefaultControllerJsonResultObj<PerformanceSignalGenerationResult> result = initDefaultJsonResult();
+        try {
+            DefaultResult<PerformanceSignalGenerationResult> generation = signalLogicService.generateActionSignals(request);
+            setDefaultResponseJsonResult(generation, result);
+        } catch (ServiceException | ControllerException e) {
+            exceptionResult(result, e);
+        }
+        return ResponseEntity.ok(result);
+    }
     @ControllerMethodAuthority(programId = "MD_PROG010D0002U", check = true)
     @Operation(summary = "Generate KPI signals by snapshot")
     @PostMapping(value = "/generateKpiBySnapshot", produces = MediaType.APPLICATION_JSON_VALUE)

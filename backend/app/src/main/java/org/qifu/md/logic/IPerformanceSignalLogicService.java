@@ -10,4 +10,7 @@ import org.qifu.md.model.PerformanceSignalGenerationResult;
 public interface IPerformanceSignalLogicService {
     DefaultResult<PerformanceSignalGenerationResult> generateKpiSignals(Map<String, Object> params) throws ServiceException;
     DefaultResult<List<MdPerformanceSignal>> generateKpiSignalsBySnapshotOid(String snapshotOid) throws ServiceException;
+    DefaultResult<PerformanceSignalGenerationResult> generateOkrSignals(Map<String, Object> params) throws ServiceException;
+    DefaultResult<PerformanceSignalGenerationResult> generateStrategySignals(Map<String, Object> params) throws ServiceException;
+    DefaultResult<PerformanceSignalGenerationResult> generateActionSignals(Map<String, Object> params) throws ServiceException;
 }
