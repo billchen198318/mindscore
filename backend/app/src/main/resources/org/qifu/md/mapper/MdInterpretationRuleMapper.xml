@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.qifu.md.mapper.MdInterpretationRuleMapper">
+  <resultMap id="BaseResultMap" type="org.qifu.md.entity.MdInterpretationRule">
+    <id column="OID" jdbcType="CHAR" property="oid" />
+    <result column="TENANT_OID" jdbcType="CHAR" property="tenantOid" />
+    <result column="RULE_CODE" jdbcType="VARCHAR" property="ruleCode" />
+    <result column="RULE_NAME" jdbcType="VARCHAR" property="ruleName" />
+    <result column="RULE_TYPE" jdbcType="VARCHAR" property="ruleType" />
+    <result column="SOURCE_TYPE" jdbcType="VARCHAR" property="sourceType" />
+    <result column="CONDITION_EXPR" jdbcType="LONGVARCHAR" property="conditionExpr" />
+    <result column="ACTION_EXPR" jdbcType="LONGVARCHAR" property="actionExpr" />
+    <result column="SEVERITY" jdbcType="VARCHAR" property="severity" />
+    <result column="ENABLED_FLAG" jdbcType="VARCHAR" property="enabledFlag" />
+    <result column="PRIORITY_NO" jdbcType="INTEGER" property="priorityNo" />
+    <result column="DESCRIPTION" jdbcType="VARCHAR" property="description" />
+    <result column="IS_DELETED" jdbcType="INTEGER" property="isDeleted" />
+    <result column="CUSERID" jdbcType="VARCHAR" property="cuserid" />
+    <result column="CDATE" jdbcType="TIMESTAMP" property="cdate" />
+    <result column="UUSERID" jdbcType="VARCHAR" property="uuserid" />
+    <result column="UDATE" jdbcType="TIMESTAMP" property="udate" />
+  </resultMap>
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_interpretation_rule
+    where OID = #{oid,jdbcType=CHAR}
+  </select>
+
+  <sql id="baseConditions">
+    AND COALESCE(IS_DELETED, 0) = 0
+    <if test="oid != null and oid != ''.toString()">AND OID = #{oid,jdbcType=CHAR}</if>
+    <if test="tenantOid != null and tenantOid != ''.toString()">AND TENANT_OID = #{tenantOid,jdbcType=CHAR}</if>
+    <if test="ruleCode != null and ruleCode != ''.toString()">AND RULE_CODE = #{ruleCode,jdbcType=VARCHAR}</if>
+    <if test="ruleCodeLike != null and ruleCodeLike != ''.toString()">AND RULE_CODE LIKE #{ruleCodeLike,jdbcType=VARCHAR}</if>
+    <if test="ruleNameLike != null and ruleNameLike != ''.toString()">AND RULE_NAME LIKE #{ruleNameLike,jdbcType=VARCHAR}</if>
+    <if test="ruleType != null and ruleType != ''.toString()">AND RULE_TYPE = #{ruleType,jdbcType=VARCHAR}</if>
+    <if test="sourceType != null and sourceType != ''.toString()">AND SOURCE_TYPE = #{sourceType,jdbcType=VARCHAR}</if>
+    <if test="severity != null and severity != ''.toString()">AND SEVERITY = #{severity,jdbcType=VARCHAR}</if>
+    <if test="enabledFlag != null and enabledFlag != ''.toString()">AND ENABLED_FLAG = #{enabledFlag,jdbcType=VARCHAR}</if>
+  </sql>
+
+  <select id="selectListByParams" parameterType="java.util.HashMap" resultMap="BaseResultMap">
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_interpretation_rule
+    where 1=1
+    <include refid="baseConditions" />
+    <if test="orderBy != null and orderBy != ''.toString() and sortType != null and sortType != ''.toString()">
+      ORDER BY ${orderBy} ${sortType}
+    </if>
+  </select>
+
+  <select id="findPage" parameterType="java.util.HashMap" resultMap="BaseResultMap">
+    <include refid="org.qifu.core.mapper.DB1Config.sql1"/>
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_interpretation_rule
+    where 1=1
+    <include refid="baseConditions" />
+    <include refid="org.qifu.core.mapper.DB1Config.sql2"/>
+  </select>
+
+  <select id="count" parameterType="java.util.HashMap" resultType="java.lang.Long">
+    select count(*)
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_interpretation_rule
+    where 1=1
+    <include refid="baseConditions" />
+  </select>
+
+  <insert id="insert" parameterType="org.qifu.md.entity.MdInterpretationRule">
+    insert into <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_interpretation_rule
+    (OID, TENANT_OID, RULE_CODE, RULE_NAME, RULE_TYPE, SOURCE_TYPE, CONDITION_EXPR, ACTION_EXPR,
+     SEVERITY, ENABLED_FLAG, PRIORITY_NO, DESCRIPTION, IS_DELETED, CUSERID, CDATE, UUSERID, UDATE)
+    values
+    (#{oid,jdbcType=CHAR}, #{tenantOid,jdbcType=CHAR}, #{ruleCode,jdbcType=VARCHAR}, #{ruleName,jdbcType=VARCHAR},
+     #{ruleType,jdbcType=VARCHAR}, #{sourceType,jdbcType=VARCHAR}, #{conditionExpr,jdbcType=LONGVARCHAR},
+     #{actionExpr,jdbcType=LONGVARCHAR}, #{severity,jdbcType=VARCHAR}, #{enabledFlag,jdbcType=VARCHAR},
+     #{priorityNo,jdbcType=INTEGER}, #{description,jdbcType=VARCHAR}, #{isDeleted,jdbcType=INTEGER},
+     #{cuserid,jdbcType=VARCHAR}, #{cdate,jdbcType=TIMESTAMP}, #{uuserid,jdbcType=VARCHAR}, #{udate,jdbcType=TIMESTAMP})
+  </insert>
+
+  <update id="update" parameterType="org.qifu.md.entity.MdInterpretationRule">
+    update <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_interpretation_rule
+    set TENANT_OID = #{tenantOid,jdbcType=CHAR},
+        RULE_NAME = #{ruleName,jdbcType=VARCHAR},
+        RULE_TYPE = #{ruleType,jdbcType=VARCHAR},
+        SOURCE_TYPE = #{sourceType,jdbcType=VARCHAR},
+        CONDITION_EXPR = #{conditionExpr,jdbcType=LONGVARCHAR},
+        ACTION_EXPR = #{actionExpr,jdbcType=LONGVARCHAR},
+        SEVERITY = #{severity,jdbcType=VARCHAR},
+        ENABLED_FLAG = #{enabledFlag,jdbcType=VARCHAR},
+        PRIORITY_NO = #{priorityNo,jdbcType=INTEGER},
+        DESCRIPTION = #{description,jdbcType=VARCHAR},
+        IS_DELETED = #{isDeleted,jdbcType=INTEGER},
+        UUSERID = #{uuserid,jdbcType=VARCHAR},
+        UDATE = #{udate,jdbcType=TIMESTAMP}
+    where OID = #{oid,jdbcType=CHAR}
+  </update>
+
+  <delete id="delete" parameterType="org.qifu.md.entity.MdInterpretationRule">
+    delete from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_interpretation_rule
+    where OID = #{oid,jdbcType=CHAR}
+  </delete>
+</mapper>

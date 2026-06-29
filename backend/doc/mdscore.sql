@@ -1,9 +1,9 @@
 /*M!999999\- enable the sandbox mode */ 
--- MariaDB dump 10.19-12.2.2-MariaDB, for Win64 (AMD64)
+-- MariaDB dump 10.19-12.3.2-MariaDB, for Win64 (AMD64)
 --
 -- Host: localhost    Database: mdscore
 -- ------------------------------------------------------
--- Server version	12.2.2-MariaDB
+-- Server version	12.3.2-MariaDB
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -320,6 +320,50 @@ INSERT INTO `md_formula_recommend_rule` VALUES
 ('038cae6c-6980-11f1-a592-005056c00001','REC_BOOLEAN_BIGGER_TARGET','Boolean Bigger Target Formula','BIGGER','TARGET','','BOOLEAN','038b26bf-6980-11f1-a592-005056c00001',110,'N','Y','Use pass/fail scoring for boolean KPI.','system','2026-06-16 20:36:22',NULL,NULL),
 ('038cb47f-6980-11f1-a592-005056c00001','REC_BOOLEAN_MANUAL_CUSTOM','Boolean Manual Custom Formula','MANUAL','CUSTOM','','BOOLEAN','038b26bf-6980-11f1-a592-005056c00001',110,'N','Y','Use pass/fail scoring for boolean KPI.','system','2026-06-16 20:36:22',NULL,NULL);
 /*!40000 ALTER TABLE `md_formula_recommend_rule` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `md_interpretation_rule`
+--
+
+DROP TABLE IF EXISTS `md_interpretation_rule`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `md_interpretation_rule` (
+  `OID` char(36) NOT NULL COMMENT 'OID',
+  `TENANT_OID` char(36) NOT NULL DEFAULT 'DEFAULT' COMMENT 'Tenant OID',
+  `RULE_CODE` varchar(50) NOT NULL COMMENT 'Rule code',
+  `RULE_NAME` varchar(200) NOT NULL COMMENT 'Rule name',
+  `RULE_TYPE` varchar(30) NOT NULL COMMENT 'Rule type',
+  `SOURCE_TYPE` varchar(30) NOT NULL COMMENT 'Source type',
+  `CONDITION_EXPR` mediumtext NOT NULL COMMENT 'Condition expression',
+  `ACTION_EXPR` mediumtext NOT NULL COMMENT 'Action expression',
+  `SEVERITY` varchar(20) NOT NULL DEFAULT 'MEDIUM' COMMENT 'Severity',
+  `ENABLED_FLAG` varchar(1) NOT NULL DEFAULT 'Y' COMMENT 'Enabled flag',
+  `PRIORITY_NO` int(11) NOT NULL DEFAULT 0 COMMENT 'Priority number',
+  `DESCRIPTION` varchar(500) DEFAULT NULL COMMENT 'Description',
+  `IS_DELETED` int(1) NOT NULL DEFAULT 0 COMMENT 'Is deleted',
+  `CUSERID` varchar(24) NOT NULL COMMENT 'Create user',
+  `CDATE` datetime NOT NULL COMMENT 'Create date',
+  `UUSERID` varchar(24) DEFAULT NULL COMMENT 'Update user',
+  `UDATE` datetime DEFAULT NULL COMMENT 'Update date',
+  PRIMARY KEY (`OID`),
+  UNIQUE KEY `UK_MD_INTERPRETATION_RULE` (`TENANT_OID`,`RULE_CODE`),
+  KEY `IDX_MD_RULE_SOURCE` (`SOURCE_TYPE`,`ENABLED_FLAG`),
+  KEY `IDX_MD_RULE_PRIORITY` (`PRIORITY_NO`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `md_interpretation_rule`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `md_interpretation_rule` WRITE;
+/*!40000 ALTER TABLE `md_interpretation_rule` DISABLE KEYS */;
+/*!40000 ALTER TABLE `md_interpretation_rule` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
@@ -1890,6 +1934,9 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `tb_sys_menu` WRITE;
 /*!40000 ALTER TABLE `tb_sys_menu` DISABLE KEYS */;
 INSERT INTO `tb_sys_menu` VALUES
+('0221042a-73bc-11f1-9b72-15f41cc6f7d9','MD_PROG010D0001Q','25b62ac5-6e3a-11f1-ada3-f96ece44675b','Y','admin','2026-06-29 21:11:15',NULL,NULL),
+('0221ee8b-73bc-11f1-9b72-d7b8e167458c','MD_PROG010D0002Q','25b62ac5-6e3a-11f1-ada3-f96ece44675b','Y','admin','2026-06-29 21:11:15',NULL,NULL),
+('0222d8ec-73bc-11f1-9b72-67dd7fb65fa7','MD_PROG010D0003Q','25b62ac5-6e3a-11f1-ada3-f96ece44675b','Y','admin','2026-06-29 21:11:15',NULL,NULL),
 ('079c507d-6adc-11f1-8576-2d8a171b1ad4','MD_PROG008D0001Q','8748b563-6ab5-11f1-b802-2d3506a5d7f6','Y','admin','2026-06-18 14:07:47',NULL,NULL),
 ('079f5dbe-6adc-11f1-8576-7d5f2d10c2a1','MD_PROG008D0002Q','8748b563-6ab5-11f1-b802-2d3506a5d7f6','Y','admin','2026-06-18 14:07:47',NULL,NULL),
 ('07a0481f-6adc-11f1-8576-77fc06a38a11','MD_PROG008D0005Q','8748b563-6ab5-11f1-b802-2d3506a5d7f6','Y','admin','2026-06-18 14:07:47',NULL,NULL),
@@ -1940,9 +1987,7 @@ INSERT INTO `tb_sys_menu` VALUES
 ('f027877a-4487-11ee-b50d-8fe1228e511a','CORE_PROG001D0004Q','7ea68636-c93a-4669-ac42-dafc3770d20d','Y','admin','2023-08-27 11:15:13',NULL,NULL),
 ('f02898eb-4487-11ee-b50d-45ee94442a45','CORE_PROG001D0005Q','7ea68636-c93a-4669-ac42-dafc3770d20d','Y','admin','2023-08-27 11:15:13',NULL,NULL),
 ('f07acfb8-4612-11ee-9a04-71984fef28fa','CORE_PROG004D0001Q','5e055f61-bfc5-402c-93b4-f241dc17b00b','Y','admin','2023-08-29 10:22:45',NULL,NULL),
-('f07b9309-4612-11ee-9a04-9f3e4fe17b25','CORE_PROG004D0002Q','5e055f61-bfc5-402c-93b4-f241dc17b00b','Y','admin','2023-08-29 10:22:45',NULL,NULL),
-('fad2fc9c-6f94-11f1-8db8-fdb6a36a0b30','MD_PROG010D0001Q','25b62ac5-6e3a-11f1-ada3-f96ece44675b','Y','admin','2026-06-24 14:21:47',NULL,NULL),
-('fad398dd-6f94-11f1-8db8-c5479b253ba7','MD_PROG010D0002Q','25b62ac5-6e3a-11f1-ada3-f96ece44675b','Y','admin','2026-06-24 14:21:47',NULL,NULL);
+('f07b9309-4612-11ee-9a04-9f3e4fe17b25','CORE_PROG004D0002Q','5e055f61-bfc5-402c-93b4-f241dc17b00b','Y','admin','2023-08-29 10:22:45',NULL,NULL);
 /*!40000 ALTER TABLE `tb_sys_menu` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -2051,6 +2096,9 @@ INSERT INTO `tb_sys_prog` VALUES
 ('5c6f46d7-6ab5-11f1-a6b2-244bfee7c856','MD_PROG008D0001A','AH01 - Action Plan (Create)','#/md_prog008d0001/create','N','N',0,0,'CORE','ITEM','SYSTEM','clipboard-check','admin','2026-06-18 09:29:13',NULL,NULL),
 ('5c7200ab-6ab5-11f1-a6b2-244bfee7c856','MD_PROG008D0001E','AH01 - Action Plan (Edit)','#/md_prog008d0001/edit','Y','N',0,0,'CORE','ITEM','SYSTEM','clipboard-check','admin','2026-06-18 09:29:13',NULL,NULL),
 ('5e082c7c-1730-4176-89c6-93e235707deb','CORE_PROG002D0001A','ZB01 - Role (Create)','#/prog002d0001/create','N','N',0,0,'CORE','ITEM','PEOPLE','person-square','admin','2017-05-09 11:15:50','admin','2023-08-27 16:46:40'),
+('5fe4ce9b-73bb-11f1-a5f8-005056c00001','MD_PROG010D0003Q','AJ03 - Interpretation Rule','#/md_prog010d0003','N','N',0,0,'CORE','ITEM','SYSTEM','sliders','admin','2026-06-29 21:06:30',NULL,NULL),
+('5fe4d294-73bb-11f1-a5f8-005056c00001','MD_PROG010D0003A','AJ03 - Interpretation Rule (Create)','#/md_prog010d0003/create','N','N',0,0,'CORE','ITEM','SYSTEM','sliders','admin','2026-06-29 21:06:30',NULL,NULL),
+('5fe4f432-73bb-11f1-a5f8-005056c00001','MD_PROG010D0003E','AJ03 - Interpretation Rule (Edit)','#/md_prog010d0003/edit','Y','N',0,0,'CORE','ITEM','SYSTEM','sliders','admin','2026-06-29 21:06:30',NULL,NULL),
 ('61aea7ff-7a42-4a92-9a0b-4a0dfe60858b','CORE_PROG004D0001Q','ZD01 - Event log','#/prog004d0001','N','N',0,0,'CORE','ITEM','PROPERTIES','clipboard-pulse','admin','2017-06-03 14:22:07','admin','2023-08-29 10:17:34'),
 ('6709eeb9-6605-11f1-a6b2-244bfee7c856','MD_PROG002D','AB. 計算規則','#','N','N',0,0,'CORE','FOLDER','SYSTEM','gear-wide','admin','2026-06-12 10:20:08','admin','2026-06-12 10:23:37'),
 ('670fcd02-6605-11f1-a6b2-244bfee7c856','MD_PROG002D0001Q','AB01 - Formula','#/md_prog002d0001','N','N',0,0,'CORE','ITEM','SYSTEM','calculator','admin','2026-06-12 10:20:08',NULL,NULL),
@@ -2381,4 +2429,4 @@ SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2026-06-24 14:24:30
+-- Dump completed on 2026-06-29 21:13:23
