@@ -75,6 +75,22 @@ const deleteRule = async (oid: string) => {
         hideLoading();
     }
 };
+const evaluateRules = async () => {
+    showLoading();
+    try {
+        const response = await getAxiosInstance().post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/evaluate', {
+            sourceType: queryPageStore.queryParam.sourceType,
+            signalStatus: 'OPEN'
+        });
+        if (response.data?.success !== import.meta.env.VITE_SUCCESS_FLAG) throw new Error(response.data?.message || 'Evaluation failed');
+        const value = response.data?.value || {};
+        toast.success(`Evaluation completed. Matched: ${value.matchedCount || 0}, inserted: ${value.insertedCount || 0}, updated: ${value.updatedCount || 0}`);
+    } catch (e: any) {
+        toast.warning(escapeQifuHtmlMsg(e?.message || String(e)));
+    } finally {
+        hideLoading();
+    }
+};
 
 const btnClear = () => {
     queryPageStore.clearData();
@@ -120,7 +136,7 @@ onMounted(() => {
         <div class="col-md-2"><select class="form-select" v-model="queryPageStore.queryParam.sourceType"><option v-for="item in sourceTypeOptions" :key="item.value" :value="item.value">{{ item.label }}</option></select></div>
         <div class="col-md-2"><select class="form-select" v-model="queryPageStore.queryParam.severity"><option v-for="item in severityOptions" :key="item.value" :value="item.value">{{ item.label }}</option></select></div>
         <div class="col-md-1"><select class="form-select" v-model="queryPageStore.queryParam.enabledFlag"><option value="">All</option><option value="Y">Y</option><option value="N">N</option></select></div>
-        <div class="col-md-3 d-flex gap-2"><button class="btn btn-primary" @click="queryRules"><i class="bi bi-search"></i> Query</button><button class="btn btn-outline-secondary" @click="btnClear"><i class="bi bi-eraser"></i></button></div>
+        <div class="col-md-4 d-flex gap-2"><button class="btn btn-primary" @click="queryRules"><i class="bi bi-search"></i> Query</button><button class="btn btn-outline-success" @click="evaluateRules"><i class="bi bi-lightning-charge"></i> Evaluate</button><button class="btn btn-outline-secondary" @click="btnClear"><i class="bi bi-eraser"></i></button></div>
       </div>
     </div>
   </div>

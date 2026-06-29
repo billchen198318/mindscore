@@ -1,6 +1,7 @@
 package org.qifu.md.api;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.qifu.base.exception.ControllerException;
@@ -8,10 +9,13 @@ import org.qifu.base.exception.ServiceException;
 import org.qifu.base.model.CheckControllerFieldHandler;
 import org.qifu.base.model.ControllerMethodAuthority;
 import org.qifu.base.model.DefaultControllerJsonResultObj;
+import org.qifu.base.model.DefaultResult;
 import org.qifu.base.model.QueryResult;
 import org.qifu.base.model.SearchBody;
 import org.qifu.core.util.CoreApiSupport;
 import org.qifu.md.entity.MdInterpretationRule;
+import org.qifu.md.logic.IInsightEvaluationLogicService;
+import org.qifu.md.model.InsightEvaluationResult;
 import org.qifu.md.service.IMdInterpretationRuleService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -31,9 +35,13 @@ public class MdPROG010D0003Controller extends CoreApiSupport {
     private static final String DEFAULT_TENANT_OID = "DEFAULT";
 
     private final IMdInterpretationRuleService<MdInterpretationRule, String> ruleService;
+    private final IInsightEvaluationLogicService insightEvaluationLogicService;
 
-    public MdPROG010D0003Controller(IMdInterpretationRuleService<MdInterpretationRule, String> ruleService) {
+    public MdPROG010D0003Controller(
+            IMdInterpretationRuleService<MdInterpretationRule, String> ruleService,
+            IInsightEvaluationLogicService insightEvaluationLogicService) {
         this.ruleService = ruleService;
+        this.insightEvaluationLogicService = insightEvaluationLogicService;
     }
 
     @ControllerMethodAuthority(programId = "MD_PROG010D0003Q", check = true)
@@ -110,6 +118,22 @@ public class MdPROG010D0003Controller extends CoreApiSupport {
             result.setValue(ruleService.delete(key).getValue());
             successResult(result);
         } catch (ServiceException e) {
+            exceptionResult(result, e);
+        }
+        return ResponseEntity.ok(result);
+    }
+
+
+    @ControllerMethodAuthority(programId = "MD_PROG010D0003E", check = true)
+    @Operation(summary = "Evaluate signals with interpretation rules")
+    @PostMapping(value = "/evaluate", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<DefaultControllerJsonResultObj<InsightEvaluationResult>> evaluate(
+            @RequestBody Map<String, Object> request) {
+        DefaultControllerJsonResultObj<InsightEvaluationResult> result = initDefaultJsonResult();
+        try {
+            DefaultResult<InsightEvaluationResult> evaluation = insightEvaluationLogicService.evaluate(request);
+            setDefaultResponseJsonResult(evaluation, result);
+        } catch (ServiceException | ControllerException e) {
             exceptionResult(result, e);
         }
         return ResponseEntity.ok(result);

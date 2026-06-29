@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.qifu.md.mapper.MdInsightMapper">
+  <resultMap id="BaseResultMap" type="org.qifu.md.entity.MdInsight">
+    <id column="OID" jdbcType="CHAR" property="oid" />
+    <result column="TENANT_OID" jdbcType="CHAR" property="tenantOid" />
+    <result column="INSIGHT_NO" jdbcType="VARCHAR" property="insightNo" />
+    <result column="INSIGHT_TYPE" jdbcType="VARCHAR" property="insightType" />
+    <result column="SEVERITY" jdbcType="VARCHAR" property="severity" />
+    <result column="SOURCE_TYPE" jdbcType="VARCHAR" property="sourceType" />
+    <result column="SOURCE_OID" jdbcType="CHAR" property="sourceOid" />
+    <result column="SIGNAL_OID" jdbcType="CHAR" property="signalOid" />
+    <result column="RULE_OID" jdbcType="CHAR" property="ruleOid" />
+    <result column="TITLE" jdbcType="VARCHAR" property="title" />
+    <result column="SUMMARY_TEXT" jdbcType="VARCHAR" property="summaryText" />
+    <result column="STATUS" jdbcType="VARCHAR" property="status" />
+    <result column="OWNER_ACCOUNT" jdbcType="VARCHAR" property="ownerAccount" />
+    <result column="DUE_DATE" jdbcType="DATE" property="dueDate" />
+    <result column="GENERATED_BY_TYPE" jdbcType="VARCHAR" property="generatedByType" />
+    <result column="GENERATED_AT" jdbcType="TIMESTAMP" property="generatedAt" />
+    <result column="ACCEPTED_AT" jdbcType="TIMESTAMP" property="acceptedAt" />
+    <result column="DISMISSED_AT" jdbcType="TIMESTAMP" property="dismissedAt" />
+    <result column="RESOLVED_AT" jdbcType="TIMESTAMP" property="resolvedAt" />
+    <result column="IS_DELETED" jdbcType="INTEGER" property="isDeleted" />
+    <result column="CUSERID" jdbcType="VARCHAR" property="cuserid" />
+    <result column="CDATE" jdbcType="TIMESTAMP" property="cdate" />
+    <result column="UUSERID" jdbcType="VARCHAR" property="uuserid" />
+    <result column="UDATE" jdbcType="TIMESTAMP" property="udate" />
+  </resultMap>
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_insight
+    where OID = #{oid,jdbcType=CHAR}
+  </select>
+
+  <sql id="baseConditions">
+    AND COALESCE(IS_DELETED, 0) = 0
+    <if test="oid != null and oid != ''.toString()">AND OID = #{oid,jdbcType=CHAR}</if>
+    <if test="tenantOid != null and tenantOid != ''.toString()">AND TENANT_OID = #{tenantOid,jdbcType=CHAR}</if>
+    <if test="insightNo != null and insightNo != ''.toString()">AND INSIGHT_NO = #{insightNo,jdbcType=VARCHAR}</if>
+    <if test="insightNoLike != null and insightNoLike != ''.toString()">AND INSIGHT_NO LIKE #{insightNoLike,jdbcType=VARCHAR}</if>
+    <if test="insightType != null and insightType != ''.toString()">AND INSIGHT_TYPE = #{insightType,jdbcType=VARCHAR}</if>
+    <if test="severity != null and severity != ''.toString()">AND SEVERITY = #{severity,jdbcType=VARCHAR}</if>
+    <if test="sourceType != null and sourceType != ''.toString()">AND SOURCE_TYPE = #{sourceType,jdbcType=VARCHAR}</if>
+    <if test="sourceOid != null and sourceOid != ''.toString()">AND SOURCE_OID = #{sourceOid,jdbcType=CHAR}</if>
+    <if test="signalOid != null and signalOid != ''.toString()">AND SIGNAL_OID = #{signalOid,jdbcType=CHAR}</if>
+    <if test="ruleOid != null and ruleOid != ''.toString()">AND RULE_OID = #{ruleOid,jdbcType=CHAR}</if>
+    <if test="titleLike != null and titleLike != ''.toString()">AND TITLE LIKE #{titleLike,jdbcType=VARCHAR}</if>
+    <if test="status != null and status != ''.toString()">AND STATUS = #{status,jdbcType=VARCHAR}</if>
+    <if test="ownerAccount != null and ownerAccount != ''.toString()">AND OWNER_ACCOUNT = #{ownerAccount,jdbcType=VARCHAR}</if>
+    <if test="generatedByType != null and generatedByType != ''.toString()">AND GENERATED_BY_TYPE = #{generatedByType,jdbcType=VARCHAR}</if>
+  </sql>
+
+  <select id="selectListByParams" parameterType="java.util.HashMap" resultMap="BaseResultMap">
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_insight
+    where 1=1
+    <include refid="baseConditions" />
+    <if test="orderBy != null and orderBy != ''.toString() and sortType != null and sortType != ''.toString()">
+      ORDER BY ${orderBy} ${sortType}
+    </if>
+  </select>
+
+  <select id="findPage" parameterType="java.util.HashMap" resultMap="BaseResultMap">
+    <include refid="org.qifu.core.mapper.DB1Config.sql1"/>
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_insight
+    where 1=1
+    <include refid="baseConditions" />
+    <include refid="org.qifu.core.mapper.DB1Config.sql2"/>
+  </select>
+
+  <select id="count" parameterType="java.util.HashMap" resultType="java.lang.Long">
+    select count(*)
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_insight
+    where 1=1
+    <include refid="baseConditions" />
+  </select>
+
+  <insert id="insert" parameterType="org.qifu.md.entity.MdInsight">
+    insert into <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_insight
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="oid != null">OID,</if>
+      <if test="tenantOid != null">TENANT_OID,</if>
+      <if test="insightNo != null">INSIGHT_NO,</if>
+      <if test="insightType != null">INSIGHT_TYPE,</if>
+      <if test="severity != null">SEVERITY,</if>
+      <if test="sourceType != null">SOURCE_TYPE,</if>
+      <if test="sourceOid != null">SOURCE_OID,</if>
+      <if test="signalOid != null">SIGNAL_OID,</if>
+      <if test="ruleOid != null">RULE_OID,</if>
+      <if test="title != null">TITLE,</if>
+      <if test="summaryText != null">SUMMARY_TEXT,</if>
+      <if test="status != null">STATUS,</if>
+      <if test="ownerAccount != null">OWNER_ACCOUNT,</if>
+      <if test="dueDate != null">DUE_DATE,</if>
+      <if test="generatedByType != null">GENERATED_BY_TYPE,</if>
+      <if test="generatedAt != null">GENERATED_AT,</if>
+      <if test="acceptedAt != null">ACCEPTED_AT,</if>
+      <if test="dismissedAt != null">DISMISSED_AT,</if>
+      <if test="resolvedAt != null">RESOLVED_AT,</if>
+      <if test="isDeleted != null">IS_DELETED,</if>
+      <if test="cuserid != null">CUSERID,</if>
+      <if test="cdate != null">CDATE,</if>
+      <if test="uuserid != null">UUSERID,</if>
+      <if test="udate != null">UDATE,</if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="oid != null">#{oid,jdbcType=CHAR},</if>
+      <if test="tenantOid != null">#{tenantOid,jdbcType=CHAR},</if>
+      <if test="insightNo != null">#{insightNo,jdbcType=VARCHAR},</if>
+      <if test="insightType != null">#{insightType,jdbcType=VARCHAR},</if>
+      <if test="severity != null">#{severity,jdbcType=VARCHAR},</if>
+      <if test="sourceType != null">#{sourceType,jdbcType=VARCHAR},</if>
+      <if test="sourceOid != null">#{sourceOid,jdbcType=CHAR},</if>
+      <if test="signalOid != null">#{signalOid,jdbcType=CHAR},</if>
+      <if test="ruleOid != null">#{ruleOid,jdbcType=CHAR},</if>
+      <if test="title != null">#{title,jdbcType=VARCHAR},</if>
+      <if test="summaryText != null">#{summaryText,jdbcType=VARCHAR},</if>
+      <if test="status != null">#{status,jdbcType=VARCHAR},</if>
+      <if test="ownerAccount != null">#{ownerAccount,jdbcType=VARCHAR},</if>
+      <if test="dueDate != null">#{dueDate,jdbcType=DATE},</if>
+      <if test="generatedByType != null">#{generatedByType,jdbcType=VARCHAR},</if>
+      <if test="generatedAt != null">#{generatedAt,jdbcType=TIMESTAMP},</if>
+      <if test="acceptedAt != null">#{acceptedAt,jdbcType=TIMESTAMP},</if>
+      <if test="dismissedAt != null">#{dismissedAt,jdbcType=TIMESTAMP},</if>
+      <if test="resolvedAt != null">#{resolvedAt,jdbcType=TIMESTAMP},</if>
+      <if test="isDeleted != null">#{isDeleted,jdbcType=INTEGER},</if>
+      <if test="cuserid != null">#{cuserid,jdbcType=VARCHAR},</if>
+      <if test="cdate != null">#{cdate,jdbcType=TIMESTAMP},</if>
+      <if test="uuserid != null">#{uuserid,jdbcType=VARCHAR},</if>
+      <if test="udate != null">#{udate,jdbcType=TIMESTAMP},</if>
+    </trim>
+  </insert>
+
+  <update id="update" parameterType="org.qifu.md.entity.MdInsight">
+    update <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_insight
+    <set>
+      <if test="tenantOid != null">TENANT_OID = #{tenantOid,jdbcType=CHAR},</if>
+      <if test="insightNo != null">INSIGHT_NO = #{insightNo,jdbcType=VARCHAR},</if>
+      <if test="insightType != null">INSIGHT_TYPE = #{insightType,jdbcType=VARCHAR},</if>
+      <if test="severity != null">SEVERITY = #{severity,jdbcType=VARCHAR},</if>
+      <if test="sourceType != null">SOURCE_TYPE = #{sourceType,jdbcType=VARCHAR},</if>
+      <if test="sourceOid != null">SOURCE_OID = #{sourceOid,jdbcType=CHAR},</if>
+      <if test="signalOid != null">SIGNAL_OID = #{signalOid,jdbcType=CHAR},</if>
+      <if test="ruleOid != null">RULE_OID = #{ruleOid,jdbcType=CHAR},</if>
+      <if test="title != null">TITLE = #{title,jdbcType=VARCHAR},</if>
+      <if test="summaryText != null">SUMMARY_TEXT = #{summaryText,jdbcType=VARCHAR},</if>
+      <if test="status != null">STATUS = #{status,jdbcType=VARCHAR},</if>
+      <if test="ownerAccount != null">OWNER_ACCOUNT = #{ownerAccount,jdbcType=VARCHAR},</if>
+      <if test="dueDate != null">DUE_DATE = #{dueDate,jdbcType=DATE},</if>
+      <if test="generatedByType != null">GENERATED_BY_TYPE = #{generatedByType,jdbcType=VARCHAR},</if>
+      <if test="generatedAt != null">GENERATED_AT = #{generatedAt,jdbcType=TIMESTAMP},</if>
+      <if test="acceptedAt != null">ACCEPTED_AT = #{acceptedAt,jdbcType=TIMESTAMP},</if>
+      <if test="dismissedAt != null">DISMISSED_AT = #{dismissedAt,jdbcType=TIMESTAMP},</if>
+      <if test="resolvedAt != null">RESOLVED_AT = #{resolvedAt,jdbcType=TIMESTAMP},</if>
+      <if test="isDeleted != null">IS_DELETED = #{isDeleted,jdbcType=INTEGER},</if>
+      <if test="uuserid != null">UUSERID = #{uuserid,jdbcType=VARCHAR},</if>
+      <if test="udate != null">UDATE = #{udate,jdbcType=TIMESTAMP},</if>
+    </set>
+    where OID = #{oid,jdbcType=CHAR}
+  </update>
+
+  <delete id="delete" parameterType="org.qifu.md.entity.MdInsight">
+    delete from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_insight
+    where OID = #{oid,jdbcType=CHAR}
+  </delete>
+</mapper>

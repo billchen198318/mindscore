@@ -325,6 +325,59 @@ COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
+-- Table structure for table `md_insight`
+--
+
+DROP TABLE IF EXISTS `md_insight`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `md_insight` (
+  `OID` char(36) NOT NULL,
+  `TENANT_OID` char(36) NOT NULL DEFAULT 'DEFAULT',
+  `INSIGHT_NO` varchar(64) NOT NULL,
+  `INSIGHT_TYPE` varchar(32) NOT NULL,
+  `SEVERITY` varchar(32) NOT NULL DEFAULT 'MEDIUM',
+  `SOURCE_TYPE` varchar(32) NOT NULL,
+  `SOURCE_OID` char(36) NOT NULL,
+  `SIGNAL_OID` char(36) DEFAULT NULL,
+  `RULE_OID` char(36) DEFAULT NULL,
+  `TITLE` varchar(200) NOT NULL,
+  `SUMMARY_TEXT` varchar(4000) DEFAULT NULL,
+  `STATUS` varchar(32) NOT NULL DEFAULT 'OPEN',
+  `OWNER_ACCOUNT` varchar(64) DEFAULT NULL,
+  `DUE_DATE` date DEFAULT NULL,
+  `GENERATED_BY_TYPE` varchar(32) NOT NULL DEFAULT 'RULE',
+  `GENERATED_AT` datetime NOT NULL DEFAULT current_timestamp(),
+  `ACCEPTED_AT` datetime DEFAULT NULL,
+  `DISMISSED_AT` datetime DEFAULT NULL,
+  `RESOLVED_AT` datetime DEFAULT NULL,
+  `IS_DELETED` tinyint(4) NOT NULL DEFAULT 0,
+  `CUSERID` varchar(64) DEFAULT NULL,
+  `CDATE` datetime NOT NULL DEFAULT current_timestamp(),
+  `UUSERID` varchar(64) DEFAULT NULL,
+  `UDATE` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`OID`),
+  UNIQUE KEY `UK_MD_INSIGHT_NO` (`TENANT_OID`,`INSIGHT_NO`),
+  KEY `IDX_MD_INSIGHT_SOURCE` (`SOURCE_TYPE`,`SOURCE_OID`),
+  KEY `IDX_MD_INSIGHT_SIGNAL_RULE` (`SIGNAL_OID`,`RULE_OID`),
+  KEY `IDX_MD_INSIGHT_STATUS` (`STATUS`,`SEVERITY`),
+  KEY `IDX_MD_INSIGHT_OWNER` (`OWNER_ACCOUNT`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `md_insight`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `md_insight` WRITE;
+/*!40000 ALTER TABLE `md_insight` DISABLE KEYS */;
+/*!40000 ALTER TABLE `md_insight` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
 -- Table structure for table `md_interpretation_rule`
 --
 
@@ -2429,4 +2482,4 @@ SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2026-06-29 21:13:23
+-- Dump completed on 2026-06-29 21:34:34
