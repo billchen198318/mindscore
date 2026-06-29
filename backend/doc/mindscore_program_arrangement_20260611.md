@@ -290,9 +290,9 @@ This family covers signal generation, insight, recommendation and LLM config.
 |---|---|---|---|---|
 | `MD_PROG010D0001` | `md_prog010d0001` | `MdLlmProviderConfig` / `MdLlmRunLog` | LLM config and audit log | Low |
 | `MD_PROG010D0002` | `md_prog010d0002` | `MdPerformanceSignal` | Signal list / generation | Low |
-| `MD_PROG010D0003` | `md_prog010d0003` | `MdInterpretationRule` | Rule maintenance | Low |
-| `MD_PROG010D0004` | `md_prog010d0004` | `MdInsight` | Insight inbox | Low |
-| `MD_PROG010D0005` | `md_prog010d0005` | `MdInsightEvidence` / `MdInsightRecommendation` | Insight detail | Low |
+| `MD_PROG010D0003` | `md_prog010d0003` | `MdInterpretationRule` | Rule maintenance and rule evaluation | Low |
+| `MD_PROG010D0004` | `md_prog010d0004` | `MdInsight` | Insight inbox, detail and lifecycle status | Low |
+| `MD_PROG010D0005` | `md_prog010d0005` | `MdInsightEvidence` / `MdInsightRecommendation` | Insight evidence and recommendation | Low |
 
 Recommended backend controllers:
 
@@ -1155,12 +1155,23 @@ API key 實作規則：
 - 標準化 KPI / OKR / BSC / PDCA 成為 signal
 
 #### MD_PROG010D0003 - Interpretation Rule
+Implementation notes:
+
+- Maintain deterministic interpretation rules.
+- Evaluate open performance signals through `/api/MD_PROG010D0003/evaluate`.
+- Evaluation creates or updates `md_insight` from matching `md_performance_signal` and enabled `md_interpretation_rule` rows.
 
 核心用途：
 
 - 定義 deterministic 風險規則
 
 #### MD_PROG010D0004 - Insight
+Implementation notes:
+
+- Query generated `md_insight` rows.
+- View insight detail.
+- Manage lifecycle status: `OPEN`, `ACCEPTED`, `DISMISSED`, `RESOLVED`.
+- This program does not provide manual insight creation; generated insights come from rule evaluation first.
 
 核心用途：
 
@@ -1168,6 +1179,12 @@ API key 實作規則：
 - 顯示風險、異常、落後、逾期
 
 #### MD_PROG010D0005 - Insight Evidence / Recommendation
+Implementation notes:
+
+- Remaining Phase 14 scope.
+- Manage evidence rows that explain why an insight exists.
+- Manage recommendation rows and recommendation status.
+- Recommendation should be implemented before Action from insight.
 
 核心用途：
 

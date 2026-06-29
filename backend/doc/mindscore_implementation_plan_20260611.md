@@ -190,6 +190,16 @@ Recommended implementation order:
 5. Insight generate / list / detail
 6. Recommendation
 7. Action from insight
+Current implementation notes:
+
+- `MD_PROG010D0001` implements LLM provider config, connection test, and run log query.
+- `MD_PROG010D0002` implements performance signal query and signal generation for KPI, OKR, Strategy, and Action overdue cases.
+- `MD_PROG010D0003` implements interpretation rule maintenance and rule evaluation through `/api/MD_PROG010D0003/evaluate`.
+- Rule evaluation reads open `md_performance_signal` rows, matches enabled `md_interpretation_rule` rows, and creates or updates `md_insight`.
+- `MD_PROG010D0004` implements Insight Inbox: list, detail, Accept, Dismiss, and Resolve. It does not provide manual create.
+- `MD_PROG010D0005` remains the next Phase 14 program for insight evidence and recommendation.
+- Action from insight remains unfinished and should be implemented after recommendation.
+- Unified LLM explanation/recommendation generation remains unfinished; current LLM support covers provider configuration, connection test, and run logging foundation.
 
 Phase 14 foundation tables:
 
