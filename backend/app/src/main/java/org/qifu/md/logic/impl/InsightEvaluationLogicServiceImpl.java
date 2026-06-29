@@ -25,8 +25,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.qifu.util.LoadResources;
+import tools.jackson.core.type.TypeReference;
 
 @Service
 @ServiceAuthority(check = true)
@@ -39,17 +39,13 @@ public class InsightEvaluationLogicServiceImpl implements IInsightEvaluationLogi
     private final IMdPerformanceSignalService<MdPerformanceSignal, String> signalService;
     private final IMdInterpretationRuleService<MdInterpretationRule, String> ruleService;
     private final IMdInsightService<MdInsight, String> insightService;
-    private final ObjectMapper objectMapper;
-
     public InsightEvaluationLogicServiceImpl(
             IMdPerformanceSignalService<MdPerformanceSignal, String> signalService,
             IMdInterpretationRuleService<MdInterpretationRule, String> ruleService,
-            IMdInsightService<MdInsight, String> insightService,
-            ObjectMapper objectMapper) {
+            IMdInsightService<MdInsight, String> insightService) {
         this.signalService = signalService;
         this.ruleService = ruleService;
         this.insightService = insightService;
-        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -192,7 +188,7 @@ public class InsightEvaluationLogicServiceImpl implements IInsightEvaluationLogi
             return Map.of();
         }
         try {
-            return objectMapper.readValue(json, new TypeReference<Map<String, Object>>() {});
+            return LoadResources.getObjectMapper().readValue(json, new TypeReference<Map<String, Object>>() {});
         } catch (Exception ex) {
             throw new ServiceException("Invalid rule " + fieldName + " JSON");
         }
