@@ -82,14 +82,14 @@ MindScore 用來協助組織回答幾個關鍵問題：
 
 ### Insight / LLM
 
-Insight / LLM 是後續規劃階段，預計用於：
+Insight / LLM 是 MindScore 的解釋與建議層，用於：
 
 - Performance Signal 產生
 - Interpretation Rule 解讀規則
 - Insight 清單與明細
 - Recommendation 建議
 - 從 Insight 建立 Action
-- LLM Provider 設定，預計支援 OpenAI 與 Gemini
+- LLM Provider 設定，支援 OpenAI 與 Gemini
 - LLM Run Log 稽核紀錄
 
 ## 程式模組
@@ -105,7 +105,7 @@ Insight / LLM 是後續規劃階段，預計用於：
 | `MD_PROG007D` | `AG. Strategy / BSC` | 策略工作區、主題、目標、連結與策略快照報表 |
 | `MD_PROG008D` | `AH. Action / PDCA` | Action Plan、Action Item 與 Action / PDCA Report |
 | `MD_PROG009D` | `AI. Dashboard` | 跨 KPI / OKR / Strategy / Action 的管理儀表板 |
-| `MD_PROG010D` | Insight / LLM | 後續規劃的洞察、建議與 LLM 稽核功能 |
+| `MD_PROG010D` | Insight / LLM | Signal, Rule, Insight, Evidence, Recommendation, LLM and Action follow-up |
 
 ## 專案結構
 
@@ -168,7 +168,7 @@ db1.datasource.password=ENC(CLI 輸出的密文)
 
 ## 目前狀態
 
-目前核心功能已推進到 Phase 13 管理儀表板：
+目前主要功能已推進到 Phase 14 Insight / LLM：
 
 - 基本資料
 - 計算規則
@@ -177,8 +177,12 @@ db1.datasource.password=ENC(CLI 輸出的密文)
 - Strategy / BSC 維護與策略快照報表
 - Action / PDCA 維護與報表
 - 跨領域管理儀表板
+- Insight / LLM
+- Insight Evidence / Recommendation
+- LLM Recommendation generation
+- Recommendation to Action follow-up
 
-下一階段為 Insight / LLM。
+Phase 14 已完成。
 
 ## 專案來源
 
