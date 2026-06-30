@@ -378,6 +378,87 @@ COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
+-- Table structure for table `md_insight_evidence`
+--
+
+DROP TABLE IF EXISTS `md_insight_evidence`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `md_insight_evidence` (
+  `OID` char(36) NOT NULL,
+  `TENANT_OID` char(36) NOT NULL,
+  `INSIGHT_OID` char(36) NOT NULL,
+  `EVIDENCE_TYPE` varchar(32) NOT NULL,
+  `SOURCE_TYPE` varchar(32) DEFAULT NULL,
+  `SOURCE_OID` char(36) DEFAULT NULL,
+  `LABEL` varchar(200) NOT NULL,
+  `VALUE_TEXT` varchar(2000) DEFAULT NULL,
+  `VALUE_NO` decimal(18,4) DEFAULT NULL,
+  `EVIDENCE_JSON` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`EVIDENCE_JSON`)),
+  `SORT_NO` int(11) NOT NULL DEFAULT 0,
+  `CUSERID` varchar(64) DEFAULT NULL,
+  `CDATE` datetime NOT NULL DEFAULT current_timestamp(),
+  `IS_DELETED` tinyint(4) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`OID`),
+  KEY `IDX_MD_INSIGHT_EVIDENCE_INSIGHT` (`INSIGHT_OID`),
+  KEY `IDX_MD_INSIGHT_EVIDENCE_SOURCE` (`SOURCE_TYPE`,`SOURCE_OID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `md_insight_evidence`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `md_insight_evidence` WRITE;
+/*!40000 ALTER TABLE `md_insight_evidence` DISABLE KEYS */;
+/*!40000 ALTER TABLE `md_insight_evidence` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `md_insight_recommendation`
+--
+
+DROP TABLE IF EXISTS `md_insight_recommendation`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `md_insight_recommendation` (
+  `OID` char(36) NOT NULL,
+  `TENANT_OID` char(36) NOT NULL,
+  `INSIGHT_OID` char(36) NOT NULL,
+  `RECOMMENDATION_TYPE` varchar(32) NOT NULL,
+  `TITLE` varchar(200) NOT NULL,
+  `CONTENT_TEXT` varchar(4000) DEFAULT NULL,
+  `PRIORITY_NO` int(11) NOT NULL DEFAULT 0,
+  `STATUS` varchar(32) NOT NULL DEFAULT 'OPEN',
+  `ACCEPTED_FLAG` varchar(1) NOT NULL DEFAULT 'N',
+  `ACTION_CREATED_FLAG` varchar(1) NOT NULL DEFAULT 'N',
+  `CUSERID` varchar(64) DEFAULT NULL,
+  `CDATE` datetime NOT NULL DEFAULT current_timestamp(),
+  `UUSERID` varchar(64) DEFAULT NULL,
+  `UDATE` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `IS_DELETED` tinyint(4) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`OID`),
+  KEY `IDX_MD_RECOMMENDATION_INSIGHT` (`INSIGHT_OID`),
+  KEY `IDX_MD_RECOMMENDATION_STATUS` (`STATUS`,`ACCEPTED_FLAG`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `md_insight_recommendation`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `md_insight_recommendation` WRITE;
+/*!40000 ALTER TABLE `md_insight_recommendation` DISABLE KEYS */;
+/*!40000 ALTER TABLE `md_insight_recommendation` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
 -- Table structure for table `md_interpretation_rule`
 --
 
@@ -1998,10 +2079,6 @@ INSERT INTO `tb_sys_menu` VALUES
 ('4bd4d202-5feb-495b-8c8c-ec6b7f5b8041','CORE_PROG002D0002Q','79e1cf24-2522-4cdf-abcc-6455b47d545b','Y','admin','2017-05-10 14:20:12',NULL,NULL),
 ('57b2fa07-6985-11f1-9ff0-6fc50c28457a','MD_PROG006D','00000000-0000-0000-0000-000000000000','Y','admin','2026-06-16 21:14:44',NULL,NULL),
 ('5e055f61-bfc5-402c-93b4-f241dc17b00b','CORE_PROG004D','00000000-0000-0000-0000-000000000000','Y','admin','2017-06-03 14:23:17',NULL,NULL),
-('6012087b-73c2-11f1-ae8e-4516adb7d062','MD_PROG010D0001Q','25b62ac5-6e3a-11f1-ada3-f96ece44675b','Y','admin','2026-06-29 21:56:49',NULL,NULL),
-('601319ec-73c2-11f1-ae8e-77a6585c377a','MD_PROG010D0002Q','25b62ac5-6e3a-11f1-ada3-f96ece44675b','Y','admin','2026-06-29 21:56:49',NULL,NULL),
-('6013dd3d-73c2-11f1-ae8e-afc6ee5fce69','MD_PROG010D0003Q','25b62ac5-6e3a-11f1-ada3-f96ece44675b','Y','admin','2026-06-29 21:56:49',NULL,NULL),
-('6014eeae-73c2-11f1-ae8e-51e1bfd97486','MD_PROG010D0004Q','25b62ac5-6e3a-11f1-ada3-f96ece44675b','Y','admin','2026-06-29 21:56:49',NULL,NULL),
 ('6383c095-6633-11f1-aa10-b7dc47bd3176','MD_PROG002D0001Q','bef9d6cc-6605-11f1-81b4-6babbff1c7f5','Y','admin','2026-06-12 15:50:32',NULL,NULL),
 ('63845cd6-6633-11f1-aa10-2bc96535409b','MD_PROG002D0002Q','bef9d6cc-6605-11f1-81b4-6babbff1c7f5','Y','admin','2026-06-12 15:50:32',NULL,NULL),
 ('63856e47-6633-11f1-aa10-0dba6dbbdbe5','MD_PROG002D0003Q','bef9d6cc-6605-11f1-81b4-6babbff1c7f5','Y','admin','2026-06-12 15:50:32',NULL,NULL),
@@ -2015,6 +2092,11 @@ INSERT INTO `tb_sys_menu` VALUES
 ('947ccbfe-6558-11f1-8ea0-db03aa0e50b5','MD_PROG001D0001Q','91f90746-6558-11f1-8ea0-31612e6b0ce2','Y','admin','2026-06-11 13:44:14',NULL,NULL),
 ('947d412f-6558-11f1-8ea0-5d8cbc8c4b4c','MD_PROG001D0002Q','91f90746-6558-11f1-8ea0-31612e6b0ce2','Y','admin','2026-06-11 13:44:14',NULL,NULL),
 ('947db660-6558-11f1-8ea0-f1e5fa666cce','MD_PROG001D0003Q','91f90746-6558-11f1-8ea0-31612e6b0ce2','Y','admin','2026-06-11 13:44:14',NULL,NULL),
+('9940d7f0-7482-11f1-a7d2-39230da18856','MD_PROG010D0001Q','25b62ac5-6e3a-11f1-ada3-f96ece44675b','Y','admin','2026-06-30 20:52:49',NULL,NULL),
+('9941c251-7482-11f1-a7d2-5d26f7ebc8e4','MD_PROG010D0002Q','25b62ac5-6e3a-11f1-ada3-f96ece44675b','Y','admin','2026-06-30 20:52:49',NULL,NULL),
+('99425e92-7482-11f1-a7d2-a7662d7ecf3e','MD_PROG010D0003Q','25b62ac5-6e3a-11f1-ada3-f96ece44675b','Y','admin','2026-06-30 20:52:49',NULL,NULL),
+('9942fad3-7482-11f1-a7d2-8d3e9547c9b2','MD_PROG010D0004Q','25b62ac5-6e3a-11f1-ada3-f96ece44675b','Y','admin','2026-06-30 20:52:49',NULL,NULL),
+('99445a64-7482-11f1-a7d2-bf341fe7459d','MD_PROG010D0005Q','25b62ac5-6e3a-11f1-ada3-f96ece44675b','Y','admin','2026-06-30 20:52:49',NULL,NULL),
 ('9972c249-2985-49ac-9b8b-f6c25c65fd4e','CORE_PROG002D0003Q','79e1cf24-2522-4cdf-abcc-6455b47d545b','Y','admin','2017-05-10 14:20:12',NULL,NULL),
 ('b575783b-692f-11f1-b477-7bfe882fcfd1','MD_PROG005D','00000000-0000-0000-0000-000000000000','Y','admin','2026-06-16 11:01:45',NULL,NULL),
 ('b576629c-692f-11f1-b477-61800eed04aa','MD_PROG005D0001Q','b575783b-692f-11f1-b477-7bfe882fcfd1','Y','admin','2026-06-16 11:01:45',NULL,NULL),
@@ -2206,6 +2288,9 @@ INSERT INTO `tb_sys_prog` VALUES
 ('c9d51115-6984-11f1-a592-005056c00001','MD_PROG006D0001Q','AF01 - OKR Cycle','#/md_prog006d0001','N','N',0,0,'CORE','ITEM','SYSTEM','calendar3','admin','2026-06-16 21:10:33',NULL,NULL),
 ('c9d511cc-6984-11f1-a592-005056c00001','MD_PROG006D0001A','AF01 - OKR Cycle (新增)','#/md_prog006d0001/create','N','N',0,0,'CORE','ITEM','SYSTEM','calendar3','admin','2026-06-16 21:10:33',NULL,NULL),
 ('c9d51275-6984-11f1-a592-005056c00001','MD_PROG006D0001E','AF01 - OKR Cycle (編輯)','#/md_prog006d0001/edit','Y','N',0,0,'CORE','ITEM','SYSTEM','calendar3','admin','2026-06-16 21:10:33',NULL,NULL),
+('d1995b08-7481-11f1-a5f8-005056c00001','MD_PROG010D0005Q','AJ05 - Insight Evidence / Recommendation','#/md_prog010d0005','N','N',0,0,'CORE','ITEM','SYSTEM','lightbulb','admin','2026-06-30 20:46:56',NULL,NULL),
+('d19960e5-7481-11f1-a5f8-005056c00001','MD_PROG010D0005A','AJ05 - Insight Recommendation (Create)','#/md_prog010d0005','Y','N',0,0,'CORE','ITEM','SYSTEM','lightbulb','admin','2026-06-30 20:46:56',NULL,NULL),
+('d1996191-7481-11f1-a5f8-005056c00001','MD_PROG010D0005E','AJ05 - Insight Recommendation (Edit)','#/md_prog010d0005','Y','N',0,0,'CORE','ITEM','SYSTEM','lightbulb','admin','2026-06-30 20:46:56',NULL,NULL),
 ('da69253b-6557-11f1-8ea0-3792e4bd3499','MD_PROG001D','AA. 基本資料','#','N','N',0,0,'CORE','FOLDER','SYSTEM','folder','admin','2026-06-11 13:39:02',NULL,NULL),
 ('da7d969a-5efb-4e84-9eab-4fdae236f28c','CORE_PROG002D0002Q','ZB02 - User role','#/prog002d0002','N','N',0,0,'CORE','ITEM','PERSON','person-check','admin','2017-05-08 21:34:39','admin','2023-08-28 19:54:25'),
 ('dda67b1d-e3a2-4534-835a-c62d9e8421f3','CORE_PROG001D0005S01Q','ZA05 - JasperReport (Parameter)','#/prog001d0005/setparam','Y','N',0,0,'CORE','ITEM','APPLICATION_PDF','file-pdf','admin','2017-05-18 09:57:26','admin','2023-08-24 20:21:02'),
@@ -2485,4 +2570,4 @@ SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2026-06-29 21:58:00
+-- Dump completed on 2026-06-30 20:54:23

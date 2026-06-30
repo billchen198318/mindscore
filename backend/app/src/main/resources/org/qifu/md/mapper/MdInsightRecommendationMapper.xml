@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.qifu.md.mapper.MdInsightRecommendationMapper">
+  <resultMap id="BaseResultMap" type="org.qifu.md.entity.MdInsightRecommendation">
+    <id column="OID" jdbcType="CHAR" property="oid" />
+    <result column="TENANT_OID" jdbcType="CHAR" property="tenantOid" />
+    <result column="INSIGHT_OID" jdbcType="CHAR" property="insightOid" />
+    <result column="RECOMMENDATION_TYPE" jdbcType="VARCHAR" property="recommendationType" />
+    <result column="TITLE" jdbcType="VARCHAR" property="title" />
+    <result column="CONTENT_TEXT" jdbcType="VARCHAR" property="contentText" />
+    <result column="PRIORITY_NO" jdbcType="INTEGER" property="priorityNo" />
+    <result column="STATUS" jdbcType="VARCHAR" property="status" />
+    <result column="ACCEPTED_FLAG" jdbcType="VARCHAR" property="acceptedFlag" />
+    <result column="ACTION_CREATED_FLAG" jdbcType="VARCHAR" property="actionCreatedFlag" />
+    <result column="CUSERID" jdbcType="VARCHAR" property="cuserid" />
+    <result column="CDATE" jdbcType="TIMESTAMP" property="cdate" />
+    <result column="UUSERID" jdbcType="VARCHAR" property="uuserid" />
+    <result column="UDATE" jdbcType="TIMESTAMP" property="udate" />
+    <result column="IS_DELETED" jdbcType="INTEGER" property="isDeleted" />
+  </resultMap>
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_insight_recommendation
+    where OID = #{oid,jdbcType=CHAR}
+  </select>
+
+  <sql id="baseConditions">
+    AND COALESCE(IS_DELETED, 0) = 0
+    <if test="oid != null and oid != ''.toString()">AND OID = #{oid,jdbcType=CHAR}</if>
+    <if test="tenantOid != null and tenantOid != ''.toString()">AND TENANT_OID = #{tenantOid,jdbcType=CHAR}</if>
+    <if test="insightOid != null and insightOid != ''.toString()">AND INSIGHT_OID = #{insightOid,jdbcType=CHAR}</if>
+    <if test="recommendationType != null and recommendationType != ''.toString()">AND RECOMMENDATION_TYPE = #{recommendationType,jdbcType=VARCHAR}</if>
+    <if test="titleLike != null and titleLike != ''.toString()">AND TITLE LIKE #{titleLike,jdbcType=VARCHAR}</if>
+    <if test="status != null and status != ''.toString()">AND STATUS = #{status,jdbcType=VARCHAR}</if>
+    <if test="acceptedFlag != null and acceptedFlag != ''.toString()">AND ACCEPTED_FLAG = #{acceptedFlag,jdbcType=VARCHAR}</if>
+    <if test="actionCreatedFlag != null and actionCreatedFlag != ''.toString()">AND ACTION_CREATED_FLAG = #{actionCreatedFlag,jdbcType=VARCHAR}</if>
+  </sql>
+
+  <select id="selectListByParams" parameterType="java.util.HashMap" resultMap="BaseResultMap">
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_insight_recommendation
+    where 1=1
+    <include refid="baseConditions" />
+    <if test="orderBy != null and orderBy != ''.toString() and sortType != null and sortType != ''.toString()">
+      ORDER BY ${orderBy} ${sortType}
+    </if>
+  </select>
+
+  <select id="findPage" parameterType="java.util.HashMap" resultMap="BaseResultMap">
+    <include refid="org.qifu.core.mapper.DB1Config.sql1"/>
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_insight_recommendation
+    where 1=1
+    <include refid="baseConditions" />
+    <include refid="org.qifu.core.mapper.DB1Config.sql2"/>
+  </select>
+
+  <select id="count" parameterType="java.util.HashMap" resultType="java.lang.Long">
+    select count(*)
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_insight_recommendation
+    where 1=1
+    <include refid="baseConditions" />
+  </select>
+
+  <insert id="insert" parameterType="org.qifu.md.entity.MdInsightRecommendation">
+    insert into <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_insight_recommendation
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="oid != null">OID,</if>
+      <if test="tenantOid != null">TENANT_OID,</if>
+      <if test="insightOid != null">INSIGHT_OID,</if>
+      <if test="recommendationType != null">RECOMMENDATION_TYPE,</if>
+      <if test="title != null">TITLE,</if>
+      <if test="contentText != null">CONTENT_TEXT,</if>
+      <if test="priorityNo != null">PRIORITY_NO,</if>
+      <if test="status != null">STATUS,</if>
+      <if test="acceptedFlag != null">ACCEPTED_FLAG,</if>
+      <if test="actionCreatedFlag != null">ACTION_CREATED_FLAG,</if>
+      <if test="cuserid != null">CUSERID,</if>
+      <if test="cdate != null">CDATE,</if>
+      <if test="uuserid != null">UUSERID,</if>
+      <if test="udate != null">UDATE,</if>
+      <if test="isDeleted != null">IS_DELETED,</if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="oid != null">#{oid,jdbcType=CHAR},</if>
+      <if test="tenantOid != null">#{tenantOid,jdbcType=CHAR},</if>
+      <if test="insightOid != null">#{insightOid,jdbcType=CHAR},</if>
+      <if test="recommendationType != null">#{recommendationType,jdbcType=VARCHAR},</if>
+      <if test="title != null">#{title,jdbcType=VARCHAR},</if>
+      <if test="contentText != null">#{contentText,jdbcType=VARCHAR},</if>
+      <if test="priorityNo != null">#{priorityNo,jdbcType=INTEGER},</if>
+      <if test="status != null">#{status,jdbcType=VARCHAR},</if>
+      <if test="acceptedFlag != null">#{acceptedFlag,jdbcType=VARCHAR},</if>
+      <if test="actionCreatedFlag != null">#{actionCreatedFlag,jdbcType=VARCHAR},</if>
+      <if test="cuserid != null">#{cuserid,jdbcType=VARCHAR},</if>
+      <if test="cdate != null">#{cdate,jdbcType=TIMESTAMP},</if>
+      <if test="uuserid != null">#{uuserid,jdbcType=VARCHAR},</if>
+      <if test="udate != null">#{udate,jdbcType=TIMESTAMP},</if>
+      <if test="isDeleted != null">#{isDeleted,jdbcType=INTEGER},</if>
+    </trim>
+  </insert>
+
+  <update id="update" parameterType="org.qifu.md.entity.MdInsightRecommendation">
+    update <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_insight_recommendation
+    <set>
+      <if test="tenantOid != null">TENANT_OID = #{tenantOid,jdbcType=CHAR},</if>
+      <if test="insightOid != null">INSIGHT_OID = #{insightOid,jdbcType=CHAR},</if>
+      <if test="recommendationType != null">RECOMMENDATION_TYPE = #{recommendationType,jdbcType=VARCHAR},</if>
+      <if test="title != null">TITLE = #{title,jdbcType=VARCHAR},</if>
+      <if test="contentText != null">CONTENT_TEXT = #{contentText,jdbcType=VARCHAR},</if>
+      <if test="priorityNo != null">PRIORITY_NO = #{priorityNo,jdbcType=INTEGER},</if>
+      <if test="status != null">STATUS = #{status,jdbcType=VARCHAR},</if>
+      <if test="acceptedFlag != null">ACCEPTED_FLAG = #{acceptedFlag,jdbcType=VARCHAR},</if>
+      <if test="actionCreatedFlag != null">ACTION_CREATED_FLAG = #{actionCreatedFlag,jdbcType=VARCHAR},</if>
+      <if test="uuserid != null">UUSERID = #{uuserid,jdbcType=VARCHAR},</if>
+      <if test="udate != null">UDATE = #{udate,jdbcType=TIMESTAMP},</if>
+      <if test="isDeleted != null">IS_DELETED = #{isDeleted,jdbcType=INTEGER},</if>
+    </set>
+    where OID = #{oid,jdbcType=CHAR}
+  </update>
+
+  <delete id="delete" parameterType="org.qifu.md.entity.MdInsightRecommendation">
+    delete from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_insight_recommendation
+    where OID = #{oid,jdbcType=CHAR}
+  </delete>
+</mapper>

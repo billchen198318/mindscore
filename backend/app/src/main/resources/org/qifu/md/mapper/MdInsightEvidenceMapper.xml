@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.qifu.md.mapper.MdInsightEvidenceMapper">
+  <resultMap id="BaseResultMap" type="org.qifu.md.entity.MdInsightEvidence">
+    <id column="OID" jdbcType="CHAR" property="oid" />
+    <result column="TENANT_OID" jdbcType="CHAR" property="tenantOid" />
+    <result column="INSIGHT_OID" jdbcType="CHAR" property="insightOid" />
+    <result column="EVIDENCE_TYPE" jdbcType="VARCHAR" property="evidenceType" />
+    <result column="SOURCE_TYPE" jdbcType="VARCHAR" property="sourceType" />
+    <result column="SOURCE_OID" jdbcType="CHAR" property="sourceOid" />
+    <result column="LABEL" jdbcType="VARCHAR" property="label" />
+    <result column="VALUE_TEXT" jdbcType="VARCHAR" property="valueText" />
+    <result column="VALUE_NO" jdbcType="DECIMAL" property="valueNo" />
+    <result column="EVIDENCE_JSON" jdbcType="LONGVARCHAR" property="evidenceJson" />
+    <result column="SORT_NO" jdbcType="INTEGER" property="sortNo" />
+    <result column="CUSERID" jdbcType="VARCHAR" property="cuserid" />
+    <result column="CDATE" jdbcType="TIMESTAMP" property="cdate" />
+    <result column="IS_DELETED" jdbcType="INTEGER" property="isDeleted" />
+  </resultMap>
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_insight_evidence
+    where OID = #{oid,jdbcType=CHAR}
+  </select>
+
+  <sql id="baseConditions">
+    AND COALESCE(IS_DELETED, 0) = 0
+    <if test="oid != null and oid != ''.toString()">AND OID = #{oid,jdbcType=CHAR}</if>
+    <if test="tenantOid != null and tenantOid != ''.toString()">AND TENANT_OID = #{tenantOid,jdbcType=CHAR}</if>
+    <if test="insightOid != null and insightOid != ''.toString()">AND INSIGHT_OID = #{insightOid,jdbcType=CHAR}</if>
+    <if test="evidenceType != null and evidenceType != ''.toString()">AND EVIDENCE_TYPE = #{evidenceType,jdbcType=VARCHAR}</if>
+    <if test="sourceType != null and sourceType != ''.toString()">AND SOURCE_TYPE = #{sourceType,jdbcType=VARCHAR}</if>
+    <if test="sourceOid != null and sourceOid != ''.toString()">AND SOURCE_OID = #{sourceOid,jdbcType=CHAR}</if>
+    <if test="labelLike != null and labelLike != ''.toString()">AND LABEL LIKE #{labelLike,jdbcType=VARCHAR}</if>
+  </sql>
+
+  <select id="selectListByParams" parameterType="java.util.HashMap" resultMap="BaseResultMap">
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_insight_evidence
+    where 1=1
+    <include refid="baseConditions" />
+    <if test="orderBy != null and orderBy != ''.toString() and sortType != null and sortType != ''.toString()">
+      ORDER BY ${orderBy} ${sortType}
+    </if>
+  </select>
+
+  <select id="findPage" parameterType="java.util.HashMap" resultMap="BaseResultMap">
+    <include refid="org.qifu.core.mapper.DB1Config.sql1"/>
+    select *
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_insight_evidence
+    where 1=1
+    <include refid="baseConditions" />
+    <include refid="org.qifu.core.mapper.DB1Config.sql2"/>
+  </select>
+
+  <select id="count" parameterType="java.util.HashMap" resultType="java.lang.Long">
+    select count(*)
+    from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_insight_evidence
+    where 1=1
+    <include refid="baseConditions" />
+  </select>
+
+  <insert id="insert" parameterType="org.qifu.md.entity.MdInsightEvidence">
+    insert into <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_insight_evidence
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="oid != null">OID,</if>
+      <if test="tenantOid != null">TENANT_OID,</if>
+      <if test="insightOid != null">INSIGHT_OID,</if>
+      <if test="evidenceType != null">EVIDENCE_TYPE,</if>
+      <if test="sourceType != null">SOURCE_TYPE,</if>
+      <if test="sourceOid != null">SOURCE_OID,</if>
+      <if test="label != null">LABEL,</if>
+      <if test="valueText != null">VALUE_TEXT,</if>
+      <if test="valueNo != null">VALUE_NO,</if>
+      <if test="evidenceJson != null">EVIDENCE_JSON,</if>
+      <if test="sortNo != null">SORT_NO,</if>
+      <if test="cuserid != null">CUSERID,</if>
+      <if test="cdate != null">CDATE,</if>
+      <if test="isDeleted != null">IS_DELETED,</if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="oid != null">#{oid,jdbcType=CHAR},</if>
+      <if test="tenantOid != null">#{tenantOid,jdbcType=CHAR},</if>
+      <if test="insightOid != null">#{insightOid,jdbcType=CHAR},</if>
+      <if test="evidenceType != null">#{evidenceType,jdbcType=VARCHAR},</if>
+      <if test="sourceType != null">#{sourceType,jdbcType=VARCHAR},</if>
+      <if test="sourceOid != null">#{sourceOid,jdbcType=CHAR},</if>
+      <if test="label != null">#{label,jdbcType=VARCHAR},</if>
+      <if test="valueText != null">#{valueText,jdbcType=VARCHAR},</if>
+      <if test="valueNo != null">#{valueNo,jdbcType=DECIMAL},</if>
+      <if test="evidenceJson != null">#{evidenceJson,jdbcType=LONGVARCHAR},</if>
+      <if test="sortNo != null">#{sortNo,jdbcType=INTEGER},</if>
+      <if test="cuserid != null">#{cuserid,jdbcType=VARCHAR},</if>
+      <if test="cdate != null">#{cdate,jdbcType=TIMESTAMP},</if>
+      <if test="isDeleted != null">#{isDeleted,jdbcType=INTEGER},</if>
+    </trim>
+  </insert>
+
+  <update id="update" parameterType="org.qifu.md.entity.MdInsightEvidence">
+    update <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_insight_evidence
+    <set>
+      <if test="tenantOid != null">TENANT_OID = #{tenantOid,jdbcType=CHAR},</if>
+      <if test="insightOid != null">INSIGHT_OID = #{insightOid,jdbcType=CHAR},</if>
+      <if test="evidenceType != null">EVIDENCE_TYPE = #{evidenceType,jdbcType=VARCHAR},</if>
+      <if test="sourceType != null">SOURCE_TYPE = #{sourceType,jdbcType=VARCHAR},</if>
+      <if test="sourceOid != null">SOURCE_OID = #{sourceOid,jdbcType=CHAR},</if>
+      <if test="label != null">LABEL = #{label,jdbcType=VARCHAR},</if>
+      <if test="valueText != null">VALUE_TEXT = #{valueText,jdbcType=VARCHAR},</if>
+      <if test="valueNo != null">VALUE_NO = #{valueNo,jdbcType=DECIMAL},</if>
+      <if test="evidenceJson != null">EVIDENCE_JSON = #{evidenceJson,jdbcType=LONGVARCHAR},</if>
+      <if test="sortNo != null">SORT_NO = #{sortNo,jdbcType=INTEGER},</if>
+      <if test="isDeleted != null">IS_DELETED = #{isDeleted,jdbcType=INTEGER},</if>
+    </set>
+    where OID = #{oid,jdbcType=CHAR}
+  </update>
+
+  <delete id="delete" parameterType="org.qifu.md.entity.MdInsightEvidence">
+    delete from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_insight_evidence
+    where OID = #{oid,jdbcType=CHAR}
+  </delete>
+</mapper>
