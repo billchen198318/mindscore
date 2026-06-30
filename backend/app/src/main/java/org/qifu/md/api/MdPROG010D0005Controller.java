@@ -9,12 +9,17 @@ import org.qifu.base.exception.ServiceException;
 import org.qifu.base.model.CheckControllerFieldHandler;
 import org.qifu.base.model.ControllerMethodAuthority;
 import org.qifu.base.model.DefaultControllerJsonResultObj;
+import org.qifu.base.model.DefaultResult;
 import org.qifu.base.model.QueryResult;
 import org.qifu.base.model.SearchBody;
 import org.qifu.core.util.CoreApiSupport;
+import org.qifu.md.entity.MdActionItem;
+import org.qifu.md.entity.MdActionPlan;
 import org.qifu.md.entity.MdInsight;
 import org.qifu.md.entity.MdInsightEvidence;
 import org.qifu.md.entity.MdInsightRecommendation;
+import org.qifu.md.logic.IInsightRecommendationWorkflowService;
+import org.qifu.md.service.IMdActionPlanService;
 import org.qifu.md.service.IMdInsightEvidenceService;
 import org.qifu.md.service.IMdInsightRecommendationService;
 import org.qifu.md.service.IMdInsightService;
@@ -38,14 +43,20 @@ public class MdPROG010D0005Controller extends CoreApiSupport {
     private final IMdInsightService<MdInsight, String> insightService;
     private final IMdInsightEvidenceService<MdInsightEvidence, String> evidenceService;
     private final IMdInsightRecommendationService<MdInsightRecommendation, String> recommendationService;
+    private final IMdActionPlanService<MdActionPlan, String> actionPlanService;
+    private final IInsightRecommendationWorkflowService workflowService;
 
     public MdPROG010D0005Controller(
             IMdInsightService<MdInsight, String> insightService,
             IMdInsightEvidenceService<MdInsightEvidence, String> evidenceService,
-            IMdInsightRecommendationService<MdInsightRecommendation, String> recommendationService) {
+            IMdInsightRecommendationService<MdInsightRecommendation, String> recommendationService,
+            IMdActionPlanService<MdActionPlan, String> actionPlanService,
+            IInsightRecommendationWorkflowService workflowService) {
         this.insightService = insightService;
         this.evidenceService = evidenceService;
         this.recommendationService = recommendationService;
+        this.actionPlanService = actionPlanService;
+        this.workflowService = workflowService;
     }
 
     @ControllerMethodAuthority(programId = "MD_PROG010D0005Q", check = true)
@@ -220,6 +231,49 @@ public class MdPROG010D0005Controller extends CoreApiSupport {
         return updateRecommendationStatus(request, "OPEN", "N");
     }
 
+    @ControllerMethodAuthority(programId = "MD_PROG010D0005Q", check = true)
+    @Operation(summary = "Action plan option list")
+    @PostMapping(value = "/findActionPlanList", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<DefaultControllerJsonResultObj<List<MdActionPlan>>> findActionPlanList(@RequestBody MdActionPlan request) {
+        DefaultControllerJsonResultObj<List<MdActionPlan>> result = initDefaultJsonResult();
+        try {
+            DefaultResult<List<MdActionPlan>> query = actionPlanService.selectList("PLAN_CODE", "ASC");
+            setDefaultResponseJsonResult(query, result);
+        } catch (ServiceException | ControllerException e) {
+            exceptionResult(result, e);
+        }
+        return ResponseEntity.ok(result);
+    }
+
+    @ControllerMethodAuthority(programId = "MD_PROG010D0005E", check = true)
+    @Operation(summary = "Generate recommendation with LLM")
+    @PostMapping(value = "/generateLlmRecommendation", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<DefaultControllerJsonResultObj<MdInsightRecommendation>> generateLlmRecommendation(
+            @RequestBody Map<String, Object> request) {
+        DefaultControllerJsonResultObj<MdInsightRecommendation> result = initDefaultJsonResult();
+        try {
+            result.setValue(workflowService.generateLlmRecommendation(request));
+            successResult(result);
+        } catch (ServiceException e) {
+            exceptionResult(result, e);
+        }
+        return ResponseEntity.ok(result);
+    }
+
+    @ControllerMethodAuthority(programId = "MD_PROG010D0005E", check = true)
+    @Operation(summary = "Create action item from recommendation")
+    @PostMapping(value = "/createActionFromRecommendation", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<DefaultControllerJsonResultObj<MdActionItem>> createActionFromRecommendation(
+            @RequestBody Map<String, Object> request) {
+        DefaultControllerJsonResultObj<MdActionItem> result = initDefaultJsonResult();
+        try {
+            result.setValue(workflowService.createActionFromRecommendation(request));
+            successResult(result);
+        } catch (ServiceException e) {
+            exceptionResult(result, e);
+        }
+        return ResponseEntity.ok(result);
+    }
     private ResponseEntity<DefaultControllerJsonResultObj<MdInsightRecommendation>> updateRecommendationStatus(
             MdInsightRecommendation request, String status, String acceptedFlag) {
         DefaultControllerJsonResultObj<MdInsightRecommendation> result = initDefaultJsonResult();

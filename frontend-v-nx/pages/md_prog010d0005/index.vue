@@ -28,7 +28,10 @@ const qFieldShow = ref(true);
 const insightList = ref<any[]>([]);
 const evidenceList = ref<any[]>([]);
 const recommendationList = ref<any[]>([]);
+const actionPlanList = ref<any[]>([]);
 const selectedInsight = ref<any>(null);
+const selectedActionPlanOid = ref('');
+const llmPromptHint = ref('');
 const recommendationEditMode = ref(false);
 const checkFields = ref<Record<string, any>>({});
 const recommendationForm = ref<any>({
@@ -166,6 +169,54 @@ const selectInsight = async (oid: string) => {
     }
 };
 
+const loadActionPlans = async () => {
+    try {
+        const response = await getAxiosInstance().post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/findActionPlanList', {});
+        if (response.data?.success !== import.meta.env.VITE_SUCCESS_FLAG) throw new Error(response.data?.message || 'Action plan query failed');
+        actionPlanList.value = response.data.value || [];
+    } catch (e: any) {
+        toast.warning(escapeQifuHtmlMsg(e?.message || String(e)));
+    }
+};
+
+const generateLlmRecommendation = async () => {
+    if (!selectedInsight.value?.oid) return;
+    showLoading();
+    try {
+        const response = await getAxiosInstance().post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/generateLlmRecommendation', {
+            insightOid: selectedInsight.value.oid,
+            promptHint: llmPromptHint.value
+        });
+        if (response.data?.success !== import.meta.env.VITE_SUCCESS_FLAG) throw new Error(response.data?.message || 'LLM generation failed');
+        toast.success('LLM recommendation generated');
+        await queryRecommendations();
+    } catch (e: any) {
+        toast.warning(escapeQifuHtmlMsg(e?.message || String(e)));
+    } finally {
+        hideLoading();
+    }
+};
+
+const createActionFromRecommendation = async (recommendationOid: string) => {
+    if (!selectedActionPlanOid.value) {
+        toast.warning('Action plan is required');
+        return;
+    }
+    showLoading();
+    try {
+        const response = await getAxiosInstance().post(import.meta.env.VITE_API_URL + PageConstants.eventNamespace + '/createActionFromRecommendation', {
+            recommendationOid,
+            planOid: selectedActionPlanOid.value
+        });
+        if (response.data?.success !== import.meta.env.VITE_SUCCESS_FLAG) throw new Error(response.data?.message || 'Action creation failed');
+        toast.success('Action item created');
+        await queryRecommendations();
+    } catch (e: any) {
+        toast.warning(escapeQifuHtmlMsg(e?.message || String(e)));
+    } finally {
+        hideLoading();
+    }
+};
 const saveRecommendation = async () => {
     if (!selectedInsight.value?.oid) return;
     checkFields.value = {};
@@ -267,6 +318,7 @@ const initRecommendationGridConfig = () => getGridConfig('oid', [
     { method: (oid: string) => changeRecommendationStatus(oid, '/dismissRecommendation', 'Recommendation dismissed'), icon: 'x-circle', type: 'dismiss', memo: 'Dismiss recommendation.', class: 'btn btn-outline-secondary btn-sm' },
     { method: (oid: string) => changeRecommendationStatus(oid, '/completeRecommendation', 'Recommendation completed'), icon: 'flag', type: 'complete', memo: 'Complete recommendation.', class: 'btn btn-outline-info btn-sm' },
     { method: (oid: string) => changeRecommendationStatus(oid, '/reopenRecommendation', 'Recommendation reopened'), icon: 'arrow-counterclockwise', type: 'reopen', memo: 'Reopen recommendation.', class: 'btn btn-outline-warning btn-sm' },
+    { method: createActionFromRecommendation, icon: 'clipboard-plus', type: 'action', memo: 'Create action item.', class: 'btn btn-outline-dark btn-sm' },
     { method: (oid: string) => confirmFire('Delete this recommendation?', deleteRecommendation, oid), icon: 'trash', type: 'delete', memo: 'Delete recommendation.', class: 'btn btn-outline-danger btn-sm' }
 ], [
     { label: 'Actions', field: 'oid', textAlign: 'center', labTextAlign: 'center' },
@@ -285,6 +337,7 @@ onMounted(() => {
     const recommendationConfig = initRecommendationGridConfig();
     if (queryPageStore.recommendationGridConfig.column) resetConfigByOld(recommendationConfig, queryPageStore.recommendationGridConfig);
     queryPageStore.recommendationGridConfig = recommendationConfig;
+    loadActionPlans();
     if (queryPageStore.insightGridConfig.total > 0) queryInsights();
 });
 </script>
@@ -329,6 +382,27 @@ onMounted(() => {
           <div class="col-md-3"><strong>Owner</strong><div>{{ selectedInsight.ownerAccount || '-' }}</div></div>
           <div class="col-md-3"><strong>Generated</strong><div>{{ dateText(selectedInsight.generatedAt) }}</div></div>
           <div class="col-12"><strong>Summary</strong><div class="border rounded p-2 bg-light">{{ selectedInsight.summaryText || '-' }}</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-body">
+        <div class="row g-3 align-items-end">
+          <div class="col-md-5">
+            <label class="form-label" for="llmPromptHint">LLM prompt hint</label>
+            <input id="llmPromptHint" class="form-control" placeholder="Optional instruction" v-model="llmPromptHint">
+          </div>
+          <div class="col-md-3">
+            <button class="btn btn-outline-primary" @click="generateLlmRecommendation"><i class="bi bi-stars"></i> Generate Recommendation</button>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label" for="actionPlanOid">Action plan for created actions</label>
+            <select id="actionPlanOid" class="form-select" v-model="selectedActionPlanOid">
+              <option value="">Select action plan</option>
+              <option v-for="plan in actionPlanList" :key="plan.oid" :value="plan.oid">{{ plan.planCode }} - {{ plan.planName }}</option>
+            </select>
+          </div>
         </div>
       </div>
     </div>

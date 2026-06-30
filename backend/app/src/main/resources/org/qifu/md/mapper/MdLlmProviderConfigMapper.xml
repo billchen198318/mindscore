@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.qifu.md.mapper.MdLlmProviderConfigMapper">
   <resultMap id="BaseResultMap" type="org.qifu.md.entity.MdLlmProviderConfig">
@@ -31,6 +31,7 @@
     <if test="providerNameLike != null and providerNameLike != ''">AND PROVIDER_NAME LIKE #{providerNameLike}</if>
     <if test="providerType != null and providerType != ''">AND PROVIDER_TYPE=#{providerType}</if>
     <if test="enabledFlag != null and enabledFlag != ''">AND ENABLED_FLAG=#{enabledFlag}</if>
+    <if test="defaultFlag != null and defaultFlag != ''">AND DEFAULT_FLAG=#{defaultFlag}</if>
   </sql>
   <select id="selectListByParams" parameterType="java.util.HashMap" resultMap="BaseResultMap">
     select * from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_llm_provider_config where 1=1
@@ -49,18 +50,66 @@
   </select>
   <insert id="insert" parameterType="org.qifu.md.entity.MdLlmProviderConfig">
     insert into <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_llm_provider_config
-    (OID,PROVIDER_CODE,PROVIDER_NAME,PROVIDER_TYPE,API_BASE_URL,DEFAULT_MODEL,API_KEY_ENCRYPTED,API_KEY_MASKED,
-     ENABLED_FLAG,DEFAULT_FLAG,CONNECT_STATUS,LAST_TEST_AT,LAST_ERROR_MESSAGE,CONFIG_JSON,CUSERID,CDATE,UUSERID,UDATE)
-    values (#{oid},#{providerCode},#{providerName},#{providerType},#{apiBaseUrl},#{defaultModel},#{apiKeyEncrypted},#{apiKeyMasked},
-     #{enabledFlag},#{defaultFlag},#{connectStatus},#{lastTestAt},#{lastErrorMessage},#{configJson},#{cuserid},#{cdate},#{uuserid},#{udate})
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="oid != null">OID,</if>
+      <if test="providerCode != null">PROVIDER_CODE,</if>
+      <if test="providerName != null">PROVIDER_NAME,</if>
+      <if test="providerType != null">PROVIDER_TYPE,</if>
+      <if test="apiBaseUrl != null">API_BASE_URL,</if>
+      <if test="defaultModel != null">DEFAULT_MODEL,</if>
+      <if test="apiKeyEncrypted != null">API_KEY_ENCRYPTED,</if>
+      <if test="apiKeyMasked != null">API_KEY_MASKED,</if>
+      <if test="enabledFlag != null">ENABLED_FLAG,</if>
+      <if test="defaultFlag != null">DEFAULT_FLAG,</if>
+      <if test="connectStatus != null">CONNECT_STATUS,</if>
+      <if test="lastTestAt != null">LAST_TEST_AT,</if>
+      <if test="lastErrorMessage != null">LAST_ERROR_MESSAGE,</if>
+      <if test="configJson != null">CONFIG_JSON,</if>
+      <if test="cuserid != null">CUSERID,</if>
+      <if test="cdate != null">CDATE,</if>
+      <if test="uuserid != null">UUSERID,</if>
+      <if test="udate != null">UDATE,</if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="oid != null">#{oid,jdbcType=CHAR},</if>
+      <if test="providerCode != null">#{providerCode,jdbcType=VARCHAR},</if>
+      <if test="providerName != null">#{providerName,jdbcType=VARCHAR},</if>
+      <if test="providerType != null">#{providerType,jdbcType=VARCHAR},</if>
+      <if test="apiBaseUrl != null">#{apiBaseUrl,jdbcType=VARCHAR},</if>
+      <if test="defaultModel != null">#{defaultModel,jdbcType=VARCHAR},</if>
+      <if test="apiKeyEncrypted != null">#{apiKeyEncrypted,jdbcType=LONGVARCHAR},</if>
+      <if test="apiKeyMasked != null">#{apiKeyMasked,jdbcType=VARCHAR},</if>
+      <if test="enabledFlag != null">#{enabledFlag,jdbcType=CHAR},</if>
+      <if test="defaultFlag != null">#{defaultFlag,jdbcType=CHAR},</if>
+      <if test="connectStatus != null">#{connectStatus,jdbcType=VARCHAR},</if>
+      <if test="lastTestAt != null">#{lastTestAt,jdbcType=TIMESTAMP},</if>
+      <if test="lastErrorMessage != null">#{lastErrorMessage,jdbcType=VARCHAR},</if>
+      <if test="configJson != null">#{configJson,jdbcType=LONGVARCHAR},</if>
+      <if test="cuserid != null">#{cuserid,jdbcType=VARCHAR},</if>
+      <if test="cdate != null">#{cdate,jdbcType=TIMESTAMP},</if>
+      <if test="uuserid != null">#{uuserid,jdbcType=VARCHAR},</if>
+      <if test="udate != null">#{udate,jdbcType=TIMESTAMP},</if>
+    </trim>
   </insert>
   <update id="update" parameterType="org.qifu.md.entity.MdLlmProviderConfig">
-    update <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_llm_provider_config set
-      PROVIDER_NAME=#{providerName}, PROVIDER_TYPE=#{providerType}, API_BASE_URL=#{apiBaseUrl}, DEFAULT_MODEL=#{defaultModel},
-      API_KEY_ENCRYPTED=#{apiKeyEncrypted}, API_KEY_MASKED=#{apiKeyMasked}, ENABLED_FLAG=#{enabledFlag}, DEFAULT_FLAG=#{defaultFlag},
-      CONNECT_STATUS=#{connectStatus}, LAST_TEST_AT=#{lastTestAt}, LAST_ERROR_MESSAGE=#{lastErrorMessage}, CONFIG_JSON=#{configJson},
-      UUSERID=#{uuserid}, UDATE=#{udate}
-    where OID=#{oid}
+    update <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_llm_provider_config
+    <set>
+      <if test="providerName != null">PROVIDER_NAME = #{providerName,jdbcType=VARCHAR},</if>
+      <if test="providerType != null">PROVIDER_TYPE = #{providerType,jdbcType=VARCHAR},</if>
+      API_BASE_URL = #{apiBaseUrl,jdbcType=VARCHAR},
+      <if test="defaultModel != null">DEFAULT_MODEL = #{defaultModel,jdbcType=VARCHAR},</if>
+      <if test="apiKeyEncrypted != null">API_KEY_ENCRYPTED = #{apiKeyEncrypted,jdbcType=LONGVARCHAR},</if>
+      <if test="apiKeyMasked != null">API_KEY_MASKED = #{apiKeyMasked,jdbcType=VARCHAR},</if>
+      <if test="enabledFlag != null">ENABLED_FLAG = #{enabledFlag,jdbcType=CHAR},</if>
+      <if test="defaultFlag != null">DEFAULT_FLAG = #{defaultFlag,jdbcType=CHAR},</if>
+      CONNECT_STATUS = #{connectStatus,jdbcType=VARCHAR},
+      LAST_TEST_AT = #{lastTestAt,jdbcType=TIMESTAMP},
+      LAST_ERROR_MESSAGE = #{lastErrorMessage,jdbcType=VARCHAR},
+      CONFIG_JSON = #{configJson,jdbcType=LONGVARCHAR},
+      <if test="uuserid != null">UUSERID = #{uuserid,jdbcType=VARCHAR},</if>
+      <if test="udate != null">UDATE = #{udate,jdbcType=TIMESTAMP},</if>
+    </set>
+    where OID = #{oid,jdbcType=CHAR}
   </update>
   <delete id="delete" parameterType="org.qifu.md.entity.MdLlmProviderConfig">
     delete from <include refid="org.qifu.core.mapper.DB1Config.schema"/>md_llm_provider_config where OID=#{oid}
