@@ -1181,10 +1181,11 @@ Implementation notes:
 #### MD_PROG010D0005 - Insight Evidence / Recommendation
 Implementation notes:
 
-- Remaining Phase 14 scope.
+- Implemented Phase 14 scope for insight evidence and recommendation.
 - Manage evidence rows that explain why an insight exists.
 - Manage recommendation rows and recommendation status.
-- Recommendation should be implemented before Action from insight.
+- Generate deterministic recommendations from interpretation rules and optional LLM recommendations through backend provider configuration.
+- Create action items from accepted recommendations and link them back to the source insight.
 
 核心用途：
 

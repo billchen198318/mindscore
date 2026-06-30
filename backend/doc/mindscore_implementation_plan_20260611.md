@@ -197,9 +197,10 @@ Current implementation notes:
 - `MD_PROG010D0003` implements interpretation rule maintenance and rule evaluation through `/api/MD_PROG010D0003/evaluate`.
 - Rule evaluation reads open `md_performance_signal` rows, matches enabled `md_interpretation_rule` rows, and creates or updates `md_insight`.
 - `MD_PROG010D0004` implements Insight Inbox: list, detail, Accept, Dismiss, and Resolve. It does not provide manual create.
-- `MD_PROG010D0005` remains the next Phase 14 program for insight evidence and recommendation.
-- Action from insight remains unfinished and should be implemented after recommendation.
-- Unified LLM explanation/recommendation generation remains unfinished; current LLM support covers provider configuration, connection test, and run logging foundation.
+- `MD_PROG010D0005` implements Insight Evidence / Recommendation: evidence list, recommendation maintenance, recommendation status, LLM recommendation generation, and action creation from recommendation.
+- Rule evaluation now persists insight evidence rows and deterministic recommendation rows from matched performance signals and interpretation rules.
+- Unified LLM recommendation generation is implemented through backend provider configuration and run logging. Runtime validation still requires actual provider configuration, API key, encryption key, and network access.
+- Phase 14 program implementation is complete. Permission seed data remains an environment/administration task.
 
 Phase 14 foundation tables:
 
